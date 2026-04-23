@@ -46,6 +46,22 @@ juice:
   # 注意：邮件中通常不使用，可能与布局冲突，设为 false
   inlinePseudoElements: false
 
+  # 是否保留伪选择器规则（如 :hover、:active）
+  # 设为 true 时保留 ignoredPseudos 中的伪选择器规则，其他样式内联
+  preservePseudos: true
+
+  # 保留的 CSS 选择器（支持子字符串匹配）
+  # 当 removeStyleTags 为 true 时，这些选择器的样式会保留在 <style> 标签内
+  # 用于需要保留的邮件客户端特定样式，如 '.gmail-'、'#outlook'、'@media'
+  # preservedSelectors:
+  #   - '.gmail-'
+  #   - '@media'
+
+  # 将保留的 CSS（媒体查询、@font-face 等）插入到文档的位置
+  # - true: 自动选择位置（优先 head，其次 body，最后文档末尾）
+  # - CSS 选择器字符串: 插入到匹配元素的末尾，如 '#email-head'
+  insertPreservedExtraCss: true
+
   # 额外附加的外部 CSS 文件（相对于 HTML 模板所在目录）
   # extraCssFiles: []
 
