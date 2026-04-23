@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node bin/juice.js",
     "test": "node bin/juice.js --help",
-    "postinstall": "node bin/juice.js --register"
+    "postinstall": "node bin/juice.js --install",
+    "preuninstall": "node bin/juice.js --uninstall"
   },
   "keywords": [
     "email",

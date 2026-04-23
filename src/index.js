@@ -10,64 +10,56 @@ const chalk = require('chalk');
 const ora = require('ora');
 const { minify: htmlMinify } = require('html-minifier-terser');
 
-// ─── 内置硬编码兜底默认值（始终存在，最低优先级）──────────────────────────────
+// ─── 从 defaults/juice.yaml 加载默认配置 ─────────────────────────────────────
 
-const CODE_DEFAULTS = {
-  juice: {
-    removeStyleTags: true,
-    preserveMediaQueries: true,
-    preserveFontFaces: true,
-    preserveKeyFrames: true,
-    applyStyleTags: true,
-    applyAttributesTableElements: true,
-    extraCssFiles: [],
-  },
-  variables: {},
-  output: {
-    normalSuffix: '.output.html',
-    minifiedSuffix: '.minified.html',
-    encoding: 'utf8',
-  },
-  minify: {
-    collapseWhitespace: true,
-    conservativeCollapse: false,
-    removeComments: true,
-    removeConditionalComments: false,
-    minifyCSS: true,
-    minifyJS: false,
-    removeEmptyAttributes: false,
-    collapseBooleanAttributes: false,
-  },
-};
+const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '..', 'defaults', 'juice.yaml');
 
-// ─── 配置文件查找（互斥，只生效一个）────────────────────────────────────────────
+function loadDefaultConfig() {
+  try {
+    const content = fs.readFileSync(DEFAULT_CONFIG_PATH, 'utf8');
+    return yaml.load(content) || {};
+  } catch (e) {
+    // 如果 defaults/juice.yaml 不存在，使用内置最小配置
+    console.warn(chalk.yellow(`  ⚠  无法加载默认配置 ${DEFAULT_CONFIG_PATH}，使用内置默认值\n`));
+    return {};
+  }
+}
+
+const CODE_DEFAULTS = loadDefaultConfig();
+
+// 用户主目录候选（支持 yaml/yml）
+const HOME_CANDIDATES = [
+  path.join(os.homedir(), 'juice.yaml'),
+  path.join(os.homedir(), 'juice.yml'),
+];
+
+// ─── 配置文件查找 ─────────────────────────────────────────────────────────────
 
 /**
- * 查找"高优先级用户配置"（三者互斥，只生效第一个找到的）：
- *   -c 指定  →  优先使用，停止查找
- *   输入文件同目录  →  其次，停止查找
- *   用户主目录  →  最后
+ * 查找用户配置文件
  *
- * 返回 { primaryPath, homePath }，homePath 始终参与合并（即使不存在）
+ * 配置加载顺序（优先级从低到高）：
+ *   1. CLI 内置默认值（defaults/juice.yaml）
+ *   2. 用户主目录 ~/juice.yaml（如果存在）
+ *   3. 优先配置文件（-c 指定 或 输入文件同级目录，二者互斥）
+ *
+ * 返回：
+ *   - highPriorityPath: 高优先级配置路径（-c 指定 或 输入文件同级目录，二者互斥）
+ *   - homePath: 用户主目录配置路径（可能不存在）
  */
 function findConfigs(configPath, inputFile) {
-  // 用户主目录候选
-  const homeCandidates = [
-    path.join(os.homedir(), 'juice.yaml'),
-    path.join(os.homedir(), 'juice.yml'),
-  ];
+  let highPriorityPath = null;
 
-  // 1. -c 命令行指定（最高优先）
+  // 1. 优先使用 -c 指定的配置文件
   if (configPath) {
     const resolved = path.resolve(configPath);
     if (!fs.existsSync(resolved)) {
       throw new Error(`指定的配置文件不存在：${resolved}`);
     }
-    return { primaryPath: resolved, homePath: homeCandidates[0], homeExists: fs.existsSync(homeCandidates[0]) };
+    highPriorityPath = resolved;
   }
-
-  // 2. 输入文件同目录
-  if (inputFile) {
+  // 2. 否则使用输入文件同级目录下的配置（互斥）
+  else if (inputFile) {
     const inputDir = path.dirname(path.resolve(inputFile));
     const fileCandidates = [
       path.join(inputDir, 'juice.yaml'),
@@ -75,20 +67,13 @@ function findConfigs(configPath, inputFile) {
     ];
     for (const c of fileCandidates) {
       if (fs.existsSync(c)) {
-        return { primaryPath: c, homePath: homeCandidates[0], homeExists: fs.existsSync(homeCandidates[0]) };
+        highPriorityPath = c;
+        break;
       }
     }
   }
 
-  // 3. 用户主目录
-  for (const c of homeCandidates) {
-    if (fs.existsSync(c)) {
-      return { primaryPath: c, homePath: c, homeExists: true };
-    }
-  }
-
-  // 4. 找不到任何配置文件
-  return { primaryPath: null, homePath: homeCandidates[0], homeExists: false };
+  return { highPriorityPath, homePath: HOME_CANDIDATES[0] };
 }
 
 // ─── 配置文件加载 ─────────────────────────────────────────────────────────────
@@ -133,21 +118,23 @@ function deepMerge(base, ...overrides) {
  * 配置合并，返回最终生效配置
  *
  * 合并顺序（优先级从低到高）：
- *   CODE_DEFAULTS  <  用户主目录 juice.yaml  <  高优先级配置（-c/输入目录）
- *
- * 即：先合并 CODE + home（如果有），再合并 primary（如果有）
+ *   CLI 内置默认值  <  用户目录 ~/juice.yaml  <  优先配置（-c/输入目录）
  */
-function buildConfig(primaryPath, homePath, homeExists) {
+function buildConfig(highPriorityPath, homePath) {
+  const homeExists = fs.existsSync(homePath);
   const layers = [];
 
+  // 1. CLI 内置默认值（最低优先级）
   layers.push({ label: 'CLI 内置默认值', data: CODE_DEFAULTS });
 
+  // 2. 用户目录配置（如果有）
   if (homeExists) {
     layers.push({ label: `用户目录配置 (${homePath})`, data: loadYaml(homePath) });
   }
 
-  if (primaryPath) {
-    layers.push({ label: `当前配置 (${primaryPath})`, data: loadYaml(primaryPath) });
+  // 3. 优先配置（最高优先级，-c 指定 或 输入文件同级目录，互斥）
+  if (highPriorityPath) {
+    layers.push({ label: `优先配置 (${highPriorityPath})`, data: loadYaml(highPriorityPath) });
   }
 
   const config = deepMerge(...layers.map((l) => l.data));
@@ -222,9 +209,9 @@ async function run({ file, config: configPath }) {
       process.exit(1);
     }
 
-    // 2. 查找配置（互斥）+ 合并
-    const { primaryPath, homePath, homeExists } = findConfigs(configPath, inputFile);
-    const { config, layers } = buildConfig(primaryPath, homePath, homeExists);
+    // 2. 查找配置（-c 和输入文件同级目录互斥）+ 合并
+    const { highPriorityPath, homePath } = findConfigs(configPath, inputFile);
+    const { config, layers } = buildConfig(highPriorityPath, homePath);
     const encoding = (config.output && config.output.encoding) || 'utf8';
 
     // 3. CSS 内联
