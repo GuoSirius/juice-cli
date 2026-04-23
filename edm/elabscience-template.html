@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=Edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,viewport-fit=cover" />
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="render" content="webkit|ie-comp|ie-stand" />
+
+    <!-- 禁止页面缓存 -->
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <!-- IE10 and IE11 on Windows Phone have a small tap highlight when you tap an element. Adding this meta tag removes this. -->
+    <meta name="msapplication-tap-highlight" content="no" />
+
+    <title></title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+
+    <link rel="shortcut icon" href="favicon.ico" />
+
+    <style>
+      /* 默认样式重置区，确保所有浏览器默认样式统一，没事别乱动 start */
+      html, body {
+        width: 100%;
+        height: 100%;
+        line-height: 1.5;
+        color: #000;
+        font-size: 16px;
+      }
+
+      *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        line-height: 1.5;
+        word-break: break-word;
+        box-sizing: border-box;
+      }
+
+      table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+      }
+
+      span {
+        display: inline-block;
+      }
+
+      img {
+        display: inline-block;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      a {
+        display: inline-block;
+        color: #000;
+        cursor: pointer;
+      }
+
+      a:hover {
+        text-decoration: underline !important;
+      }
+      /* 默认样式重置区，确保所有浏览器默认样式统一，没事别乱动 end */
+
+      /* 公用样式区，模板样式，适合所有需求，三思而后行 start */
+      .app {
+        max-width: 750px;
+        min-width: 320px;
+        /*min-height: 100%;*/
+        margin: 0 auto;
+        box-shadow: 0.5px 0.666px 14.1px 0.9px rgba(13, 2, 3, 0.1);
+      }
+
+      .header {}
+
+      .header .banner {}
+
+      .header .banner img {
+        width: 100%;
+      }
+
+      .header .navigation {}
+
+      .header .navigation a {
+        color: #006DB8;
+      }
+
+      .header .navigation a:hover {}
+
+      .main {}
+
+      .footer {}
+
+      .footer .connect-us {}
+
+      .footer .connect-us-title {
+        padding-bottom: 5px;
+      }
+
+      .footer .connect-us-separator {
+        padding-top: 8px;
+        border-bottom: 1px dashed #828282;
+      }
+
+      .footer .contact-us {}
+
+      .footer .contact-us-qrcode {}
+
+      .footer .contact-us-qrcode img {
+        width: 60px;
+      }
+
+      .footer .contact-us-whatsApp {
+        padding: 5px 0;
+        margin-top: 6px;
+        color: #fff;
+        font-size: 12px;
+        border-radius: 12px;
+        background-color: rgb(43, 176, 181);
+      }
+
+      .table-bordered {
+        border: 1px solid #DCEFF3;
+      }
+
+      .table-bordered thead {
+        color: #fff;
+        font-weight: bold;
+        background-color: #4389DE;
+      }
+
+      .table-bordered th, .table-bordered td {
+        padding: 10px;
+        border: 1px solid #DCEFF3;
+      }
+
+      .table-stripe {
+        border: 1px solid #6ca2e4;
+      }
+
+      .table-stripe thead {}
+
+      .table-stripe tbody tr:nth-child(2n) {
+        background-color: #ebf2fb;
+      }
+
+      .table-stripe th, .table-stripe td {
+        padding: 5px 8px;
+        border: 1px solid #6ca2e4;
+      }
+
+      .table-dashed {
+        border: 1px dashed #6ca2e4;
+        border-radius: 20px;
+      }
+
+      .square-title {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .square-title::before {
+        content: '';
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+        margin-bottom: -1px;
+        background-color: #3a82db;
+      }
+
+      .wifi-title {
+        padding-left: 32px;
+        color: #2c2c2c;
+        font-size: 22px;
+        font-weight: bold;
+        background: url(https://file.elabscience.com/edm/202603251412/title-icon.png) 0 6px / 21px 24px no-repeat scroll;
+      }
+
+      .gold-title {
+        padding-left: 75px;
+        color: #a26316;
+        font-size: 22px;
+        font-weight: bold;
+        background: url(https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604071051/title-icon.png) 0 6px / 68px 24px no-repeat scroll;
+      }
+
+      .circle-title {
+        font-size: 22px;
+        font-weight: bolder;
+      }
+
+      .circle-title::before, .circle-title::after {
+        content: '';
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-top: -2px;
+        vertical-align: middle;
+        border-radius: 50%;
+        border: 1px solid #1873C2;
+      }
+
+      .circle-title::before {
+        margin-top: -3px;
+        margin-right: 6px;
+      }
+
+      .circle-title::after {
+        margin-left: 6px;
+      }
+
+      .dot {
+        margin-top: -2px;
+        font-size: 12px;
+        vertical-align: middle;
+      }
+
+      .image-box {
+        line-height: 0;
+        font-size: 0;
+        user-select: none;
+      }
+
+      .button {
+        padding: 5px 16px;
+        color: #fff;
+        font-size: 14px;
+        border-radius: 3px;
+        background-color: #006db8;
+      }
+
+      .text-link {
+        color: #0365B0;
+      }
+
+      .text-link:hover, .text-link-hover:hover {
+        color: #0365B0 !important;
+      }
+
+      .bg-primary {
+        background-color: #3a82db;
+      }
+
+      .bg-white {
+        background-color: #fff;
+      }
+
+      .border {
+        border: 1px solid #DCEFF3;
+      }
+
+      .border-dashed {
+        border: 1px dashed #3a82db;
+      }
+
+      .relative {
+        position: relative;
+      }
+
+      .absolute {
+        position: absolute;
+      }
+
+      .table-auto {
+        table-layout: auto;
+      }
+
+      .border-separate {
+        border-collapse: separate;
+      }
+
+      .h-a {
+        height: auto;
+      }
+
+      .h-0 {
+        height: 0;
+      }
+
+      .px-5 {
+        padding-inline: 5px !important;
+      }
+
+      .py-8 {
+        padding-block: 8px !important;
+      }
+
+      .line-height-0 {
+        line-height: 0;
+      }
+
+      .align-top {
+        vertical-align: top;
+      }
+
+      .align-text-top {
+        vertical-align: text-top;
+      }
+
+      .align-mid, .align-middle {
+        vertical-align: middle;
+      }
+
+      .align-bottom {
+        vertical-align: bottom;
+      }
+
+      .align-text-bottom {
+        vertical-align: text-bottom;
+      }
+
+      .text-left {
+        text-align: left;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .color-primary {
+        /*color: #0365B0;*/
+      }
+
+      .color-white {
+        color: #fff;
+      }
+
+      .color-orange {
+        color: #f7750b;
+      }
+
+      .decoration-none {
+        text-decoration: none;
+      }
+
+      .font-bold {
+        font-weight: bold;
+      }
+
+      .text-size-0 {
+        font-size: 0;
+      }
+
+      .text-size-\[10px\] {
+        font-size: 10px;
+      }
+
+      .text-size-\[12px\] {
+        font-size: 12px;
+      }
+
+      .text-size-\[14px\] {
+        font-size: 14px;
+      }
+
+      .text-size-base {
+        font-size: 16px;
+      }
+
+      .text-size-\[16px\] {
+        font-size: 16px;
+      }
+
+      .text-size-\[18px\] {
+        font-size: 18px;
+      }
+      /* 公用样式区，模板样式，适合所有需求，三思而后行 end */
+
+      /* 页面特定样式区，特定需求页面的定制样式，随便霍霍，满足需求即可 start */
+      /* TODO */
+      /* 页面特定样式区，特定需求页面的定制样式，随便霍霍，满足需求即可 end */
+    </style>
+  </head>
+
+  <body>
+    <table cellspacing="0" cellpadding="0" border="0" id="app" class="app">
+      <tbody>
+        <tr>
+          <td>
+            <!-- 页头 start -->
+            <table cellspacing="0" cellpadding="0" border="0" class="header">
+              <colgroup>
+                <col width="10px" />
+                <col />
+                <col />
+                <col width="10px" />
+              </colgroup>
+
+              <tbody>
+                <tr>
+                  <td colspan="4">
+                    <a href="https://www.elabscience.com/" class="banner image-box">
+                      <img src="https://file.elabscience.com/edm/edmelabheader.png" alt="Elabscience" />
+                    </a>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 16px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="navigation text-center table-auto">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <a href="https://www.elabscience.com/products/flow-cytometry-antibodies" class="decoration-none">Flow Cytometry Antibodies</a>
+                          </td>
+                          <td>
+                            <a href="https://www.elabscience.com/products/cell-function-assays" class="decoration-none">Apoptosis and Cell Health Detection</a>
+                          </td>
+                          <td>
+                            <a href="https://www.elabscience.com/products/immunoassay-kits-and-reagents" class="decoration-none">Immunoassay Kits</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 16px;"></td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- 页头 end -->
+
+            <!-- 主体 start -->
+            <table cellspacing="0" cellpadding="0" border="0" class="main">
+              <colgroup>
+                <col width="10px" />
+                <col />
+                <col />
+                <col width="10px" />
+              </colgroup>
+
+              <tbody>
+                <tr>
+                  <td colspan="4" class="image-box">
+                    <a href="https://www.elabscience.com/about/promotions/39">
+                      <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/edm202604011140/banner.jpg" />
+                    </a>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 16px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">Elevate your research with the high-purity T, B, and NK cell subsets your downstream data depends on. EasySort™ Cell Isolation Kits eliminate compromises when isolating cell populations, ensuring superior reliability from the start. Experience an efficient workflow that delivers the clarity and consistency your functional studies demand.</td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 16px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <strong>Empower Your Research with Elabscience<sup>&reg;</sup></strong>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 6px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">From cell isolation and antibody solutions to functional assays, we provide tools that support every step of your cancer research workflow. We look forward to meeting you in person at AACR and discuss how we can support your research.</td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0">
+                      <colgroup>
+                        <col width="25%" />
+                        <col />
+                      </colgroup>
+
+                      <tbody class="align-top">
+                        <tr>
+                          <td rowspan="2" style="padding-right: 12px;" class="image-box">
+                            <img src="https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202604211539/Cyclic guanosine.webp" />
+                          </td>
+                          <td style="padding-bottom: 24px;" class="h-0">
+                            <a href="https://www.nature.com/articles/s41392-026-02624-5" class="decoration-none">
+                              <strong>Cyclic guanosine monophosphate-protein kinase G signaling attenuates aortic valve calcification through ULK1-mediated autophagy</strong>
+                            </a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <p style="margin-bottom: 12px;"><strong>Publication Date:</strong> March 12 2026</p>
+                            <p style="margin-bottom: 12px;"><strong>Journal:</strong> <i>Signal Transduction and Targeted Therapy</i></p>
+                            <p style="margin-bottom: 12px;"><strong>Impact Factor:</strong> 52.7</p>
+                            <p><strong>DOI:</strong> 10.1038/s41392-026-02624-5</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2"><strong>Keywords:</strong> Calcific Aortic Valve Disease(CAVD), cGMP-PKG Signaling, ULK1-mediated Autophagy</td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="table-dashed border-separate" style="padding: 16px;">
+                      <colgroup>
+                        <col width="40%" />
+                        <col />
+                      </colgroup>
+
+                      <tbody class="align-top">
+                        <tr>
+                          <td colspan="2"></td>
+                        </tr>
+
+                        <tr>
+                          <td rowspan="2" style="padding-right: 12px;" class="image-box align-middle">
+                            <img src="https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202604211539/Serum cGMP.webp" />
+                          </td>
+                          <td style="padding-bottoms: 24px;" class="h-0">
+                            <p>
+                              This study first demonstrates the protective role of the cGMP-PKG pathway in calcific aortic valve disease (CAVD). CAVD patients show reduced serum cGMP and suppressed PKG signaling. Activating cGMP-PKG, especially with vericiguat, alleviates valve calcification, while PKGI loss aggravates it. Mechanistically, PKGI directly phosphorylates ULK1 at Ser556 to activate autophagy, improving mitochondrial function and inhibiting osteogenic differentiation. These findings suggest that vericiguat, an oral drug already used for heart failure, could be repurposed for CAVD treatment.
+                            </p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <!-- <a href="https://www.procellsystem.com/resources/publications" class="button decoration-none">View More Publications</a> -->
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="2"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">Serum cGMP, VIC mitochondrial membrane potential (JC-1), and ATP content were measured using Elabscience<sup>&reg;</sup> cGMP(Cyclic GMP) ELISA Kit, Mitochondrial Membrane Potential Assay Kit (with JC-1), and ATP Colorimetric Assay Kit (Enzyme Method), respectively.</td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <span class="gold-title">Must-Read Cancer Research Insights for AACR 2026</span>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0">
+                      <colgroup>
+                        <col width="35%" />
+                        <col />
+                      </colgroup>
+
+                      <tbody class="align-top">
+                        <tr>
+                          <td rowspan="2" style="padding-right: 12px;" class="image-box">
+                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/edm202604011140/one.jpg" />
+                          </td>
+                          <td style="padding-bottom: 24px;" class="h-0"><strong>Why Subset Precision Matters？</strong></td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <p>Precision where it counts. Whether you are studying functional differentiation, cell exhaustion, or memory persistence, the purity of your starting population dictates the integrity of your results. EasySort™ cell isolation kits ensures your downstream data reflects true cellular biology.</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 48px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0">
+                      <colgroup>
+                        <col width="35%" />
+                        <col />
+                      </colgroup>
+
+                      <tbody class="align-top">
+                        <tr>
+                          <td rowspan="3" style="padding-right: 12px;" class="image-box">
+                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/edm202604011140/two.jpg" />
+                          </td>
+                          <td style="padding-bottom: 24px;" class="h-0"><strong>Advantages of EasySort™ Cell Isolation Kits</strong></td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <p>Engineered for speed and cell viability, EasySort™ cell isolation kits provide:</p>
+                            <p><strong><span class="color-orange">●</span> Superior Purity & Recovery:</strong> Optimized for consistent, high-yield results across diverse subsets.</p>
+                            <p><strong><span class="color-orange">●</span> Rapid Workflow:</strong> Go from sample to isolated cells in just 14–18 minutes.</p>
+                            <p><strong><span class="color-orange">●</span> Physiological Integrity:</strong> Gentle, nagative</p>
+                            <p>isolation-based processing keeps cells "experment-ready" for sensitive functional assays and flow cytometry.</p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td style="padding-top: 24px;" class="text-right">
+                            <a href="https://www.elabscience.com/products/cell-isolation-products" class="button font-bold decoration-none">Learn More</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 48px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0">
+                      <colgroup>
+                        <col width="35%" />
+                        <col />
+                      </colgroup>
+
+                      <tbody class="align-top">
+                        <tr>
+                          <td rowspan="3" style="padding-right: 12px;" class="image-box">
+                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/edm202604011140/three.jpg" />
+                          </td>
+                          <td style="padding-bottom: 24px;" class="h-0"><strong>Claim Your Free EasySort™ Evaluation Kit</strong></td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <p>We are so confident in our performance that we're offering a complete trial package to help you upgrade your workflow:</p>
+                            <p><strong>1. Request Your Free Trial:</strong> Receive a 10-assay kit plus an EasySort™ -5 Magnet (EC001), an <span class="color-orange">$852 total value</span>.</p>
+                            <p><strong>2. Share Your Insights:</strong> Submit a brief feedback report and receive a <span class="color-orange">$50 voucher</span> for your next order.</p>
+                            <p><strong>3. Keep the Gear:</strong> Purchase 500+ assays and the <span class="color-orange">EasySort™ -5 Magnet is yours to keep</span>.</p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td style="padding-top: 24px;" class="text-right">
+                            <a href="https://www.elabscience.com/about/promotions/39" class="button font-bold decoration-none">Start My Free Trial</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2" class="text-center">
+                    <span class="circle-title">Citations of Elabscience Products</span>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 18px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="table-bordered">
+                      <colgroup>
+                        <col />
+                        <col />
+                        <col />
+                      </colgroup>
+
+                      <thead>
+                        <tr>
+                          <th>Product Name</th>
+                          <th>
+                            <a href="https://www.procellsystem.com/p/neurobasal-medium-pm151223-69253" class="decoration-none text-link-hover color-white">Neurobasal Medium</a>
+                          </th>
+                          <th>
+                            <a href="https://www.procellsystem.com/p/neurobasal-a-medium-pm151236-96788" class="decoration-none color-white">Neurobasal-A Medium</a>
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr>
+                          <td>Primary Application</td>
+                          <td>Short-term or long-term maintenance and cultivation of neuronal cells in <strong>pre-production and embryonic.</strong></td>
+                          <td>Short-term or long-term maintenance and culture of both <strong>newly generated and mature neuronal cells.</strong></td>
+                        </tr>
+
+                        <tr>
+                          <td>Supplements</td>
+                          <td colspan="2">Does not contain L-glutamine and requires the addition of <a href="https://www.procellsystem.com/p/b-27-neuron-supplement-with-vitamin-a-50-pb180637-69953" class="decoration-none font-bold text-link">B-27 neuron Supplement with vitamin A, 50×</a></td>
+                        </tr>
+
+                        <tr>
+                          <td>Quality Control</td>
+                          <td colspan="2">Sterilized by 0.1 μm filtration, Endotoxin Content < 3 EU/mL.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 16px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <span class="wifi-title">Cited Product</span>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 12px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+                      <colgroup>
+                        <col />
+                        <col />
+                        <col />
+                      </colgroup>
+
+                      <thead>
+                        <tr>
+                          <th>Product Name</th>
+                          <th>Cat. No.</th>
+                          <th>Product Type</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr>
+                          <td>
+                            <a href="" class="text-link">MEM  (with NEAA)</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">PM150410</a>
+                          </td>
+                          <td rowspan="3">
+                            <a href="" class="text-link">Liquid Basal Medium</a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="" class="text-link">MEM  (with NEAA)</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">PM150410</a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="" class="text-link">MEM  (with NEAA)</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">PM150410</a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="" class="text-link">MEM  (with NEAA)</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">PM150410</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">Liquid Basal Medium</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 16px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <span class="square-title">Recommended for you</span>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 16px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+                      <colgroup>
+                        <col />
+                        <col />
+                        <col />
+                      </colgroup>
+
+                      <tbody>
+                        <tr>
+                          <td><strong>Product Name</strong></td>
+                          <td><strong>Cat. No.</strong></td>
+                          <td><strong>Product Type</strong></td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="" class="text-link">MEM  (with NEAA)</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">PM150410</a>
+                          </td>
+                          <td rowspan="3">
+                            <a href="" class="text-link">Liquid Basal Medium</a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="" class="text-link">MEM  (with NEAA)</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">PM150410</a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="" class="text-link">MEM  (with NEAA)</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">PM150410</a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="" class="text-link">MEM  (with NEAA)</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">PM150410</a>
+                          </td>
+                          <td>
+                            <a href="" class="text-link">Liquid Basal Medium</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <span class="square-title">Elabscience<sup>&reg;</sup> Product Cited in This Literature</span>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 12px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+                      <colgroup>
+                        <col />
+                        <col width="40%" />
+                      </colgroup>
+
+                      <tbody>
+                        <tr>
+                          <td>Product</td>
+                          <td>Cat. No.</td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="https://www.elabscience.com/p/atp-colorimetric-assay-kit-enzyme-method--e-bc-k774-m" class="text-link">ATP Colorimetric Assay Kit (Enzyme Method)</a>
+                          </td>
+                          <td>
+                            <a href="https://www.elabscience.com/p/atp-colorimetric-assay-kit-enzyme-method--e-bc-k774-m" class="text-link">E-BC-K774-M</a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="https://www.elabscience.com/p/cgmp-cyclic-gmp-elisa-kit--e-el-0083" class="text-link">cGMP(Cyclic GMP) ELISA Kit</a>
+                          </td>
+                          <td>
+                            <a href="https://www.elabscience.com/p/cgmp-cyclic-gmp-elisa-kit--e-el-0083" class="text-link">E-EL-0083</a>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <a href="https://www.elabscience.com/p/mitochondrial-membrane-potential-assay-kit-with-jc-1--e-ck-a301" class="text-link">Mitochondrial Membrane Potential Assay Kit (with JC-1)</a>
+                          </td>
+                          <td>
+                            <a href="https://www.elabscience.com/p/mitochondrial-membrane-potential-assay-kit-with-jc-1--e-ck-a301" class="text-link">E-CK-A301</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <span class="square-title">Recommended for you</span>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 12px"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+                      <colgroup>
+                        <col />
+                        <col />
+                        <col />
+                      </colgroup>
+
+                      <tbody>
+                        <tr>
+                          <td>
+                            <a href="https://www.procellsystem.com/p/dmem-f12-pm150312-68139" class="decoration-none text-link-hover">
+                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150312-500mL-cropped.webp" style="height: 108px;" />
+                              <p>DMEM/F12</p>
+                              <p>Cat. No.: PM150312</p>
+                            </a>
+                          </td>
+
+                          <td>
+                            <a href="https://www.procellsystem.com/p/dmem-low-glucose-pm150220-70471" class="decoration-none text-link-hover">
+                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150220-500mL-cropped.webp" style="height: 108px;" />
+                              <p>DMEM (Low glucose)</p>
+                              <p>Cat. No.: PM150220</p>
+                            </a>
+                          </td>
+
+                          <td>
+                            <a href="https://www.procellsystem.com/p/mem-with-neaa-pm150410-71162" class="decoration-none text-link-hover">
+                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150410-500mL-cropped.webp" style="height: 108px;" />
+                              <p>MEM, with NEAA</p>
+                              <p>Cat. No.: PM150410</p>
+                            </a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- 主体 end -->
+
+            <!-- 页尾 start -->
+            <table cellspacing="0" cellpadding="0" border="0" class="footer">
+              <colgroup>
+                <col width="10px" />
+                <col />
+                <col />
+                <col width="10px" />
+              </colgroup>
+
+              <tbody>
+                <tr>
+                  <td colspan="4" style="height: 24px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="connect-us text-center">
+                      <colgroup>
+                        <col width="20%" />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <!-- <col /> -->
+                        <col />
+                        <col />
+                        <col width="20%" />
+                      </colgroup>
+
+                      <tbody>
+                        <tr>
+                          <td></td>
+                          <td colspan="6" class="connect-us-title font-bold text-size-[14px]">Connect with us</td>
+                          <td></td>
+                        </tr>
+
+                        <tr>
+                          <td></td>
+                          <td class="line-height-0 font-size-0">
+                            <a href="https://www.youtube.com/c/Elabscience_Bio" class="image-box">
+                              <img src="https://oss.pri-cella.com/edm/edmfooter/1.png" alt="" />
+                            </a>
+                          </td>
+                          <td class="line-height-0 font-size-0">
+                            <a href="https://www.linkedin.com/company/elabscience" class="image-box">
+                              <img src="https://oss.pri-cella.com/edm/edmfooter/2.png" alt="" />
+                            </a>
+                          </td>
+                          <td class="line-height-0 font-size-0">
+                            <a href="https://www.facebook.com/elabscience.bionovation" class="image-box">
+                              <img src="https://oss.pri-cella.com/edm/edmfooter/3.png" alt="" />
+                            </a>
+                          </td>
+                          <td class="line-height-0 font-size-0">
+                            <a href="https://www.instagram.com/elabscience_bionovation/" class="image-box">
+                              <img src="https://oss.pri-cella.com/edm/edmfooter/5.png" alt="" />
+                            </a>
+                          </td>
+                          <!-- <td class="line-height-0 font-size-0">
+                            <a href="https://www.pinterest.com/elabscience/" class="image-box">
+                              <img src="https://oss.pri-cella.com/edm/edmfooter/6.png" alt="" />
+                            </a>
+                          </td> -->
+                          <td class="line-height-0 font-size-0">
+                            <a href="https://www.tiktok.com/@elabscience" class="image-box">
+                              <img src="https://oss.pri-cella.com/edm/edmfooter/7.png" alt="" />
+                            </a>
+                          </td>
+                          <td class="line-height-0 font-size-0">
+                            <a href="https://wa.me/13468889004" class="image-box">
+                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/edmfooter/what'sup.webp" alt="" />
+                            </a>
+                          </td>
+                          <td></td>
+                        </tr>
+
+                        <tr>
+                          <td></td>
+                          <td colspan="6" class="connect-us-separator"></td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 24px;"></td>
+                </tr>
+
+                <tr>
+                  <td></td>
+                  <td colspan="2">
+                    <table cellspacing="0" cellpadding="0" border="0" class="contact-us text-center align-middle">
+                      <colgroup>
+                        <col />
+                      </colgroup>
+
+                      <tbody>
+                        <tr>
+                          <td>
+                            <strong>Elabscience Bionovation Inc.</strong>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <img src="https://file.elabscience.com/edm/demimg2024428/电话.png" alt="" class="align-middle" />
+                            <span class="align-middle">Toll-free: <a href="tel:1-888-852-8623" class="decoration-none">1-888-852-8623</a></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <img src="https://file.elabscience.com/edm/demimg2024428/地球.png" alt="" class="align-middle" />
+                            <span class="align-middle">Web: <a href=" https://www.elabscience.com" class="decoration-none">www.elabscience.com</a></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <img src="https://file.elabscience.com/edm/demimg2024428/邮件.png" alt="" class="align-middle" />
+                            <span class="align-middle">Email: <a href="mailto:orders@elabscience.com" class="decoration-none">orders@elabscience.com</a>;<a href="mailto:techsupport@elabscience.com" class="decoration-none" style="padding-left: 10px;">techsupport@elabscience.com</a></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>14780 Memorial Drive, Suite 105, Houston, Texas, 77079, USA</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td colspan="4" style="height: 32px;"></td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- 页尾 end -->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
