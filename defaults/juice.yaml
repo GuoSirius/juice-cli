@@ -42,20 +42,27 @@ juice:
   # 为图片元素应用 height 属性
   applyHeightAttributes: true
 
-  # 保留伪元素 (::before, ::after) 对应的 <style> 块
-  # 注意：邮件中通常不使用，可能与布局冲突，设为 false
-  inlinePseudoElements: false
+  # 将伪元素 (::before, ::after) 作为 <span> 插入 DOM
+  # 设为 true 时，伪元素样式会被内联到对应的 HTML 元素
+  inlinePseudoElements: true
 
   # 是否保留伪选择器规则（如 :hover、:active）
   # 设为 true 时保留 ignoredPseudos 中的伪选择器规则，其他样式内联
   preservePseudos: true
 
   # 保留的 CSS 选择器（支持子字符串匹配）
-  # 当 removeStyleTags 为 true 时，这些选择器的样式会保留在 <style> 标签内
-  # 用于需要保留的邮件客户端特定样式，如 '.gmail-'、'#outlook'、'@media'
-  # preservedSelectors:
-  #   - '.gmail-'
-  #   - '@media'
+  # 当 removeStyleTags 为 true 时，这些选择器的样式会保留在 <style> 标签内，不会被内联
+  #
+  # 用途：用于邮件客户端特定的样式，通过条件注释包裹后针对性生效
+  # 示例：
+  #   - '.gmail-'    → Gmail 特定样式
+  #   - '#outlook-'  → Outlook 特定样式
+  #   - '@media'     → 所有媒体查询（简化写法，等同于 'screen' 'print' 等）
+  #
+  # 注意：支持子字符串匹配，如 '.gmail-' 会匹配 '.gmail-desktop'、'.gmail-mobile' 等
+  preservedSelectors:
+    - ".gmail-"
+    - "#outlook-"
 
   # 将保留的 CSS（媒体查询、@font-face 等）插入到文档的位置
   # - true: 自动选择位置（优先 head，其次 body，最后文档末尾）
