@@ -8,33 +8,33 @@
 
 - ✅ **CSS 内联** —— 将 `<style>` 中的样式全部内联为 `style=""` 属性，兼容 Gmail / Outlook / Apple Mail 等
 - ✅ **Mustache 模板变量** —— 支持 `{{变量名}}` 语法，通过配置文件批量替换
-- ✅ **三层配置合并** —— CLI 内置默认 < 用户主目录配置 < 高优先级配置，三者层层合并
+- ✅ **三层配置合并** —— CLI 默认 < 用户目录 < 优先配置，三者层层合并
 - ✅ **双文件输出** —— 同时生成标准版 `.output.html` 和压缩版 `.minified.html`
 - ✅ **响应式保留** —— `@media`、`@font-face`、`@keyframes` 均不丢失
-- ✅ **Windows 右键菜单（PowerShell 7 风格）** —— 子菜单层级，一键注册
+- ✅ **Windows 右键菜单（PowerShell 7 风格）** —— 子菜单层级，一键注册/卸载
 
 ---
 
 ## 安装
 
 ```bash
-# 全局安装（npm 包名：juice-email-cli）
+# 全局安装
 npm install -g juice-email-cli
 
-# 安装时会自动注册 Windows 右键菜单（无管理员权限时静默跳过，可稍后手动注册）
+# 安装时自动注册 Windows 右键菜单（无管理员权限时静默跳过）
 ```
 
-> **提示**：安装时如未注册右键菜单（无管理员权限），安装完成后以**管理员身份**运行以下命令即可：
+> **提示**：安装时如未注册右键菜单，安装完成后以**管理员身份**运行：
 > ```bash
-> juice --register
+> juice --install
 > ```
 
 ```bash
-# 克隆本地安装
-git clone https://github.com/siriussupreme/juice-email-cli.git
-cd juice-email-cli
-npm install       # 自动注册右键菜单（无管理员权限时跳过）
-npm link          # 将 bin/juice.js 链接到全局
+# 本地克隆安装
+git clone https://gitee.com/siriussupreme/juice-cli.git
+cd juice-cli
+npm install       # 自动注册右键菜单
+npm link          # 链接到全局
 ```
 
 ---
@@ -61,9 +61,9 @@ juice -c project.yaml -f my-email.html
 | 参数 | 简写 | 说明 |
 |------|------|------|
 | `--file <path>` | `-f` | 输入 HTML 模板文件路径（必填） |
-| `--config <path>` | `-c` | 配置文件路径，不指定时自动按优先级查找 |
-| `--register` | | 注册 Windows 右键菜单（需管理员权限） |
-| `--unregister` | | 取消 Windows 右键菜单注册 |
+| `--config <path>` | `-c` | 配置文件路径，不指定时自动查找输入文件同级目录 |
+| `--install` | | 注册 Windows 右键菜单（需管理员权限） |
+| `--uninstall` | | 取消 Windows 右键菜单注册（需管理员权限） |
 | `--version` | `-v` | 查看版本号 |
 | `--help` | `-h` | 查看帮助 |
 
@@ -74,34 +74,32 @@ juice -c project.yaml -f my-email.html
 ```
 优先级 低 ──────────────────────────────────────────────── 高
 
-  CLI 内置默认值  <  用户主目录 ~/juice.yaml  <  高优先级配置（互斥）
+  CLI 内置默认值  <  用户主目录 ~/juice.yaml  <  优先配置（互斥）
 ```
 
-**高优先级配置（三者互斥，只生效一个）：**
+**优先配置（-c 和输入文件同级目录互斥，只生效一个）：**
 
-| 优先级 | 来源 | 说明 |
-|--------|------|------|
-| 最高 | `-c <path>` | 命令行指定，指定即生效 |
-| 其次 | 输入文件同目录 `juice.yaml` | 随模板文件走，适合项目级配置 |
-| 最后 | 用户主目录 `~/juice.yaml` | 当以上两者都不存在时生效 |
+| 来源 | 说明 |
+|------|------|
+| `-c <path>` | 命令行指定，最优先 |
+| 输入文件同目录 `juice.yaml` | 随模板文件走，适合项目级配置 |
 
 **合并规则：**
 - 用户主目录配置（如果存在）**始终参与合并**
-- 高优先级配置覆盖用户主目录配置中的同名字段
+- 优先配置覆盖用户主目录配置中的同名字段
 - CLI 内置默认值兜底所有未配置字段
 
 **示例：**
 
 ```bash
-# 仅使用 -c 配置（与用户主目录合并）
+# 指定配置文件（与用户目录合并）
 juice -c project.yaml -f email.html
 
-# 仅使用输入文件目录配置（与用户主目录合并）
+# 使用输入文件同级目录配置（与用户目录合并）
 # → email.html 同目录下有 juice.yaml
 juice -f email.html
 
-# 仅使用用户主目录配置（无高优先级配置时）
-# → 用户主目录 ~/juice.yaml 生效
+# 无优先配置时，仅使用用户目录配置
 juice -f email.html
 ```
 
@@ -161,13 +159,13 @@ variables:
 
 ```bash
 # 以管理员身份运行 PowerShell，然后：
-juice --register
+juice --install
 
-# 取消注册：
-juice --unregister
+# 卸载：
+juice --uninstall
 ```
 
-> **注意**：注册/取消注册需要 **管理员权限**，请右键"以管理员身份运行"命令行。
+> **注意**：注册/卸载需要 **管理员权限**，请右键"以管理员身份运行"命令行。
 > 注册成功后如菜单未立即出现，重启文件资源管理器（`explorer.exe`）即可。
 
 ---
@@ -190,21 +188,21 @@ npm publish --tag beta
 ## 目录结构
 
 ```
-juice-email-cli/
+juice-cli/
 ├── bin/
-│   └── juice.js               # CLI 入口（#!/usr/bin/env node）
+│   └── juice.js               # CLI 入口
 ├── src/
-│   ├── index.js               # 核心逻辑（配置合并、模板处理、双输出）
-│   └── context-menu.js        # Windows 右键菜单注册（PS7 风格）
+│   ├── index.js              # 核心逻辑（配置合并、模板处理、双输出）
+│   └── context-menu.js       # Windows 右键菜单注册（PS7 风格）
 ├── defaults/
-│   └── juice.yaml             # CLI 内置默认配置（最低优先级基准）
+│   └── juice.yaml            # CLI 内置默认配置（最低优先级基准）
 ├── examples/
-│   ├── juice.yaml             # 用户配置示例
-│   └── template.html          # HTML 邮件模板示例
-├── .npmignore                 # 发布时排除的文件
-├── LICENSE                    # MIT
-├── package.json
-└── README.md
+│   ├── juice.yaml            # 用户配置示例
+│   ├── template.html          # HTML 邮件模板示例
+│   └── *.html                # 示例输出文件
+├── LICENSE                   # MIT
+├── README.md
+└── package.json
 ```
 
 ---

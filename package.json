@@ -24,13 +24,13 @@
   ],
   "author": "",
   "license": "MIT",
-  "homepage": "https://github.com/siriussupreme/juice-email-cli",
+  "homepage": "https://gitee.com/siriussupreme/juice-cli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/siriussupreme/juice-email-cli.git"
+    "url": "https://gitee.com/siriussupreme/juice-cli.git"
   },
   "bugs": {
-    "url": "https://github.com/siriussupreme/juice-email-cli/issues"
+    "url": "https://gitee.com/siriussupreme/juice-cli/issues"
   },
   "dependencies": {
     "chalk": "^4.1.2",
