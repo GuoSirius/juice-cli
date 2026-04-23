@@ -17,10 +17,10 @@ juice:
   # 保留 @media 媒体查询到独立 <style> 块（响应式邮件必须开启）
   preserveMediaQueries: true
 
-  # 保留 @font-face 声明
+  # 保留 @font-face 声明（自定义字体支持）
   preserveFontFaces: true
 
-  # 保留 @keyframes 动画（部分客户端支持）
+  # 保留 @keyframes 动画（部分邮件客户端支持）
   preserveKeyFrames: true
 
   # 将 style 内容转换为 table 系列元素的 HTML 属性（align/bgcolor 等）
@@ -29,6 +29,22 @@ juice:
 
   # 是否处理 <style> 标签中的 CSS（通常 true）
   applyStyleTags: true
+
+  # 保留 CSS 中的 !important 声明
+  preserveImportant: true
+
+  # 解析 CSS 变量（如 var(--main-color)）
+  resolveCSSVariables: true
+
+  # 为图片元素应用 width 属性
+  applyWidthAttributes: true
+
+  # 为图片元素应用 height 属性
+  applyHeightAttributes: true
+
+  # 保留伪元素 (::before, ::after) 对应的 <style> 块
+  # 注意：邮件中通常不使用，可能与布局冲突，设为 false
+  inlinePseudoElements: false
 
   # 额外附加的外部 CSS 文件（相对于 HTML 模板所在目录）
   # extraCssFiles: []
@@ -59,18 +75,41 @@ output:
   encoding: "utf8"
 
 # ─── 压缩选项（html-minifier-terser）────────────────────────────────────────
+# ⚠️ 邮件 HTML 压缩注意事项：
+#   1. 必须保持 removeConditionalComments: false，保护 Outlook 条件注释
+#   2. 不要移除属性引号，确保兼容性
+#   3. 不要移除空属性，某些属性是必需的
+#   4. 不要移除空元素，Outlook 对此支持不佳
 minify:
   # 折叠多余空白
   collapseWhitespace: true
-  # 移除 HTML 注释（Outlook 条件注释 <!--[if mso]> 不受影响）
+
+  # 保守折叠：始终保留至少 1 个空格（避免单词连在一起）
+  conservativeCollapse: true
+
+  # 移除 HTML 注释（注意：不会移除条件注释）
   removeComments: true
-  # 保留条件注释（不要改为 true，会删除 Outlook MSO 兼容代码）
+
+  # 保留条件注释（不要改为 true，会删除 <!--[if mso]> 等 Outlook MSO 兼容代码）
   removeConditionalComments: false
+
   # 压缩内联 CSS（style 属性）
   minifyCSS: true
+
   # 压缩内联 JS（邮件中通常无 JS，保持 false）
   minifyJS: false
-  # 移除空属性
+
+  # 移除空属性（设为 false 确保兼容性）
   removeEmptyAttributes: false
-  # 规范化布尔属性
+
+  # 规范化布尔属性（设为 false 确保兼容性）
   collapseBooleanAttributes: false
+
+  # 移除冗余属性（当属性值与默认值相同时）
+  removeRedundantAttributes: true
+
+  # 使用短的 doctype
+  useShortDoctype: true
+
+  # 保留行尾换行（配合 collapseWhitespace 使用）
+  preserveLineBreaks: false
