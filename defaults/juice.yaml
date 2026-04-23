@@ -1,0 +1,73 @@
+# juice-email-cli 内置默认配置
+#
+# 合并顺序（优先级从低到高）：
+#   CLI 内置默认值  <  用户主目录 ~/juice.yaml  <  高优先级配置（-c/输入目录/用户目录）
+#
+# 所有字段均与上述配置深度合并，未填写的字段自动使用本页默认值。
+# 用户配置文件（~/juice.yaml 或项目 juice.yaml）只需填写需要覆盖的字段即可。
+
+# ─── juice CSS 内联选项 ───────────────────────────────────────────────────────
+juice:
+  # 处理后移除 <style> 标签（推荐 true，提高 Gmail/Outlook 等兼容性）
+  removeStyleTags: true
+
+  # 保留 @media 媒体查询到独立 <style> 块（响应式邮件必须开启）
+  preserveMediaQueries: true
+
+  # 保留 @font-face 声明
+  preserveFontFaces: true
+
+  # 保留 @keyframes 动画（部分客户端支持）
+  preserveKeyFrames: true
+
+  # 将 style 内容转换为 table 系列元素的 HTML 属性（align/bgcolor 等）
+  # 开启后对 Outlook 2003-2019 兼容性更好
+  applyAttributesTableElements: true
+
+  # 是否处理 <style> 标签中的 CSS（通常 true）
+  applyStyleTags: true
+
+  # 额外附加的外部 CSS 文件（相对于 HTML 模板所在目录）
+  # extraCssFiles: []
+
+# ─── 模板变量（Mustache 语法：{{变量名}}）────────────────────────────────────
+variables:
+  brandName: ""
+  brandColor: "#0066cc"
+  logoUrl: ""
+  websiteUrl: ""
+  recipientName: "用户"
+  subject: ""
+  previewText: ""
+  ctaText: "立即查看"
+  ctaUrl: ""
+  companyName: ""
+  companyAddress: ""
+  unsubscribeUrl: ""
+  currentYear: "2026"
+
+# ─── 输出选项 ─────────────────────────────────────────────────────────────────
+output:
+  # 普通输出文件后缀
+  normalSuffix: ".output.html"
+  # 压缩输出文件后缀
+  minifiedSuffix: ".minified.html"
+  # 文件编码
+  encoding: "utf8"
+
+# ─── 压缩选项（html-minifier-terser）────────────────────────────────────────
+minify:
+  # 折叠多余空白
+  collapseWhitespace: true
+  # 移除 HTML 注释（Outlook 条件注释 <!--[if mso]> 不受影响）
+  removeComments: true
+  # 保留条件注释（不要改为 true，会删除 Outlook MSO 兼容代码）
+  removeConditionalComments: false
+  # 压缩内联 CSS（style 属性）
+  minifyCSS: true
+  # 压缩内联 JS（邮件中通常无 JS，保持 false）
+  minifyJS: false
+  # 移除空属性
+  removeEmptyAttributes: false
+  # 规范化布尔属性
+  collapseBooleanAttributes: false

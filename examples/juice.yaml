@@ -1,0 +1,49 @@
+# juice.yaml - 用户配置文件示例
+#
+# 放置位置（优先级从低到高）：
+#   ~/juice.yaml          ← 用户主目录，对所有项目生效
+#   <模板文件目录>/juice.yaml ← 仅对当前项目生效（推荐）
+#   juice -c <此文件>       ← 命令行指定
+#
+# 所有配置项均与 CLI 内置默认值深度合并，未填写的字段自动使用内置值。
+# 完整默认配置见：<CLI安装目录>/defaults/juice.yaml
+
+# ─── 模板变量（Mustache 语法：{{变量名}}）────────────────────────────────────
+variables:
+  brandName: "我的品牌"
+  brandColor: "#0066cc"
+  logoUrl: "https://via.placeholder.com/150x50"
+  websiteUrl: "https://example.com"
+  recipientName: "用户"
+  subject: "欢迎使用 juice 邮件工具"
+  previewText: "这是一封测试邮件"
+  ctaText: "立即查看"
+  ctaUrl: "https://example.com/action"
+  companyName: "Example Corp."
+  companyAddress: "上海市浦东新区 XX 路 123 号"
+  unsubscribeUrl: "https://example.com/unsubscribe"
+  currentYear: "2026"
+
+# ─── juice CSS 内联选项（仅列出需要覆盖默认值的项）──────────────────────────
+# juice:
+#   removeStyleTags: true           # 移除 <style>（推荐）
+#   preserveMediaQueries: true      # 保留 @media（响应式必须）
+#   preserveFontFaces: true
+#   preserveKeyFrames: true
+#   applyAttributesTableElements: true
+#   extraCssFiles:                  # 附加 CSS 文件（相对于模板目录）
+#     - reset.css
+#     - email-base.css
+
+# ─── 输出选项 ─────────────────────────────────────────────────────────────────
+# output:
+#   normalSuffix: ".output.html"    # 标准版后缀
+#   minifiedSuffix: ".minified.html" # 压缩版后缀
+#   encoding: "utf8"
+
+# ─── 压缩选项 ─────────────────────────────────────────────────────────────────
+# minify:
+#   collapseWhitespace: true
+#   removeComments: true            # 移除 HTML 注释（条件注释不受影响）
+#   minifyCSS: true                 # 压缩内联 CSS
+#   minifyJS: false
