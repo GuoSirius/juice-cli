@@ -14,13 +14,19 @@ program
   .option('-c, --config <path>', '配置文件路径（不指定时自动查找输入文件同级目录）')
   .option('--install',   '注册 Windows 右键菜单（需管理员权限）')
   .option('--uninstall', '取消 Windows 右键菜单注册（需管理员权限）')
+  .addHelpText('before', `
+╔════════════════════════════════════════════════════════════════╗
+║  juice-email-cli v${pkg.version}                                     ║
+║  HTML 邮件生成工具 - CSS 内联 + 模板变量 + 压缩                  ║
+╚════════════════════════════════════════════════════════════════╝
+`)
   .addHelpText('after', `
 配置加载顺序（优先级从低到高）：
   1. CLI 内置默认值（defaults/juice.yaml）
   2. 用户主目录 ~/juice.yaml（如果存在）
   3. 优先配置（-c 指定 或 输入文件同级目录，二者互斥）
 
-示例：
+使用示例：
   juice -f my-email.html
   juice -c project.yaml -f emails/welcome.html
   juice --install          （管理员权限，注册右键菜单）
@@ -29,6 +35,8 @@ program
 输出文件（与输入文件同目录）：
   <name>.output.html     CSS 内联 + 变量替换后的标准版
   <name>.minified.html   在标准版基础上压缩的精简版
+
+更多信息：https://gitee.com/siriussupreme/juice-cli
 `)
   .action(async (options) => {
     // 注册/卸载右键菜单
