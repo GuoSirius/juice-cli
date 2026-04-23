@@ -1,0 +1,11 @@
+/* email-links.css - 链接样式 */
+
+/* 链接 hover 时显示下划线（仅部分邮件客户端支持） */
+a:hover {
+  text-decoration: underline !important;
+}
+
+/* 可选：hover 时改变颜色 */
+/* a:hover {
+  color: #004499 !important;
+} */

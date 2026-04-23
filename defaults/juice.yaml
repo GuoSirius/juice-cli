@@ -11,7 +11,8 @@
 
 # ─── juice CSS 内联选项 ───────────────────────────────────────────────────────
 juice:
-  # 处理后移除 <style> 标签（推荐 true，提高 Gmail/Outlook 等兼容性）
+  # 处理完成后移除 <style> 标签（推荐 true，提高 Gmail/Outlook 等邮件客户端兼容性）
+  # 设为 true 时，内联完成后会删除所有 <style> 标签（除非通过 preservedSelectors 保留特定选择器）
   removeStyleTags: true
 
   # 保留 @media 媒体查询到独立 <style> 块（响应式邮件必须开启）
@@ -23,50 +24,60 @@ juice:
   # 保留 @keyframes 动画（部分邮件客户端支持）
   preserveKeyFrames: true
 
-  # 将 style 内容转换为 table 系列元素的 HTML 属性（align/bgcolor 等）
-  # 开启后对 Outlook 2003-2019 兼容性更好
+  # 将 style 属性中的样式转换为 table 系列元素的 HTML 属性（align、bgcolor、valign 等）
+  # 开启后对 Outlook 2003-2019（使用 Word 渲染引擎）的兼容性更好
+  # 注意：仅对 <table>、<tr>、<td>、<th> 等表格元素生效
   applyAttributesTableElements: true
 
-  # 是否处理 <style> 标签中的 CSS（通常 true）
+  # 是否处理 HTML 文档中的 <style> 标签（通常保持 true）
+  # 设为 true 时，<style> 标签内的 CSS 会被解析并内联到对应元素
+  # 设为 false 时，<style> 标签的 CSS 不会被处理（适用于已内联或使用外部 CSS 的场景）
   applyStyleTags: true
 
   # 保留 CSS 中的 !important 声明
-  preserveImportant: true
+  preserveImportant: false
 
-  # 解析 CSS 变量（如 var(--main-color)）
+  # 解析 CSS 变量（如 var(--brand-color)）并替换为具体值
+  # 设为 true 时，CSS 变量会被解析并内联到对应的 style 属性中
   resolveCSSVariables: true
 
-  # 为图片元素应用 width 属性
+  # 为 <img> 元素应用 width 属性（基于 CSS 样式中的宽度值）
+  # 设为 true 时，图片的 CSS 宽度会同时添加为 HTML width 属性
   applyWidthAttributes: true
 
-  # 为图片元素应用 height 属性
+  # 为 <img> 元素应用 height 属性（基于 CSS 样式中的高度值）
+  # 设为 true 时，图片的 CSS 高度会同时添加为 HTML height 属性
   applyHeightAttributes: true
 
-  # 将伪元素 (::before, ::after) 作为 <span> 插入 DOM
-  # 设为 true 时，伪元素样式会被内联到对应的 HTML 元素
+  # 将 ::before 和 ::after 伪元素转换为 <span> 标签插入 DOM
+  # 设为 true 时，伪元素内容将作为可见的 DOM 元素呈现，而非仅保留样式
   inlinePseudoElements: true
 
-  # 是否保留伪选择器规则（如 :hover、:active）
-  # 设为 true 时保留 ignoredPseudos 中的伪选择器规则，其他样式内联
+  # 移除 <style> 标签时，是否保留伪类选择器规则（:hover、:active、:focus 等）
+  # 设为 true 时，juice.ignoredPseudos 中的伪类规则会保留在 <style> 标签内，其他样式正常内联
+  # 设为 false 时，所有伪类规则都会被移除
   preservePseudos: true
 
-  # 保留的 CSS 选择器（支持子字符串匹配）
-  # 当 removeStyleTags 为 true 时，这些选择器的样式会保留在 <style> 标签内，不会被内联
+  # 保留的 CSS 选择器列表（支持子字符串匹配）
+  # 当 removeStyleTags 为 true 时，这些选择器的规则会保留在 <style> 标签内，不会被内联
   #
-  # 用途：用于邮件客户端特定的样式，通过条件注释包裹后针对性生效
+  # 用途：保留邮件客户端特定的样式（如 Gmail/Outlook 兼容性修复）
+  # 匹配方式：子字符串包含即匹配
   # 示例：
-  #   - '.gmail-'    → Gmail 特定样式
-  #   - '#outlook-'  → Outlook 特定样式
-  #   - '@media'     → 所有媒体查询（简化写法，等同于 'screen' 'print' 等）
+  #   - '.gmail-'    → 匹配 '.gmail-desktop'、'.gmail-mobile' 等 Gmail 相关样式
+  #   - '#outlook-'  → 匹配 '#outlook-wrapper'、'#outlook-footer' 等 Outlook 相关样式
+  #   - 'conditional' → 匹配包含 'conditional' 的选择器（如条件注释包裹的选择器）
   #
-  # 注意：支持子字符串匹配，如 '.gmail-' 会匹配 '.gmail-desktop'、'.gmail-mobile' 等
+  # 注意：这是简化写法，实际由 juice 库的子字符串匹配逻辑处理
   preservedSelectors:
     - ".gmail-"
     - "#outlook-"
+    - ":hover"
 
-  # 将保留的 CSS（媒体查询、@font-face 等）插入到文档的位置
-  # - true: 自动选择位置（优先 head，其次 body，最后文档末尾）
-  # - CSS 选择器字符串: 插入到匹配元素的末尾，如 '#email-head'
+  # 将保留的额外 CSS（媒体查询、@font-face、@keyframes）插入到文档的位置
+  # 仅当 preserveMediaQueries/preserveFontFaces/preserveKeyFrames 为 true 时生效
+  # - true: 自动选择位置（优先 <head>，其次 <body>，最后文档末尾）
+  # - CSS 选择器字符串: 插入到匹配元素的内部末尾，如 '#email-container'
   insertPreservedExtraCss: true
 
   # 额外附加的外部 CSS 文件（相对于 HTML 模板所在目录）

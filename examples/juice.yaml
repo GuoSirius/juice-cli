@@ -25,15 +25,14 @@ variables:
   currentYear: "2026"
 
 # ─── juice CSS 内联选项（仅列出需要覆盖默认值的项）──────────────────────────
-# juice:
-#   removeStyleTags: true           # 移除 <style>（推荐）
-#   preserveMediaQueries: true      # 保留 @media（响应式必须）
-#   preserveFontFaces: true
-#   preserveKeyFrames: true
-#   applyAttributesTableElements: true
-#   extraCssFiles:                  # 附加 CSS 文件（相对于模板目录）
-#     - reset.css
-#     - email-base.css
+juice:
+  preserveMediaQueries: true   # 保留 @media（响应式必须）
+  preservedSelectors:          # 保留的选择器（不会被内联）
+    - ".gmail-"
+    - "#outlook-"
+    - "a:hover"                # 链接 hover 效果（如需下划线等 hover 样式）
+  extraCssFiles:               # 附加 CSS 文件（相对于模板目录）
+    - email-links.css
 
 # ─── 输出选项 ─────────────────────────────────────────────────────────────────
 # output:
