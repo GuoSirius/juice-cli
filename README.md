@@ -8,10 +8,11 @@
 
 - ✅ **CSS 内联** —— 将 `<style>` 中的样式全部内联为 `style=""` 属性，兼容 Gmail / Outlook / Apple Mail 等
 - ✅ **Mustache 模板变量** —— 支持 `{{变量名}}` 语法，通过配置文件批量替换
+- ✅ **Mustache 列表循环** —— 支持 `{{#items}}...{{/items}}` 遍历数组，支持嵌套循环
 - ✅ **三层配置合并** —— CLI 默认 < 用户目录 < 优先配置，三者层层合并
 - ✅ **双文件输出** —— 同时生成标准版 `.output.html` 和压缩版 `.minified.html`
 - ✅ **响应式保留** —— `@media`、`@font-face`、`@keyframes` 均不丢失
-- ✅ **Windows 右键菜单（PowerShell 7 风格）** —— 子菜单层级，一键注册/卸载
+- ✅ **Windows 右键菜单（自定义图标）** —— 子菜单层级，一键注册/卸载，支持自定义图标
 
 ---
 
@@ -119,10 +120,33 @@ variables:
   companyName: "My Company"
   currentYear: "2026"
 
+  # 列表数据示例
+  products:
+    - name: "产品 A"
+      price: "¥99.00"
+      tag: "热销"
+    - name: "产品 B"
+      price: "¥199.00"
+    - name: "产品 C"
+      price: "¥299.00"
+
+  features:
+    - title: "特性一"
+      items:
+        - "优势 A"
+        - "优势 B"
+    - title: "特性二"
+      items:
+        - "优势 C"
+        - "优势 D"
+
 # juice 选项（全部可选，均有内置默认值）
 # juice:
 #   removeStyleTags: true
 #   preserveMediaQueries: true
+#   preservePseudos: true           # 保留 hover 等伪类
+#   preservedSelectors:             # 保留的选择器（不会被内联）
+#     - "a:hover"
 #   extraCssFiles:
 #     - email-reset.css
 
@@ -145,11 +169,63 @@ variables:
 <a href="{{ctaUrl}}" style="background-color: {{brandColor}};">{{ctaText}}</a>
 ```
 
+### Mustache 列表循环
+
+支持 `{{#items}}...{{/items}}` 语法遍历数组数据：
+
+```yaml
+# juice.yaml - 配置列表数据
+variables:
+  products:
+    - name: "产品 A"
+      price: "¥99.00"
+      tag: "热销"
+    - name: "产品 B"
+      price: "¥199.00"
+    - name: "产品 C"
+      price: "¥299.00"
+```
+
+```html
+<!-- HTML 模板 -->
+{{#products}}
+<div class="product-item">
+  <h3>{{name}}</h3>
+  <p class="price">{{price}}</p>
+  {{#tag}}<span class="tag">{{tag}}</span>{{/tag}}
+</div>
+{{/products}}
+
+<!-- 空列表备选内容 -->
+{{^products}}
+<p>暂无商品</p>
+{{/products}}
+
+<!-- 嵌套循环示例 -->
+{{#features}}
+<div class="feature-column">
+  <h4>{{title}}</h4>
+  <ul>
+    {{#items}}
+    <li>{{.}}</li>
+    {{/items}}
+  </ul>
+</div>
+{{/features}}
+```
+
+| 语法 | 说明 | 示例 |
+|------|------|------|
+| `{{#list}}{{/list}}` | 循环遍历 | `{{#products}}{{name}}{{/products}}` |
+| `{{^list}}{{/list}}` | 反向（空列表时显示） | `{{^products}}暂无{{/products}}` |
+| `{{.}}` | 当前元素 | `{{#.}}{{.}}{{/}}` |
+| `{{#var}}{{/var}}` | 条件渲染（仅当有值时显示） | `{{#tag}}{{tag}}{{/tag}}` |
+
 ---
 
-## Windows 右键菜单（PowerShell 7 风格）
+## Windows 右键菜单（自定义图标）
 
-注册后，在 `.html` / `.htm` 文件上右键可看到级联子菜单：
+注册后，在 `.html` / `.htm` 文件上右键可看到级联子菜单（带自定义图标）：
 
 ```
 📧 用 juice 生成邮件 HTML
@@ -167,6 +243,8 @@ juice --uninstall
 
 > **注意**：注册/卸载需要 **管理员权限**，请右键"以管理员身份运行"命令行。
 > 注册成功后如菜单未立即出现，重启文件资源管理器（`explorer.exe`）即可。
+
+> **图标说明**：自定义图标位于 `icons/juice-icon.ico`，支持 16x16 到 256x256 多种尺寸。
 
 ---
 
@@ -192,15 +270,19 @@ juice-cli/
 ├── bin/
 │   └── juice.js               # CLI 入口
 ├── src/
-│   ├── index.js              # 核心逻辑（配置合并、模板处理、双输出）
-│   └── context-menu.js       # Windows 右键菜单注册（PS7 风格）
+│   ├── index.js               # 核心逻辑（配置合并、模板处理、双输出）
+│   └── context-menu.js        # Windows 右键菜单注册（自定义图标）
 ├── defaults/
-│   └── juice.yaml            # CLI 内置默认配置（最低优先级基准）
+│   └── juice.yaml             # CLI 内置默认配置（最低优先级基准）
 ├── examples/
-│   ├── juice.yaml            # 用户配置示例
-│   ├── template.html          # HTML 邮件模板示例
-│   └── *.html                # 示例输出文件
-├── LICENSE                   # MIT
+│   ├── juice.yaml             # 用户配置示例（含列表数据）
+│   ├── template.html           # HTML 邮件模板示例（含列表循环）
+│   └── *.css                   # 附加样式文件
+├── icons/
+│   └── juice-icon.ico          # 右键菜单自定义图标
+├── scripts/
+│   └── generate-icon.js        # 图标生成脚本
+├── LICENSE                    # MIT
 ├── README.md
 └── package.json
 ```
