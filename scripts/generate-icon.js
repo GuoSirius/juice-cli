@@ -93,59 +93,106 @@ function makeCrcTable() {
 }
 
 /**
- * 生成邮件图标像素数据
+ * 生成邮件图标像素数据（简洁信封 + 闪电设计）
  */
 function generateIconPixels(width, height) {
   const data = [];
-  const padding = Math.floor(width * 0.08);
-  const rectHeight = Math.floor(height * 0.6);
-  const cornerRadius = Math.floor(width * 0.06);
   
-  // 品牌色 (RGB)
-  const bgR = 0, bgG = 102, bgB = 204;
-  const foldR = 255, foldG = 255, foldB = 255;
+  // 颜色定义
+  const bgColor = { r: 30, g: 100, b: 220 };     // 蓝色背景
+  const foldColor = { r: 255, g: 255, b: 255 }; // 折痕白色
+  const boltColor = { r: 255, g: 210, b: 0 };    // 闪电金色
   
   for (let y = 0; y < height; y++) {
     data.push(0); // filter byte
     for (let x = 0; x < width; x++) {
-      // 计算矩形区域
-      const inRect = x >= padding && x < width - padding && 
-                     y >= padding && y < padding + rectHeight;
-      
-      // 计算圆角裁剪
-      let alpha = 255;
+      let alpha = 0;
       let r = 0, g = 0, b = 0;
       
-      if (inRect) {
-        // 背景色
-        r = bgR; g = bgG; b = bgB;
+      // 画一个简单的矩形信封（占满整个图标）
+      const inMain = x >= 1 && x < width - 1 && y >= 1 && y < height - 1;
+      
+      if (inMain) {
+        alpha = 255;
+        r = bgColor.r;
+        g = bgColor.g;
+        b = bgColor.b;
         
-        // 折痕线 (V 形)
-        const cx = width / 2;
-        const lineWidth = Math.max(2, width * 0.03);
+        // 画倒 V 形折痕（信封折线）
+        const midX = width / 2;
+        const topY = height * 0.65;
+        const leftX = width * 0.1;
+        const rightX = width * 0.9;
         
-        // 下折痕
-        const foldY = padding + rectHeight - (x - padding);
-        if (Math.abs(y - foldY) < lineWidth && x >= padding && x <= width - padding) {
-          r = foldR; g = foldG; b = foldB;
+        // 左上到中间
+        if (y >= topY && y <= height * 0.85) {
+          const progress = (y - topY) / (height * 0.2);
+          const lineX = leftX + (midX - leftX) * progress;
+          if (Math.abs(x - lineX) < 1.5) {
+            r = foldColor.r; g = foldColor.g; b = foldColor.b;
+          }
         }
         
-        // 上折痕（浅色）
-        const topFoldY = padding + (x - padding);
-        if (Math.abs(y - topFoldY) < lineWidth * 0.6 && x >= padding && x <= width - padding) {
-          r = foldR; g = foldG; b = foldB;
+        // 右上到中间
+        if (y >= topY && y <= height * 0.85) {
+          const progress = (y - topY) / (height * 0.2);
+          const lineX = rightX - (rightX - midX) * progress;
+          if (Math.abs(x - lineX) < 1.5) {
+            r = foldColor.r; g = foldColor.g; b = foldColor.b;
+          }
         }
         
-        // 闪电图标
-        const lx = width * 0.7;
-        const ly = height * 0.7;
-        if (isInLightning(x, y, lx, ly, width * 0.15)) {
-          r = 255; g = 215; b = 0;
-        }
+        // 画闪电符号（右下角）
+        const boltX = width * 0.72;
+        const boltY = height * 0.6;
+        const boltW = width * 0.12;
+        const boltH = height * 0.2;
         
-      } else if (y < padding || y >= padding + rectHeight) {
-        // 透明背景
-        alpha = 0;
+        // 闪电主干（斜矩形）
+        const inBolt = (
+          // 主干
+          (x >= boltX - boltW/2 && x <= boltX + boltW/2 && 
+           y >= boltY && y <= boltY + boltH) ||
+          // 上斜
+          (x >= boltX - boltW * 0.1 && x <= boltX + boltW * 0.3 &&
+           y >= boltY - boltH * 0.4 && y <= boltY + boltH * 0.1)
+        );
+        
+        if (inBolt) {
+          // 描边
+          const isEdge = (
+            (x >= boltX - boltW/2 && x <= boltX - boltW/4 && y >= boltY + boltH * 0.7 && y <= boltY + boltH) ||
+            (x >= boltX + boltW/4 && x <= boltX + boltW/2 && y >= boltY - boltH * 0.3 && y <= boltY)
+          );
+          if (isEdge) {
+            r = 20; g = 20; b = 20; // 黑色描边
+          } else {
+            r = boltColor.r;
+            g = boltColor.g;
+            b = boltColor.b;
+          }
+        }
+      }
+      
+      // 圆角裁剪
+      const cr = Math.floor(width * 0.08);
+      if (cr > 0) {
+        const corners = [
+          [cr, cr],           // 左上
+          [width - cr, cr],   // 右上
+          [cr, height - cr], // 左下
+          [width - cr, height - cr] // 右下
+        ];
+        for (const [cx, cy] of corners) {
+          if (
+            (x < cr && y < cr && (x - cx) * (x - cx) + (y - cy) * (y - cy) > cr * cr) ||
+            (x >= width - cr && y < cr && (x - cx) * (x - cx) + (y - cy) * (y - cy) > cr * cr) ||
+            (x < cr && y >= height - cr && (x - cx) * (x - cx) + (y - cy) * (y - cy) > cr * cr) ||
+            (x >= width - cr && y >= height - cr && (x - cx) * (x - cx) + (y - cy) * (y - cy) > cr * cr)
+          ) {
+            alpha = 0;
+          }
+        }
       }
       
       data.push(r, g, b, alpha);
@@ -153,15 +200,6 @@ function generateIconPixels(width, height) {
   }
   
   return Buffer.from(data);
-}
-
-/**
- * 判断点是否在闪电形状内
- */
-function isInLightning(x, y, cx, cy, size) {
-  const dx = Math.abs(x - cx) / size;
-  const dy = Math.abs(y - cy) / size;
-  return dx < 0.5 && dy < 0.8 && (dx < 0.15 || dy < 0.3);
 }
 
 // ─── 创建 ICO 文件 ─────────────────────────────────────────────────────────────
