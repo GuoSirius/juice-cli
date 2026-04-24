@@ -30,6 +30,10 @@ function getJuiceScript() {
   return path.resolve(__dirname, '..', 'bin', 'juice.js');
 }
 
+function getIconPath() {
+  return path.resolve(__dirname, '..', 'icons', 'juice-icon.ico');
+}
+
 // ─── 注册表操作封装 ───────────────────────────────────────────────────────────
 
 /**
@@ -86,6 +90,7 @@ async function registerContextMenu() {
 
   const nodePath = getNodePath();
   const scriptPath = getJuiceScript();
+  const iconPath = getIconPath();
 
   // 子命令 1：生成（标准 + 压缩）
   const subCmd1 = `JuiceEmail.Generate`;
@@ -97,7 +102,7 @@ async function registerContextMenu() {
   // 子命令 1：juice 生成
   const generateCmd = `"${nodePath}" "${scriptPath}" -f "%1"`;
   regAdd(`${SUBCMD_SPACE}\\${subCmd1}`, '', 'REG_SZ', '⚡ 生成邮件 HTML（标准 + 压缩）');
-  regAdd(`${SUBCMD_SPACE}\\${subCmd1}`, 'Icon', 'REG_SZ', nodePath);
+  regAdd(`${SUBCMD_SPACE}\\${subCmd1}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${subCmd1}\\command`, '', 'REG_SZ', generateCmd);
 
   // 子命令 2：在文件目录打开 pwsh（如果安装了 PowerShell 7）
@@ -118,8 +123,8 @@ async function registerContextMenu() {
 
     // MUIVerb：菜单显示文字
     regAdd(parentKey, 'MUIVerb', 'REG_SZ', '📧 用 juice 生成邮件 HTML');
-    // Icon：使用 node.exe 图标（与 PS7 风格一致：直接引 exe）
-    regAdd(parentKey, 'Icon', 'REG_SZ', nodePath);
+    // Icon：使用自定义图标
+    regAdd(parentKey, 'Icon', 'REG_SZ', iconPath);
     // SubCommands：引用 CommandStore 中的子命令（分号分隔）
     regAdd(parentKey, 'SubCommands', 'REG_SZ', subCommands);
     // Extended：取消注释可让菜单仅在按住 Shift 时显示（默认不加）
