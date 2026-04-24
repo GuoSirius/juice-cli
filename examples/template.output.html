@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-CN" style="box-sizing: border-box;">
+<html lang="zh-CN" style="box-sizing: border-box; margin: 0; padding: 0;">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="x-apple-disable-message-reformatting">
-  <title>欢迎使用 juice 邮件工具</title>
+  <title>欢迎来到优品商城</title>
   <!--[if mso]>
   <noscript>
     <xml>
@@ -16,12 +16,17 @@
   </noscript>
   <![endif]-->
   <style>
+a:hover {
+  text-decoration: underline !important;
+}
 @media only screen and (max-width: 600px) {
   .email-container {
     border-radius: 0 !important;
   }
 
-  .email-body {
+  .email-body,
+.products-section,
+.features-section {
     padding: 24px 16px !important;
   }
 
@@ -36,67 +41,331 @@
   .btn {
     display: block !important;
   }
+
+  .product-item,
+.feature-column {
+    width: 100%;
+    margin-right: 0;
+  }
 }
 </style>
 </head>
-<body style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; margin: 0; padding: 0; min-width: 100%; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; color: #333333; width: 100% !important;">
+<body style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; color: #333333; line-height: 1.6; width: 100%;">
   <!-- Preview text (hidden) -->
-  <div style="box-sizing: border-box; display: none; max-height: 0; overflow: hidden; mso-hide: all;">这是一封测试邮件</div>
-  <div style="box-sizing: border-box; display: none; max-height: 0; overflow: hidden; mso-hide: all;">&#847;&zwnj;&nbsp;&#847;&zwnj;</div>
+  <div style="box-sizing: border-box; margin: 0; padding: 0; display: none; max-height: 0; overflow: hidden; mso-hide: all;">精选商品优惠中，最高立减 200 元</div>
+  <div style="box-sizing: border-box; margin: 0; padding: 0; display: none; max-height: 0; overflow: hidden; mso-hide: all;">&#847;&zwnj;&nbsp;&#847;&zwnj;</div>
 
-  <div class="email-wrapper" style="box-sizing: border-box; width: 100%; background-color: #f4f4f4; padding: 24px 0;">
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-      <tr style="box-sizing: border-box;">
-        <td style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" class="email-container" width="600" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;" bgcolor="#ffffff">
+  <div class="email-wrapper" style="box-sizing: border-box; margin: 0; width: 100%; background-color: #f4f4f4; padding: 24px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="box-sizing: border-box; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+      <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+        <td style="box-sizing: border-box; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" class="email-container" width="600" style="box-sizing: border-box; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;" bgcolor="#ffffff">
 
             <!-- Header -->
-            <tr style="box-sizing: border-box;">
-              <td class="email-header" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #0066cc; padding: 24px 32px; text-align: center;" bgcolor="#0066cc" align="center">
-                <a href="https:&#x2F;&#x2F;example.com" target="_blank" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
-                  <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;150x50" alt="我的品牌" width="150" style="box-sizing: border-box; -ms-interpolation-mode: bicubic; border: 0; display: block; outline: none; text-decoration: none; max-width: 150px; height: auto;" height="auto">
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="email-header" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #0066cc; padding: 24px 32px; text-align: center;" bgcolor="#0066cc" align="center">
+                <a href="https:&#x2F;&#x2F;shop.example.com" target="_blank" style="box-sizing: border-box; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+                  <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;150x50&#x2F;ffffff&#x2F;cccccc?text&#x3D;LOGO" alt="优品商城" width="150" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; display: block; outline: none; text-decoration: none; max-width: 150px; height: auto;" height="auto">
                 </a>
               </td>
             </tr>
 
             <!-- Body -->
-            <tr style="box-sizing: border-box;">
-              <td class="email-body" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 32px;">
-                <h1 style="box-sizing: border-box; font-size: 24px; font-weight: 700; margin: 0 0 16px; color: #111111;">你好，用户！</h1>
-                <p style="box-sizing: border-box; font-size: 16px; line-height: 1.6; margin: 0 0 16px; color: #555555;">欢迎使用 <strong style="box-sizing: border-box;">我的品牌</strong>。这是一封使用 juice CLI 工具生成的邮件模板示例。</p>
-                <p style="box-sizing: border-box; font-size: 16px; line-height: 1.6; margin: 0 0 16px; color: #555555;">所有 CSS 样式已被内联，确保在 Gmail、Outlook、Apple Mail 等主流邮件客户端中正确显示。</p>
-                <p style="box-sizing: border-box; font-size: 16px; line-height: 1.6; margin: 0 0 16px; color: #555555;">你可以通过修改 <code style="box-sizing: border-box;">juice.yaml</code> 配置文件中的 <code style="box-sizing: border-box;">variables</code> 字段来替换模板变量。</p>
-
-                <hr class="divider" style="box-sizing: border-box; border: none; border-top: 1px solid #eeeeee; margin: 24px 0;">
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="email-body" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 32px;">
+                <h1 style="box-sizing: border-box; padding: 0; font-size: 24px; font-weight: 700; margin: 0 0 16px; color: #111111;">你好，张三！</h1>
+                <p style="box-sizing: border-box; padding: 0; font-size: 16px; line-height: 1.6; margin: 0 0 16px; color: #555555;">欢迎使用 <strong style="box-sizing: border-box; margin: 0; padding: 0;">优品商城</strong>。这是一封使用 juice CLI 工具生成的邮件模板示例。</p>
+                <p style="box-sizing: border-box; padding: 0; font-size: 16px; line-height: 1.6; margin: 0 0 16px; color: #555555;">所有 CSS 样式已被内联，确保在 Gmail、Outlook、Apple Mail 等主流邮件客户端中正确显示。</p>
+                <p style="box-sizing: border-box; padding: 0; font-size: 16px; line-height: 1.6; margin: 0 0 16px; color: #555555;">你可以通过修改 <code style="box-sizing: border-box; margin: 0; padding: 0;">juice.yaml</code> 配置文件中的 <code style="box-sizing: border-box; margin: 0; padding: 0;">variables</code> 字段来替换模板变量。</p>
 
                 <!-- CTA Button -->
                 <!--[if mso]>
                 <table role="presentation" align="center" style="margin:32px auto;">
                   <tr><td>
                 <![endif]-->
-                <div class="btn-wrapper" style="box-sizing: border-box; text-align: center; margin: 32px 0;">
-                  <a href="https:&#x2F;&#x2F;example.com&#x2F;action" class="btn" target="_blank" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; display: inline-block; background-color: #0066cc; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 4px; mso-padding-alt: 0; color: #ffffff !important;">立即查看</a>
+                <div class="btn-wrapper" style="box-sizing: border-box; padding: 0; text-align: center; margin: 32px 0;">
+                  <a href="https:&#x2F;&#x2F;shop.example.com&#x2F;action" class="btn" target="_blank" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; display: inline-block; background-color: #0066cc; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 4px; mso-padding-alt: 0; color: #ffffff;">立即查看</a>
                 </div>
                 <!--[if mso]>
                   </td></tr>
                 </table>
                 <![endif]-->
+              </td>
+            </tr>
 
-                <hr class="divider" style="box-sizing: border-box; border: none; border-top: 1px solid #eeeeee; margin: 24px 0;">
+            <!-- Products Section (Mustache 列表循环) -->
+            <!-- 语法：............ -->
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="products-section" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 24px 32px; background-color: #fafafa;" bgcolor="#fafafa">
+                <h2 class="section-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 20px; font-weight: 600; color: #333333; margin-bottom: 20px; text-align: center;">精选商品</h2>
+                <div class="product-grid" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 100%;">
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-right: 4%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;e74c3c&#x2F;ffffff?text&#x3D;耳机" alt="无线蓝牙耳机" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">热卖</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">无线蓝牙耳机</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥299.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥399.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff; margin-right: 0;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;3498db&#x2F;ffffff?text&#x3D;手环" alt="智能手环 Pro" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">新品</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">智能手环 Pro</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥199.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥299.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-right: 4%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;2ecc71&#x2F;ffffff?text&#x3D;充电宝" alt="便携充电宝" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">特惠</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">便携充电宝</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥89.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥129.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff; margin-right: 0;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;9b59b6&#x2F;ffffff?text&#x3D;键盘" alt="无线键盘套装" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">无线键盘套装</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥159.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥259.00</span></p>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="products-section" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 24px 32px; background-color: #fafafa;" bgcolor="#fafafa">
+                <h2 class="section-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 20px; font-weight: 600; color: #333333; margin-bottom: 20px; text-align: center;">精选商品</h2>
+                <div class="product-grid" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 100%;">
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-right: 4%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;e74c3c&#x2F;ffffff?text&#x3D;耳机" alt="无线蓝牙耳机" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">热卖</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">无线蓝牙耳机</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥299.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥399.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff; margin-right: 0;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;3498db&#x2F;ffffff?text&#x3D;手环" alt="智能手环 Pro" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">新品</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">智能手环 Pro</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥199.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥299.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-right: 4%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;2ecc71&#x2F;ffffff?text&#x3D;充电宝" alt="便携充电宝" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">特惠</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">便携充电宝</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥89.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥129.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff; margin-right: 0;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;9b59b6&#x2F;ffffff?text&#x3D;键盘" alt="无线键盘套装" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">无线键盘套装</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥159.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥259.00</span></p>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="products-section" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 24px 32px; background-color: #fafafa;" bgcolor="#fafafa">
+                <h2 class="section-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 20px; font-weight: 600; color: #333333; margin-bottom: 20px; text-align: center;">精选商品</h2>
+                <div class="product-grid" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 100%;">
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-right: 4%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;e74c3c&#x2F;ffffff?text&#x3D;耳机" alt="无线蓝牙耳机" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">热卖</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">无线蓝牙耳机</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥299.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥399.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff; margin-right: 0;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;3498db&#x2F;ffffff?text&#x3D;手环" alt="智能手环 Pro" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">新品</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">智能手环 Pro</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥199.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥299.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-right: 4%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;2ecc71&#x2F;ffffff?text&#x3D;充电宝" alt="便携充电宝" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">特惠</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">便携充电宝</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥89.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥129.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff; margin-right: 0;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;9b59b6&#x2F;ffffff?text&#x3D;键盘" alt="无线键盘套装" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">无线键盘套装</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥159.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥259.00</span></p>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="products-section" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 24px 32px; background-color: #fafafa;" bgcolor="#fafafa">
+                <h2 class="section-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 20px; font-weight: 600; color: #333333; margin-bottom: 20px; text-align: center;">精选商品</h2>
+                <div class="product-grid" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 100%;">
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-right: 4%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;e74c3c&#x2F;ffffff?text&#x3D;耳机" alt="无线蓝牙耳机" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">热卖</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">无线蓝牙耳机</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥299.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥399.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff; margin-right: 0;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;3498db&#x2F;ffffff?text&#x3D;手环" alt="智能手环 Pro" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">新品</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">智能手环 Pro</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥199.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥299.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-right: 4%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;2ecc71&#x2F;ffffff?text&#x3D;充电宝" alt="便携充电宝" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    <span class="product-tag" style="box-sizing: border-box; display: inline-block; padding: 2px 8px; background-color: #0066cc; color: #ffffff; font-size: 11px; border-radius: 3px; margin: 8px 0 0 8px;">特惠</span>
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">便携充电宝</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥89.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥129.00</span></p>
+                    </div>
+                  </div>
+                  <div class="product-item" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 48%; margin-bottom: 16px; vertical-align: top; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; background: #fff; margin-right: 0;">
+                    <img src="https:&#x2F;&#x2F;via.placeholder.com&#x2F;200x120&#x2F;9b59b6&#x2F;ffffff?text&#x3D;键盘" alt="无线键盘套装" class="product-image" style="box-sizing: border-box; margin: 0; padding: 0; -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; width: 100%; height: 120px; object-fit: cover; display: block;" height="120">
+                    
+                    <div class="product-info" style="box-sizing: border-box; margin: 0; padding: 12px;">
+                      <p class="product-name" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 6px; line-height: 1.3;">无线键盘套装</p>
+                      <p class="product-price" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 16px; font-weight: 700; color: #0066cc;">¥159.00<span class="product-original" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 12px; color: #999999; text-decoration: line-through; margin-left: 6px;">¥259.00</span></p>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
 
-                <p style="box-sizing: border-box; line-height: 1.6; margin: 0 0 16px; font-size: 14px; color: #888888;">
-                  如果按钮无法点击，请复制以下链接到浏览器：<br style="box-sizing: border-box;">
-                  <a href="https:&#x2F;&#x2F;example.com&#x2F;action" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; color: #0066cc;">https:&#x2F;&#x2F;example.com&#x2F;action</a>
-                </p>
+            <!-- Features Section (嵌套循环) -->
+            <!-- 语法：........................... -->
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="features-section" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 24px 32px;">
+                <div class="features-grid" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 100%;">
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; margin-right: 3.5%; vertical-align: top; text-align: center;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">✓</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">品质保障</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">正品保证</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">7天无理由退换</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">全国联保</li>
+                    </ul>
+                  </div>
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; margin-right: 3.5%; vertical-align: top; text-align: center;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">📦</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">配送服务</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">次日达</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">包邮到家</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">实时物流</li>
+                    </ul>
+                  </div>
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; vertical-align: top; text-align: center; margin-right: 0;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">🎧</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">售后服务</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">专属客服</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">终身维护</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">极速退款</li>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="features-section" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 24px 32px;">
+                <div class="features-grid" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 100%;">
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; margin-right: 3.5%; vertical-align: top; text-align: center;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">✓</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">品质保障</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">正品保证</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">7天无理由退换</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">全国联保</li>
+                    </ul>
+                  </div>
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; margin-right: 3.5%; vertical-align: top; text-align: center;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">📦</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">配送服务</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">次日达</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">包邮到家</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">实时物流</li>
+                    </ul>
+                  </div>
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; vertical-align: top; text-align: center; margin-right: 0;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">🎧</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">售后服务</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">专属客服</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">终身维护</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">极速退款</li>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="features-section" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 24px 32px;">
+                <div class="features-grid" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 100%;">
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; margin-right: 3.5%; vertical-align: top; text-align: center;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">✓</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">品质保障</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">正品保证</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">7天无理由退换</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">全国联保</li>
+                    </ul>
+                  </div>
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; margin-right: 3.5%; vertical-align: top; text-align: center;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">📦</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">配送服务</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">次日达</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">包邮到家</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">实时物流</li>
+                    </ul>
+                  </div>
+                  <div class="feature-column" style="box-sizing: border-box; margin: 0; padding: 0; display: inline-block; width: 31%; vertical-align: top; text-align: center; margin-right: 0;">
+                    <div class="feature-icon" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 24px; margin-bottom: 8px;">🎧</div>
+                    <p class="feature-title" style="box-sizing: border-box; margin: 0; padding: 0; font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 8px;">售后服务</p>
+                    <ul class="feature-items" style="box-sizing: border-box; margin: 0; padding: 0; list-style: none; font-size: 12px; color: #666666; line-height: 1.8;">
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">专属客服</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">终身维护</li>
+                      <li style="box-sizing: border-box; margin: 0; padding: 0;">极速退款</li>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; padding: 0 32px;">
+                <hr class="divider" style="box-sizing: border-box; padding: 0; border: none; border-top: 1px solid #eeeeee; margin: 24px 0;">
               </td>
             </tr>
 
             <!-- Footer -->
-            <tr style="box-sizing: border-box;">
-              <td class="email-footer" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f9f9f9; padding: 24px 32px; text-align: center;" bgcolor="#f9f9f9" align="center">
-                <p style="box-sizing: border-box; font-size: 12px; color: #999999; margin: 4px 0; line-height: 1.5;">© 2026 Example Corp.. 保留所有权利。</p>
-                <p style="box-sizing: border-box; font-size: 12px; color: #999999; margin: 4px 0; line-height: 1.5;">上海市浦东新区 XX 路 123 号</p>
-                <p style="box-sizing: border-box; font-size: 12px; color: #999999; margin: 4px 0; line-height: 1.5;"><a href="https:&#x2F;&#x2F;example.com&#x2F;unsubscribe" style="box-sizing: border-box; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; color: #999999; text-decoration: underline;">退订邮件</a></p>
+            <tr style="box-sizing: border-box; margin: 0; padding: 0;">
+              <td class="email-footer" style="box-sizing: border-box; margin: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f9f9f9; padding: 24px 32px; text-align: center;" bgcolor="#f9f9f9" align="center">
+                <p style="box-sizing: border-box; padding: 0; font-size: 12px; color: #999999; margin: 4px 0; line-height: 1.5;">© 2026 优品商城. 保留所有权利。</p>
+                <p style="box-sizing: border-box; padding: 0; font-size: 12px; color: #999999; margin: 4px 0; line-height: 1.5;">北京市朝阳区建国路 88 号</p>
+                <p style="box-sizing: border-box; padding: 0; font-size: 12px; color: #999999; margin: 4px 0; line-height: 1.5;"><a href="https:&#x2F;&#x2F;shop.example.com&#x2F;unsubscribe" style="box-sizing: border-box; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; color: #0066cc; text-decoration: none;">退订邮件</a></p>
               </td>
             </tr>
 
