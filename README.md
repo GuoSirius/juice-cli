@@ -248,21 +248,6 @@ juice --uninstall
 
 ---
 
-## 发布 npm 包
-
-```bash
-# 登录（启用 2FA 后需使用 npm token）
-npm login
-
-# 发布（发布前确认包名：juice-email-cli）
-npm publish --access public
-
-# 发布 beta 版
-npm publish --tag beta
-```
-
----
-
 ## 目录结构
 
 ```
@@ -281,11 +266,71 @@ juice-cli/
 ├── icons/
 │   └── juice-icon.ico          # 右键菜单自定义图标
 ├── scripts/
-│   └── generate-icon.js        # 图标生成脚本
-├── LICENSE                    # MIT
+│   ├── generate-icon.js        # 图标生成脚本
+│   └── release.js              # 发布脚本
+├── .husky/
+│   └── commit-msg              # Git hooks - 提交信息校验
+├── .commitlintrc.json          # Commitlint 配置
+├── .versionrc                  # Standard-version 配置
+├── .npmrc                      # npm 发布配置
+├── CHANGELOG.md                # 变更日志（自动生成）
+├── LICENSE                     # MIT
 ├── README.md
 └── package.json
 ```
+
+---
+
+## 发布说明
+
+本项目使用自动化发布流程，包含以下功能：
+
+### 提交信息规范
+
+使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
+
+```
+<type>(<scope>): <subject>
+
+feat: 添加新功能
+fix: 修复 bug
+docs: 更新文档
+style: 代码格式调整
+refactor: 重构代码
+perf: 性能优化
+test: 添加测试
+build: 构建系统变更
+ci: CI/CD 配置变更
+chore: 其他变更
+revert: 回退提交
+```
+
+### 自动化发布
+
+```bash
+# 执行一键发布（自动引导整个流程）
+npm run release
+
+# 预览发布（不实际执行）
+npm run release:dry
+```
+
+**发布流程：**
+1. 检测未提交的文件，询问是否提交
+2. 选择版本更新类型（Major / Minor / Patch）
+3. 确认版本号
+4. 自动更新版本号、生成 CHANGELOG、打 tag
+5. 推送到远程仓库
+6. 发布到 npm
+
+### 配置文件
+
+| 文件 | 说明 |
+|------|------|
+| `.commitlintrc.json` | 提交信息校验规则 |
+| `.versionrc` | 版本更新和 CHANGELOG 生成规则 |
+| `.npmrc` | npm 发布配置 |
+| `.husky/commit-msg` | Git hooks 配置 |
 
 ---
 

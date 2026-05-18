@@ -10,7 +10,10 @@
     "start": "node bin/juice.js",
     "test": "node bin/juice.js --help",
     "postinstall": "node bin/juice.js --install",
-    "preuninstall": "node bin/juice.js --uninstall"
+    "preuninstall": "node bin/juice.js --uninstall",
+    "prepare": "husky install",
+    "release": "node scripts/release.js",
+    "release:dry": "standard-version --dry-run"
   },
   "keywords": [
     "email",
@@ -33,7 +36,6 @@
     "url": "https://gitee.com/siriussupreme/juice-cli/issues"
   },
   "dependencies": {
-    "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "html-minifier-terser": "^7.2.0",
     "js-yaml": "^4.1.0",
@@ -48,5 +50,13 @@
     "bin/",
     "src/",
     "defaults/"
-  ]
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
+    "chalk": "^5.6.2",
+    "husky": "^9.1.7",
+    "inquirer": "^13.4.3",
+    "standard-version": "^9.5.0"
+  }
 }

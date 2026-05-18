@@ -34,3 +34,6 @@ coverage/
 # Misc
 *.bak
 *.tmp
+
+# Release artifacts
+CHANGELOG.md
