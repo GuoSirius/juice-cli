@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
-const inquirer = require('inquirer');
-const chalk = require('chalk');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import inquirer from 'inquirer';
+import chalk from 'chalk';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PACKAGE_PATH = path.join(__dirname, '../package.json');
 
