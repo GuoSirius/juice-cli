@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import inquirer from 'inquirer';
+import { confirm, input, select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
@@ -109,24 +109,20 @@ async function main() {
     });
     console.log('');
 
-    const { shouldCommit } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'shouldCommit',
+    const shouldCommit = await confirm({
       message: 'Do you want to commit these files before release?',
       default: true
     });
 
     if (shouldCommit) {
-      const { commitMessage } = await inquirer.prompt({
-        type: 'input',
-        name: 'commitMessage',
+      const commitMessage = await input({
         message: 'Enter commit message (must follow conventional commit format):',
-        validate: (input) => {
-          if (!input.trim()) {
+        validate: (value) => {
+          if (!value.trim()) {
             return 'Commit message cannot be empty';
           }
           const regex = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z]+\))?: .+/;
-          if (!regex.test(input.trim())) {
+          if (!regex.test(value.trim())) {
             return 'Commit message must follow conventional format (e.g., "feat: add new feature")';
           }
           return true;
@@ -140,31 +136,30 @@ async function main() {
 
   const releaseTypes = [
     {
-      name: `Major (${currentVersion} → ${calculateNextVersion(currentVersion, 'major')})`,
-      value: 'major'
+      name: `Major`,
+      value: 'major',
+      description: `${currentVersion} → ${calculateNextVersion(currentVersion, 'major')}`
     },
     {
-      name: `Minor (${currentVersion} → ${calculateNextVersion(currentVersion, 'minor')})`,
-      value: 'minor'
+      name: `Minor`,
+      value: 'minor',
+      description: `${currentVersion} → ${calculateNextVersion(currentVersion, 'minor')}`
     },
     {
-      name: `Patch (${currentVersion} → ${calculateNextVersion(currentVersion, 'patch')})`,
-      value: 'patch'
+      name: `Patch`,
+      value: 'patch',
+      description: `${currentVersion} → ${calculateNextVersion(currentVersion, 'patch')}`
     }
   ];
 
-  const { releaseType } = await inquirer.prompt({
-    type: 'list',
-    name: 'releaseType',
+  const releaseType = await select({
     message: 'Select release type:',
     choices: releaseTypes
   });
 
   const nextVersion = calculateNextVersion(currentVersion, releaseType);
   
-  const { confirmRelease } = await inquirer.prompt({
-    type: 'confirm',
-    name: 'confirmRelease',
+  const confirmRelease = await confirm({
     message: `Confirm release: ${currentVersion} → ${nextVersion}?`,
     default: true
   });
