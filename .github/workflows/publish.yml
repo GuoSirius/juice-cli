@@ -44,7 +44,7 @@ jobs:
           if [ -f CHANGELOG.md ]; then
             awk -v ver="$VERSION" '
               BEGIN { in_section=0 }
-              /^## \[/ {
+              /^[#]+ \[/ {
                 if (in_section) exit
                 if ($0 ~ "\\[v?" ver "\\]") {
                   in_section=1
@@ -52,7 +52,7 @@ jobs:
                 }
               }
               in_section {
-                if ($0 ~ /^## \[/) exit
+                if ($0 ~ /^[#]+ \[/) exit
                 print $0
               }
             ' CHANGELOG.md > release_notes.txt
