@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.5](https://github.com/GuoSirius/juice-cli/compare/v2.0.4...v2.0.5) (2026-05-19)
+
+
+### Bug Fixes
+
+* use npm install instead of npm ci in workflow ([37521f4](https://github.com/GuoSirius/juice-cli/commit/37521f47369891d322cf6fd6164d2f978ea87fb8))
+
 ### [2.0.4](https://github.com/GuoSirius/juice-cli/compare/v2.0.3...v2.0.4) (2026-05-19)
 
 
