@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://gitee.com/siriussupreme/juice-cli/compare/v2.0.1...v2.0.2) (2026-05-19)
+
+
+### Chores
+
+* minimize .npmignore, files field now controls published content ([8d0ba35](https://gitee.com/siriussupreme/juice-cli/commit/8d0ba359f2de7445a4b53e4f76fed8393a3ad248))
+* simplify .npmignore for cleaner package ([ef38fd8](https://gitee.com/siriussupreme/juice-cli/commit/ef38fd8faf9cba451bd1c38675581292be7d9da4))
+* update gitignore for CHANGELOG and add package-lock ([202d13d](https://gitee.com/siriussupreme/juice-cli/commit/202d13d72f28125f359fd84c66f4d9b173f64b0a))
+
 ### [2.0.1](https://gitee.com/siriussupreme/juice-cli/compare/v1.3.0...v2.0.1) (2026-05-19)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "juice-email-cli",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "CLI tool to generate email-client-compatible HTML with juice (CSS inlining) + Mustache templating + minification",
   "main": "src/index.js",
   "bin": {
