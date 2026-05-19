@@ -154,7 +154,8 @@ async function main() {
 
   const releaseType = await select({
     message: 'Select release type:',
-    choices: releaseTypes
+    choices: releaseTypes,
+    default: 'patch'
   });
 
   const nextVersion = calculateNextVersion(currentVersion, releaseType);

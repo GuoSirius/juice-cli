@@ -36,4 +36,4 @@ coverage/
 *.tmp
 
 # Release artifacts
-CHANGELOG.md
+# CHANGELOG.md - kept in git for release tracking
