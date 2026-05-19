@@ -32,7 +32,7 @@ npm install -g juice-email-cli
 
 ```bash
 # 本地克隆安装
-git clone https://github.com/siriussupreme/juice-cli.git
+git clone https://github.com/GuoSirius/juice-cli.git
 cd juice-cli
 npm install       # 自动注册右键菜单
 npm link          # 链接到全局
