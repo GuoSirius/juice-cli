@@ -1,6 +1,3 @@
-# Dependencies
-node_modules/
-
 # Git
 .git
 .gitignore
@@ -9,7 +6,6 @@ node_modules/
 .vscode/
 .idea/
 *.swp
-*.swo
 *~
 
 # OS
@@ -23,10 +19,10 @@ npm-debug.log*
 # Test
 coverage/
 
-# Docs
-*.md
-!README.md
-
-# Dev
-examples/
+# Dev files
 .workbuddy/
+*.bak
+*.tmp
+
+# Docs (keep README.md via files field in package.json)
+*.md
