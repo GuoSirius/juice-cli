@@ -182,10 +182,8 @@ async function main() {
   console.log('\n' + chalk.blue('Pushing to origin...'));
   pushToRemote();
 
-  console.log('\n' + chalk.blue('Publishing to npm...'));
-  publishToNpm();
-
   console.log('\n' + chalk.green.bold('=== Release completed successfully! ==='));
+  console.log(chalk.yellow('\nNote: npm publish will be handled by GitHub Actions workflow on tag push.'));
 }
 
 main().catch(error => {
