@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.4](https://github.com/GuoSirius/juice-cli/compare/v2.0.3...v2.0.4) (2026-05-19)
+
+
+### Bug Fixes
+
+* awk pattern to match any # level in changelog parsing ([8ec2914](https://github.com/GuoSirius/juice-cli/commit/8ec29145f7177da9eacd5ce589849cf1679b8bcd))
+* precise changelog extraction by comparing heading level (# count) ([25a054d](https://github.com/GuoSirius/juice-cli/commit/25a054d8a934b4a889ed26281e09dae2d5dad8e8))
+
 ### [2.0.3](https://github.com/GuoSirius/juice-cli/compare/v2.0.2...v2.0.3) (2026-05-19)
 
 
