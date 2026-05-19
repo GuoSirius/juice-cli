@@ -90,16 +90,6 @@ function pushToRemote() {
   }
 }
 
-function publishToNpm() {
-  try {
-    execSync('npm publish', { stdio: 'inherit', cwd: path.join(__dirname, '..') });
-    console.log(chalk.green('Published to npm successfully'));
-  } catch (error) {
-    console.error(chalk.red('Error publishing to npm:', error.message));
-    process.exit(1);
-  }
-}
-
 async function main() {
   console.log(chalk.blue.bold('=== Juice CLI Release Script ===\n'));
   

@@ -267,7 +267,7 @@ juice-cli/
 │   └── juice-icon.ico          # 右键菜单自定义图标
 ├── scripts/
 │   ├── generate-icon.js        # 图标生成脚本
-│   └── release.js              # 发布脚本
+│   └── release.mjs            # 发布脚本
 ├── .husky/
 │   └── commit-msg              # Git hooks - 提交信息校验
 ├── .commitlintrc.json          # Commitlint 配置
@@ -320,8 +320,8 @@ npm run release:dry
 2. 选择版本更新类型（Major / Minor / Patch）
 3. 确认版本号
 4. 自动更新版本号、生成 CHANGELOG、打 tag
-5. 推送到远程仓库
-6. 发布到 npm
+5. 推送到 origin 和 github 远程仓库
+6. GitHub Actions 自动发布到 npm
 
 ### 配置文件
 
