@@ -1,8 +1,5 @@
-.workbuddy/
-
 # Dependencies
 node_modules/
-package-lock.json
 
 # Build outputs
 *.output.html
@@ -34,6 +31,3 @@ coverage/
 # Misc
 *.bak
 *.tmp
-
-# Release artifacts
-# CHANGELOG.md - kept in git for release tracking
