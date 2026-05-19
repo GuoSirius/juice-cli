@@ -1,4 +1,4 @@
-name: Publish to NPM
+name: Publish to NPM and GitHub Release
 
 on:
   push:
@@ -9,11 +9,13 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,30 +26,69 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify working directory
-        run: ls -la
-
       - name: Publish to npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Get version from tag
+      - name: Extract version from tag
         id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes from CHANGELOG
+        id: generate_notes
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "Extracting release notes for v$VERSION"
+          
+          if [ -f CHANGELOG.md ]; then
+            awk -v ver="$VERSION" '
+              BEGIN { in_section=0 }
+              /^## \[/ {
+                if (in_section) exit
+                if ($0 ~ "\\[v?" ver "\\]") {
+                  in_section=1
+                  next
+                }
+              }
+              in_section {
+                if ($0 ~ /^## \[/) exit
+                print $0
+              }
+            ' CHANGELOG.md > release_notes.txt
+            
+            if [ -s release_notes.txt ]; then
+              echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+              cat release_notes.txt >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "RELEASE_NOTES=See [CHANGELOG.md](https://github.com/GuoSirius/juice-cli/blob/main/CHANGELOG.md) for detailed changes." >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "RELEASE_NOTES=See [CHANGELOG.md](https://github.com/GuoSirius/juice-cli/blob/main/CHANGELOG.md) for detailed changes." >> $GITHUB_OUTPUT
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           body: |
-            ## Release Notes
+            ## What's Changed in v${{ steps.get_version.outputs.VERSION }}
 
-            See [CHANGELOG.md](https://github.com/GuoSirius/juice-cli/blob/main/CHANGELOG.md) for detailed changes.
+            ${{ steps.generate_notes.outputs.RELEASE_NOTES }}
+
+            ---
 
             ### Installation
 
             ```bash
-            npm install -g juice-email-cli
+            npm install -g juice-email-cli@${{ steps.get_version.outputs.VERSION }}
             ```
+
+            ### Changelog
+
+            See the full [CHANGELOG.md](https://github.com/GuoSirius/juice-cli/blob/main/CHANGELOG.md) for all changes.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup
+        run: rm -f release_notes.txt
