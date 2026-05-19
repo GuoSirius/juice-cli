@@ -12,7 +12,7 @@
     "postinstall": "node bin/juice.js --install",
     "preuninstall": "node bin/juice.js --uninstall",
     "prepare": "husky install",
-    "release": "node scripts/release.js",
+    "release": "node scripts/release.mjs",
     "release:dry": "standard-version --dry-run"
   },
   "keywords": [
