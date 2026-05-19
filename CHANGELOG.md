@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.3](https://github.com/GuoSirius/juice-cli/compare/v2.0.2...v2.0.3) (2026-05-19)
+
+
+### Bug Fixes
+
+* correct github username (GuoSirius) in package.json and README ([e677b05](https://github.com/GuoSirius/juice-cli/commit/e677b057700227d9774c0152171617b05ef44f89))
+
+
+### Chores
+
+* remove npm publish from release script, use github workflow instead ([e3e2e54](https://github.com/GuoSirius/juice-cli/commit/e3e2e543ed6e96919f0bdde38d39744f946083ab))
+* use github as primary repo, push to both origin and github ([ed329a4](https://github.com/GuoSirius/juice-cli/commit/ed329a41ec5d6227f09c59515f56e06e2d0188f6))
+
 ### [2.0.2](https://gitee.com/siriussupreme/juice-cli/compare/v2.0.1...v2.0.2) (2026-05-19)
 
 
