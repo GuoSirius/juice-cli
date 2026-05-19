@@ -43,16 +43,25 @@ jobs:
           
           if [ -f CHANGELOG.md ]; then
             awk -v ver="$VERSION" '
-              BEGIN { in_section=0 }
-              /^[#]+ \[/ {
-                if (in_section) exit
+              BEGIN { in_section=0; target_level=0 }
+              /^[#]+ \[[^]]+\]/ {
+                # Count leading # characters
+                match($0, /^[#]+/)
+                level = RLENGTH
+                
+                if (in_section) {
+                  # If we find a version line with same or fewer #s, stop
+                  if (level <= target_level) exit
+                  next
+                }
+                
                 if ($0 ~ "\\[v?" ver "\\]") {
-                  in_section=1
+                  in_section = 1
+                  target_level = level
                   next
                 }
               }
               in_section {
-                if ($0 ~ /^[#]+ \[/) exit
                 print $0
               }
             ' CHANGELOG.md > release_notes.txt
