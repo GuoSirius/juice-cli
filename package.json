@@ -49,7 +49,8 @@
   "files": [
     "bin/",
     "src/",
-    "defaults/"
+    "defaults/",
+    "README.md"
   ],
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",

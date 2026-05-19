@@ -1,28 +1,13 @@
 # Git
 .git
 .gitignore
+.husky/
 
-# Editor
-.vscode/
-.idea/
-*.swp
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-npm-debug.log*
-
-# Test
-coverage/
-
-# Dev files
+# Dev
 .workbuddy/
+coverage/
 *.bak
 *.tmp
 
-# Docs (keep README.md via files field in package.json)
+# Docs
 *.md
