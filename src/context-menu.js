@@ -10,7 +10,7 @@
  *     📧 用 juice 生成邮件 HTML
  *       ├── 📄 作为模板，生成邮件 HTML   → juice -f（后台执行）
  *       ├── 🧩 作为片段，拼接邮件 HTML   → juice -s（交互选择模板）
- *       ├── ⚙️ 作为配置，生成邮件 HTML   → juice -c（交互选择品牌/模板/片段）
+ *       ├── ⚙️ 作为配置，拼接邮件 HTML   → juice -c（交互选择品牌/模板/片段）
  *       └── 📂 打开 PowerShell        （可选）
  */
 
@@ -135,7 +135,7 @@ async function registerContextMenu() {
 
   // ── 子命令 3：配置文件模式 - 交互式生成（交互，需要终端）──────────────────
   const configCmd = wrapInteractive(nodePath, scriptPath, '-c %1');
-  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, '', 'REG_SZ', '⚙️ 作为配置，生成邮件 HTML') && ok;
+  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, '', 'REG_SZ', '⚙️ 作为配置，拼接邮件 HTML') && ok;
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}\\command`, '', 'REG_SZ', configCmd);
 
@@ -181,7 +181,7 @@ async function registerContextMenu() {
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
     `      ├── 📄 作为模板，生成邮件 HTML  →  juice -f（后台执行）\n` +
     `      ├── 🧩 作为片段，拼接邮件 HTML  →  juice -s（交互选择模板）\n` +
-    `      ├── ⚙️ 作为配置，生成邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
+    `      ├── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
     (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')

@@ -71,7 +71,7 @@ program
     📧 用 juice 生成邮件 HTML
       ├── 📄 作为模板，生成邮件 HTML  →  juice -f %1（后台执行）
       ├── 🧩 作为片段，拼接邮件 HTML  →  juice -s %1（交互选择模板）
-      ├── ⚙️ 作为配置，生成邮件 HTML  →  juice -c %1（交互选择品牌/模板/片段）
+      ├── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c %1（交互选择品牌/模板/片段）
       └── 📂 打开 PowerShell          （仅已安装 pwsh 时出现）
 
 更多信息：https://gitee.com/siriussupreme/juice-cli
