@@ -5,16 +5,13 @@
  *
  * 使用 HKEY_CURRENT_USER，无需管理员权限，仅对当前用户生效。
  *
- * 菜单结构：
- *   .html / .htm：
+ * 菜单结构（所有文件类型统一）：
+ *   .html / .htm / .yaml / .yml：
  *     📧 用 juice 生成邮件 HTML
  *       ├── ⚡ 生成邮件 HTML（标准 + 压缩）       → juice -f
  *       ├── 🧩 邮件片段组装（交互选择模板）       → juice -s
+ *       ├── 📋 交互式生成邮件（使用此配置）       → juice -c
  *       └── 📂 在此目录打开 PowerShell 7         （可选）
- *
- *   .yaml / .yml：
- *     📧 用 juice 生成邮件 HTML
- *       └── 📋 交互式生成邮件（使用此配置）       → juice -c
  */
 
 const { execSync } = require('child_process');
@@ -111,6 +108,15 @@ const LEGACY_SUBCMDS = [
 
 const PARENT_KEY_NAME = 'JuiceEmail';
 
+/**
+ * 为需要交互式终端输入的命令包一层 powershell -NoExit，
+ * 从右键菜单启动时才能正常显示 inquirer 提示。
+ * -f 命令不需要（非交互模式，直接生成文件）
+ */
+function wrapInteractive(nodePath, scriptPath, cliArgs) {
+  return `powershell.exe -NoExit -Command "& '${nodePath}' '${scriptPath}' ${cliArgs}"`;
+}
+
 // ─── 注册 ─────────────────────────────────────────────────────────────────────
 
 async function registerContextMenu() {
@@ -122,20 +128,20 @@ async function registerContextMenu() {
 
   let ok = true;
 
-  // ── 子命令 1：普通模式 - juice 生成 ──────────────────────────────────────
+  // ── 子命令 1：普通模式 - juice 生成（非交互，不需终端）─────────────────
   const generateCmd = `"${nodePath}" "${scriptPath}" -f %1`;
   ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}`, '', 'REG_SZ', '⚡ 生成邮件 HTML（标准 + 压缩）') && ok;
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}\\command`, '', 'REG_SZ', generateCmd);
 
-  // ── 子命令 2：片段模式 - 片段组装 ────────────────────────────────────────
-  const snippetCmd = `"${nodePath}" "${scriptPath}" -s %1`;
+  // ── 子命令 2：片段模式 - 片段组装（交互，需要终端）────────────────────────
+  const snippetCmd = wrapInteractive(nodePath, scriptPath, '-s %1');
   ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}`, '', 'REG_SZ', '🧩 邮件片段组装（交互选择模板）') && ok;
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}\\command`, '', 'REG_SZ', snippetCmd);
 
-  // ── 子命令 3：配置文件模式 - 交互式生成 ──────────────────────────────────
-  const configCmd = `"${nodePath}" "${scriptPath}" -c %1`;
+  // ── 子命令 3：配置文件模式 - 交互式生成（交互，需要终端）──────────────────
+  const configCmd = wrapInteractive(nodePath, scriptPath, '-c %1');
   ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, '', 'REG_SZ', '📋 交互式生成邮件（使用此配置）') && ok;
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}\\command`, '', 'REG_SZ', configCmd);
@@ -149,24 +155,25 @@ async function registerContextMenu() {
     regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.pwsh}\\command`, '', 'REG_SZ', pwshCmd);
   }
 
-  // ── 注册 HTML 父菜单（二级子菜单）────────────────────────────────────────
-  const htmlSubs = pwshPath
-    ? `${SUBCMDS.generate};${SUBCMDS.snippet};${SUBCMDS.pwsh}`
-    : `${SUBCMDS.generate};${SUBCMDS.snippet}`;
+  // ── 所有文件类型共用同一套子命令 ────────────────────────────────────────
+  const allSubs = pwshPath
+    ? `${SUBCMDS.generate};${SUBCMDS.snippet};${SUBCMDS.config};${SUBCMDS.pwsh}`
+    : `${SUBCMDS.generate};${SUBCMDS.snippet};${SUBCMDS.config}`;
 
+  // .html / .htm
   for (const root of HTML_ROOTS) {
     const parentKey = `${root}\\${PARENT_KEY_NAME}`;
     ok = regAdd(parentKey, 'MUIVerb', 'REG_SZ', '📧 用 juice 生成邮件 HTML') && ok;
     regAdd(parentKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(parentKey, 'SubCommands', 'REG_SZ', htmlSubs);
+    regAdd(parentKey, 'SubCommands', 'REG_SZ', allSubs);
   }
 
-  // ── 注册 YAML 父菜单（二级子菜单）────────────────────────────────────────
+  // .yaml / .yml（与 .html 共享同一套子命令）
   for (const root of YAML_ROOTS) {
     const parentKey = `${root}\\${PARENT_KEY_NAME}`;
     ok = regAdd(parentKey, 'MUIVerb', 'REG_SZ', '📧 用 juice 生成邮件 HTML') && ok;
     regAdd(parentKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(parentKey, 'SubCommands', 'REG_SZ', SUBCMDS.config);
+    regAdd(parentKey, 'SubCommands', 'REG_SZ', allSubs);
   }
 
   // ── 输出 ──────────────────────────────────────────────────────────────────
@@ -177,13 +184,12 @@ async function registerContextMenu() {
   console.log(
     '\n' +
     chalk.green('  ✔ 右键菜单注册完成！') + '\n\n' +
-    `  ${chalk.bold('.html / .htm')} 文件右键：\n` +
+    `  ${chalk.bold('.html / .htm / .yaml / .yml')} 文件右键：\n` +
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
     `      ├── ⚡ 生成邮件 HTML（标准 + 压缩）  →  juice -f\n` +
     `      ├── 🧩 邮件片段组装（交互选择模板） →  juice -s\n` +
+    `      ├── 📋 交互式生成邮件（使用此配置） →  juice -c\n` +
     (pwshPath ? `      └── 📂 在此目录打开 PowerShell 7\n` : '') +
-    `\n  ${chalk.bold('.yaml / .yml')} 文件右键：\n` +
-    `    └── 📧 交互式生成邮件（使用此配置） →  juice -c\n` +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
   );
