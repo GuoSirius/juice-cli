@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.18](https://github.com/GuoSirius/juice-cli/compare/v2.1.17...v2.1.18) (2026-05-21)
+
+
+### Bug Fixes
+
+* prompt for config when using -s interactively from right-click menu ([c77c94e](https://github.com/GuoSirius/juice-cli/commit/c77c94e00ca9a5f22acf3c2c772cc4a306a399ae))
+
 ### [2.1.17](https://github.com/GuoSirius/juice-cli/compare/v2.1.16...v2.1.17) (2026-05-21)
 
 
