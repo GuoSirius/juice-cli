@@ -102,14 +102,14 @@ async function registerContextMenu() {
 
   // ── 注册子命令到 CommandStore ─────────────────────────────────────────────
 
-  // 子命令 1：juice 生成
+  // 子命令 1：普通模式 - juice 生成
   const generateCmd = `"${nodePath}" "${scriptPath}" -f "%1"`;
   regAdd(`${SUBCMD_SPACE}\\${subCmd1}`, '', 'REG_SZ', '⚡ 生成邮件 HTML（标准 + 压缩）');
   regAdd(`${SUBCMD_SPACE}\\${subCmd1}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${subCmd1}\\command`, '', 'REG_SZ', generateCmd);
 
-  // 子命令 2：片段组装
-  const snippetCmd = `"${nodePath}" "${scriptPath}" --snippet "%1"`;
+  // 子命令 2：片段模式 - 片段组装（交互选择模板）
+  const snippetCmd = `"${nodePath}" "${scriptPath}" -s "%1"`;
   regAdd(`${SUBCMD_SPACE}\\${subCmd2}`, '', 'REG_SZ', '🧩 邮件片段组装（交互选择模板）');
   regAdd(`${SUBCMD_SPACE}\\${subCmd2}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${subCmd2}\\command`, '', 'REG_SZ', snippetCmd);
@@ -146,13 +146,11 @@ async function registerContextMenu() {
     chalk.green('  ✔ 右键菜单注册完成！') + '\n\n' +
     `  在 ${chalk.cyan('.html')} / ${chalk.cyan('.htm')} 文件上右键即可看到：\n` +
     `  ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
-    `    ├── ⚡ 生成邮件 HTML（标准 + 压缩）\n` +
-    `    ├── 🧩 邮件片段组装（交互选择模板）\n` +
+    `    ├── ⚡ 生成邮件 HTML（标准 + 压缩）  →  juice -f\n` +
+    `    ├── 🧩 邮件片段组装（交互选择模板） →  juice -s\n` +
     (pwshPath ? `    └── 📂 在此目录打开 PowerShell 7\n` : '') +
     '\n' +
-    chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n') +
-    chalk.gray('  安装时自动注册失败？请以管理员身份重新运行：\n') +
-    chalk.cyan('    juice --register\n')
+    chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
   );
 }
 

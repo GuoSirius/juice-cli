@@ -9,6 +9,10 @@
 #
 # 用户配置文件（~/juice.yaml 或项目 juice.yaml）只需填写需要覆盖的字段即可。
 
+# 设为 false 时，模板变量中的 HTML 标签会被转义（<sup> 变成 &lt;sup&gt;）
+# 默认 true：变量值中的 HTML 标签（如 <sup>、<sub>）直接渲染
+rawHtml: true
+
 # ─── juice CSS 内联选项 ───────────────────────────────────────────────────────
 juice:
   # 处理完成后移除 <style> 标签（推荐 true，提高 Gmail/Outlook 等邮件客户端兼容性）

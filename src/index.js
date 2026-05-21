@@ -146,8 +146,13 @@ function buildConfig(highPriorityPath, homePath) {
 function processTemplate(inputFile, config) {
   const htmlRaw = fs.readFileSync(inputFile, 'utf8');
 
-  // 1. Mustache 变量替换
+  // 1. Mustache 变量替换（根据 rawHtml 配置决定是否转义 HTML）
+  const originalEscape = Mustache.escape;
+  if (config.rawHtml) {
+    Mustache.escape = (text) => text;
+  }
   const htmlWithVars = Mustache.render(htmlRaw, config.variables || {});
+  Mustache.escape = originalEscape;
 
   // 2. 收集 extraCssFiles
   const basePath = path.dirname(path.resolve(inputFile));

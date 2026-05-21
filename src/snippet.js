@@ -141,7 +141,7 @@ function buildSnippetConfig({ priorityConfigPath, cliConfigPath }) {
 
 /**
  * 将 snippet HTML 插入到模板的 <tbody id="content"> 中。
- * 使用深度计数算法处理嵌套 <tbody>。
+ * 使用深度计数算法处理嵌套 <tbody>，并自动调整片段缩进以匹配模板。
  */
 function insertIntoContent(templateHtml, snippetHtml) {
   const openRe = /<tbody[\s>][^>]*\bid\s*=\s*["']content["'][^>]*>/i;
@@ -149,6 +149,18 @@ function insertIntoContent(templateHtml, snippetHtml) {
   if (!match) {
     throw new Error('模板中未找到 <tbody id="content"> 元素。模板必须包含一个带 id="content" 的 <tbody> 用于插入片段内容。');
   }
+
+  // 检测模板中 <tbody id="content"> 的缩进层级
+  const lineStart = templateHtml.lastIndexOf('\n', match.index) + 1;
+  const tagIndent = match.index - lineStart;
+
+  // 找到插入点后第一个非空行，确定子元素缩进
+  const afterOpen = templateHtml.substring(match.index + match[0].length);
+  const nextLineMatch = afterOpen.match(/\n(\s*)\S/);
+  const childIndent = nextLineMatch ? nextLineMatch[1].length : tagIndent + 2;
+
+  // 调整片段缩进以匹配模板
+  const reindentedSnippet = reindentHtml(snippetHtml, childIndent);
 
   const openTagEnd = match.index + match[0].length;
   let depth = 1;
@@ -172,7 +184,8 @@ function insertIntoContent(templateHtml, snippetHtml) {
     } else {
       depth--;
       if (depth === 0) {
-        return templateHtml.substring(0, openTagEnd) + '\n' + snippetHtml + '\n' + templateHtml.substring(nextClose.index);
+        const indent = '\n' + ' '.repeat(tagIndent);
+        return templateHtml.substring(0, openTagEnd) + '\n' + reindentedSnippet + indent + templateHtml.substring(nextClose.index);
       }
       searchPos = nextClose.index + 1;
     }
@@ -181,10 +194,41 @@ function insertIntoContent(templateHtml, snippetHtml) {
   throw new Error('无法找到 id="content" 对应的闭合 </tbody> 标签，模板 HTML 可能存在标签不匹配问题。');
 }
 
+/**
+ * 重新调整 HTML 片段的缩进，使其最外层元素对齐到目标缩进层级
+ */
+function reindentHtml(html, targetIndent) {
+  const lines = html.split('\n');
+
+  // 找到片段中非空行的最小缩进
+  let minIndent = Infinity;
+  for (const line of lines) {
+    if (line.trim().length > 0) {
+      const indent = line.length - line.trimStart().length;
+      if (indent < minIndent) minIndent = indent;
+    }
+  }
+  if (minIndent === Infinity) minIndent = 0;
+
+  const delta = targetIndent - minIndent;
+  if (delta === 0) return html;
+
+  const prefix = ' '.repeat(Math.max(0, delta));
+
+  return lines.map((line) => {
+    if (line.trim().length === 0) return '';
+    if (delta > 0) {
+      return prefix + line;
+    } else {
+      return line.substring(Math.min(-delta, line.length - line.trimStart().length));
+    }
+  }).join('\n');
+}
+
 // ─── 输出路径 ─────────────────────────────────────────────────────────────────
 
-function resolveSnippetOutputPaths(snippetPath, cwd) {
-  const name = path.parse(snippetPath).name;
+function resolveSnippetOutputPaths(outputBaseName, cwd) {
+  const name = outputBaseName;
   return {
     raw: path.join(cwd, name + '.raw.html'),
     normal: path.join(cwd, name + '.html'),
@@ -202,18 +246,23 @@ function resolveSnippetOutputPaths(snippetPath, cwd) {
  *   3. Juice CSS 内联 → .output.html
  *   4. 压缩 → .minified.html
  */
-async function assembleSnippet({ snippetPath, templatePath, config, layers, cwd }) {
+async function assembleSnippet({ snippetPath, templatePath, config, layers, cwd, outputBaseName }) {
   const templateHtml = fs.readFileSync(templatePath, 'utf8');
   const snippetRaw = fs.readFileSync(snippetPath, 'utf8');
-  const outPaths = resolveSnippetOutputPaths(snippetPath, cwd);
-  const variables = config.variables || {};
+  const outPaths = resolveSnippetOutputPaths(outputBaseName, cwd);
+  const variables = Object.assign({}, config.variables || {});
 
   // 1. 未渲染的片段插入模板 → .raw.html（Mustache 标签保留，无 juice）
-  const rawHtml = insertIntoContent(templateHtml, snippetRaw);
-  fs.writeFileSync(outPaths.raw, rawHtml, 'utf8');
+  const rawMarkup = insertIntoContent(templateHtml, snippetRaw);
+  fs.writeFileSync(outPaths.raw, rawMarkup, 'utf8');
 
   // 2. Mustache 渲染合并 HTML → .html（已渲染，无 juice 内联）
-  const renderedHtml = Mustache.render(rawHtml, variables);
+  const originalEscape = Mustache.escape;
+  if (config.rawHtml) {
+    Mustache.escape = (text) => text;
+  }
+  const renderedHtml = Mustache.render(rawMarkup, variables);
+  Mustache.escape = originalEscape;
   fs.writeFileSync(outPaths.normal, renderedHtml, 'utf8');
 
   // 3. 收集模板目录的额外 CSS + Juice CSS 内联 → .output.html
@@ -239,7 +288,7 @@ async function assembleSnippet({ snippetPath, templatePath, config, layers, cwd 
     `  ${chalk.bold('模板：')}  ${chalk.cyan(templatePath)}\n` +
     `  ${chalk.bold('配置层（低→高）：')}\n${layerLines}\n` +
     `  ${chalk.bold('输出：')}\n` +
-    `    ${chalk.green('·')} 原始组装  ${chalk.cyan(outPaths.raw)}  ${chalk.gray('(' + fmtSize(rawHtml) + ')')}\n` +
+    `    ${chalk.green('·')} 原始组装  ${chalk.cyan(outPaths.raw)}  ${chalk.gray('(' + fmtSize(rawMarkup) + ')')}\n` +
     `    ${chalk.green('·')} 已渲染    ${chalk.cyan(outPaths.normal)}  ${chalk.gray('(' + fmtSize(renderedHtml) + ')')}\n` +
     `    ${chalk.green('·')} 内联后    ${chalk.cyan(outPaths.output)}  ${chalk.gray('(' + fmtSize(processed) + ')')}\n` +
     `    ${chalk.green('·')} 压缩版    ${chalk.cyan(outPaths.minified)}  ${chalk.gray('(' + fmtSize(minified) + '，节省 ' + savings(processed, minified) + ')')}`
@@ -357,8 +406,82 @@ async function promptTemplate(templateFiles) {
   });
 }
 
+// ─── 输出文件名处理 ───────────────────────────────────────────────────────────
+
+/**
+ * 检查指定 baseName 在 cwd 下是否已有输出文件冲突
+ * 返回冲突的文件路径列表
+ */
+function checkOutputConflicts(baseName, cwd) {
+  const suffixes = ['.raw.html', '.html', '.output.html', '.minified.html'];
+  return suffixes
+    .map((s) => path.join(cwd, baseName + s))
+    .filter((p) => fs.existsSync(p));
+}
+
+/**
+ * 查找下一个可用版本号（baseName-v1, baseName-v2, ...）
+ */
+function findNextVersion(baseName, cwd) {
+  let v = 1;
+  while (true) {
+    const candidate = baseName + '-v' + v;
+    if (checkOutputConflicts(candidate, cwd).length === 0) {
+      return candidate;
+    }
+    v++;
+  }
+}
+
+/**
+ * 交互式输出文件名提示
+ * 返回最终确定的 baseName
+ */
+async function promptOutputName(defaultBaseName, cwd) {
+  const { input, select } = await import('@inquirer/prompts');
+
+  let baseName = await input({
+    message: '请输入输出文件名：',
+    default: defaultBaseName,
+  });
+
+  // 冲突检测循环
+  while (true) {
+    const conflicts = checkOutputConflicts(baseName, cwd);
+    if (conflicts.length === 0) break;
+
+    console.log(chalk.yellow(`\n  ⚠  以下文件已存在：`));
+    conflicts.forEach((f) => console.log(chalk.gray(`      ${path.basename(f)}`)));
+
+    const action = await select({
+      message: '文件已存在，请选择处理方式：',
+      choices: [
+        { name: '覆盖现有文件', value: 'overwrite' },
+        { name: `自动版本号（${findNextVersion(baseName, cwd)}）`, value: 'version' },
+        { name: '重新输入文件名', value: 'rename' },
+      ],
+    });
+
+    if (action === 'overwrite') {
+      break;
+    } else if (action === 'version') {
+      baseName = findNextVersion(baseName, cwd);
+      console.log(chalk.green(`  ✔ 已自动生成版本号：${baseName}`));
+      break;
+    } else {
+      baseName = await input({
+        message: '请重新输入输出文件名：',
+        default: baseName,
+      });
+    }
+  }
+
+  return baseName;
+}
+
 async function promptConfirm(summary) {
   const { confirm } = await import('@inquirer/prompts');
+  const outPaths = resolveSnippetOutputPaths(summary.outputBaseName, summary.outputDir);
   console.log('\n' + chalk.cyan('═══════════════════════════════════════════'));
   console.log(chalk.bold('  片段组装汇总'));
   console.log(chalk.cyan('═══════════════════════════════════════════'));
@@ -369,8 +492,8 @@ async function promptConfirm(summary) {
   console.log(`  配置 YAML：     ${chalk.green(summary.configFile)}`);
   console.log(chalk.gray('───────────────────────────────────────────'));
   console.log(`  输出目录：      ${chalk.cyan(summary.outputDir)}`);
+  console.log(`  输出文件名：    ${chalk.green(summary.outputBaseName)}`);
   console.log(`  输出文件：`);
-  const outPaths = resolveSnippetOutputPaths(summary.snippetPath, summary.outputDir);
   console.log(`    ${chalk.green('·')} ${path.basename(outPaths.raw)}  ${chalk.gray('(未渲染，无 CSS 内联)')}`);
   console.log(`    ${chalk.green('·')} ${path.basename(outPaths.normal)}  ${chalk.gray('(已渲染，无 CSS 内联)')}`);
   console.log(`    ${chalk.green('·')} ${path.basename(outPaths.output)}  ${chalk.gray('(Juice CSS 内联)')}`);
@@ -392,7 +515,7 @@ async function promptConfirm(summary) {
  *   - 配置文件：自动检测片段目录下的 juice.yaml / juice.yml，-c 可覆盖
  *   - 合并顺序：项目默认 → 用户目录 → 片段目录配置 → CLI -c
  */
-async function runSnippetMode({ snippet, template, config: cliConfigPath }) {
+async function runSnippetMode({ snippet, template, config: cliConfigPath, outputName }) {
   const snippetPath = path.resolve(snippet);
   if (!fs.existsSync(snippetPath)) {
     console.error(chalk.red(`片段文件不存在：${snippetPath}`));
@@ -437,12 +560,44 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath }) {
 
   const { config, layers } = buildSnippetConfig({ priorityConfigPath, cliConfigPath });
 
+  // 确定输出文件名
+  const defaultBaseName = outputName || path.parse(templatePath).name;
+  let outputBaseName;
+
+  if (outputName) {
+    // 命令行指定了 --name，检查冲突，有冲突则自动版本号
+    const conflicts = checkOutputConflicts(defaultBaseName, process.cwd());
+    if (conflicts.length > 0) {
+      outputBaseName = findNextVersion(defaultBaseName, process.cwd());
+      console.warn(chalk.yellow(
+        `\n⚠  文件冲突，自动使用版本号：${outputBaseName}`
+      ));
+    } else {
+      outputBaseName = defaultBaseName;
+    }
+  } else if (template) {
+    // 非交互模式（--snippet + -f 均指定），自动版本号
+    const conflicts = checkOutputConflicts(defaultBaseName, process.cwd());
+    if (conflicts.length > 0) {
+      outputBaseName = findNextVersion(defaultBaseName, process.cwd());
+      console.warn(chalk.yellow(
+        `\n⚠  文件冲突，自动使用版本号：${outputBaseName}`
+      ));
+    } else {
+      outputBaseName = defaultBaseName;
+    }
+  } else {
+    // 交互模式（--snippet 单独指定），提示用户输入
+    outputBaseName = await promptOutputName(defaultBaseName, process.cwd());
+  }
+
   await assembleSnippet({
     snippetPath,
     templatePath,
     config,
     layers,
     cwd: process.cwd(),
+    outputBaseName,
   });
 }
 
@@ -493,7 +648,11 @@ async function runInteractiveMode({ config: cliConfigPath }) {
     configFileName = configChoice.name;
   }
 
-  // 6. 汇总确认
+  // 6. 确定输出文件名
+  const defaultBaseName = path.parse(templateChoice.path).name;
+  const outputBaseName = await promptOutputName(defaultBaseName, process.cwd());
+
+  // 7. 汇总确认
   const confirmed = await promptConfirm({
     brand: brand.name,
     templateFile: templateChoice.name,
@@ -502,6 +661,7 @@ async function runInteractiveMode({ config: cliConfigPath }) {
     configFile: configFileName,
     snippetPath: snippetFile.path,
     outputDir: process.cwd(),
+    outputBaseName,
   });
 
   if (!confirmed) {
@@ -509,7 +669,7 @@ async function runInteractiveMode({ config: cliConfigPath }) {
     return;
   }
 
-  // 7. 构建配置并执行
+  // 8. 构建配置并执行
   const { config, layers } = buildSnippetConfig({ priorityConfigPath, cliConfigPath });
 
   await assembleSnippet({
@@ -518,6 +678,7 @@ async function runInteractiveMode({ config: cliConfigPath }) {
     config,
     layers,
     cwd: process.cwd(),
+    outputBaseName,
   });
 }
 
