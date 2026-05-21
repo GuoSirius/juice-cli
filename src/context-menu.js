@@ -15,6 +15,7 @@
  */
 
 const { spawnSync } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 
@@ -34,10 +35,13 @@ function getIconPath() {
 
 // ─── 注册表操作封装 ───────────────────────────────────────────────────────────
 
+const isWindows = process.platform === 'win32';
+
 /**
  * 执行 reg add — 使用 spawnSync 直接调用 reg.exe，避免 cmd.exe 解析特殊字符
  */
 function regAdd(key, valueName, type, data) {
+  if (!isWindows) return false;
   const args = ['add', key, '/f'];
   if (valueName === '') {
     args.push('/ve');
@@ -49,7 +53,7 @@ function regAdd(key, valueName, type, data) {
 
   const result = spawnSync('reg', args, { stdio: 'pipe' });
   if (result.status !== 0) {
-    const msg = result.stderr.toString().trim();
+    const msg = (result.stderr || '').toString().trim();
     console.warn(chalk.yellow(`  ⚠  reg add 失败\n     键：${key}\n     原因：${msg}`));
     return false;
   }
@@ -60,6 +64,7 @@ function regAdd(key, valueName, type, data) {
  * 执行 reg delete — 键不存在时静默忽略
  */
 function regDelete(key) {
+  if (!isWindows) return false;
   const result = spawnSync('reg', ['delete', key, '/f'], { stdio: 'pipe' });
   return result.status === 0;
 }
@@ -119,6 +124,11 @@ function wrapInteractive(nodePath, scriptPath, cliArgs) {
 // ─── 注册 ─────────────────────────────────────────────────────────────────────
 
 async function registerContextMenu() {
+  if (!isWindows) {
+    console.log(chalk.gray('  右键菜单仅支持 Windows，已跳过。\n'));
+    return;
+  }
+
   console.log(chalk.cyan('\n  注册 juice 右键菜单（当前用户，无需管理员权限）...\n'));
 
   const nodePath = getNodePath();
@@ -197,6 +207,11 @@ async function registerContextMenu() {
 // ─── 取消注册 ─────────────────────────────────────────────────────────────────
 
 async function unregisterContextMenu() {
+  if (!isWindows) {
+    console.log(chalk.gray('  右键菜单仅支持 Windows，已跳过。\n'));
+    return;
+  }
+
   console.log(chalk.cyan('\n  取消注册 juice 右键菜单...\n'));
 
   let removed = 0;
@@ -232,12 +247,12 @@ function resolvePwsh() {
     path.join(process.env['LOCALAPPDATA'] || '', 'Microsoft', 'PowerShell', 'pwsh.exe'),
   ];
   for (const p of candidates) {
-    if (require('fs').existsSync(p)) return p;
+    if (fs.existsSync(p)) return p;
   }
   try {
-    const result = require('child_process').spawnSync('where', ['pwsh'], { stdio: 'pipe' });
+    const result = spawnSync('where', ['pwsh'], { stdio: 'pipe' });
     const line = result.stdout.toString().trim().split('\n')[0].trim();
-    if (line && require('fs').existsSync(line)) return line;
+    if (line && fs.existsSync(line)) return line;
   } catch (_) {}
   return null;
 }
