@@ -479,6 +479,32 @@ async function promptOutputName(defaultBaseName, cwd) {
   return baseName;
 }
 
+/**
+ * 无片段可用时，将模板拷贝到当前目录作为快捷副本
+ */
+async function copyTemplateToCwd(templatePath) {
+  const { confirm } = await import('@inquirer/prompts');
+
+  const templateName = path.parse(templatePath).name;
+  console.log(chalk.cyan(`\n  可将模板「${path.basename(templatePath)}」拷贝到当前目录作为快捷副本。`));
+
+  const proceed = await confirm({
+    message: '是否拷贝模板到当前目录？',
+    default: true,
+  });
+
+  if (!proceed) {
+    console.log(chalk.gray('已取消。'));
+    return;
+  }
+
+  const baseName = await promptOutputName(templateName, process.cwd());
+  const destPath = path.join(process.cwd(), baseName + '.html');
+
+  fs.copyFileSync(templatePath, destPath);
+  console.log(chalk.green(`\n✔ 模板已拷贝到：${destPath}`));
+}
+
 async function promptConfirm(summary) {
   const { confirm } = await import('@inquirer/prompts');
   const outPaths = resolveSnippetOutputPaths(summary.outputBaseName, summary.outputDir);
@@ -621,8 +647,8 @@ async function runInteractiveMode({ config: cliConfigPath }) {
   // 3. 选择片段文件夹
   const snippetFolders = findSnippetFolders(brand.path);
   if (snippetFolders.length === 0) {
-    console.log(chalk.yellow(`\n  ⚠  品牌「${brand.name}」下暂无片段系列，无法继续。`));
-    console.log(chalk.gray(`     请在 edm/${brand.name}/ 下创建片段文件夹（含 HTML 和 YAML 文件）。`));
+    console.log(chalk.yellow(`\n  ⚠  品牌「${brand.name}」下暂无片段系列。`));
+    await copyTemplateToCwd(templateChoice.path);
     return;
   }
   const folder = await promptSnippetFolder(snippetFolders);
