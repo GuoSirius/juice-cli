@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.14](https://github.com/GuoSirius/juice-cli/compare/v2.1.13...v2.1.14) (2026-05-21)
+
+
+### Bug Fixes
+
+* switch to ExtendedSubCommandsKey for reliable cascading context menu ([9999029](https://github.com/GuoSirius/juice-cli/commit/9999029e56a8c82bfba905d5b451541be0117e51))
+
+
+### Chores
+
+* add WebSearch, WebFetch, and reg query permissions ([c1a16e1](https://github.com/GuoSirius/juice-cli/commit/c1a16e16fcddac3bacad3cdefc5fb80bde849428))
+
 ### [2.1.13](https://github.com/GuoSirius/juice-cli/compare/v2.1.12...v2.1.13) (2026-05-21)
 
 
