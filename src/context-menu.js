@@ -15,7 +15,6 @@
  *     📧 用 juice 生成邮件 HTML
  *       ├── 📄 作为模板，生成邮件 HTML   → juice -f（后台执行）
  *       ├── 🧩 作为片段，拼接邮件 HTML   → juice -s（交互选择模板）
- *       ├── ⚙️ 作为配置，拼接邮件 HTML   → juice -c（交互选择品牌/模板/片段）
  *       └── 📂 打开 PowerShell        （可选）
  *
  *   .yaml / .yml：
@@ -190,26 +189,27 @@ function resolvePwsh() {
  * @param {'html'|'yaml'} kind - 子命令集合类型
  */
 function registerSubCommands(containerPath, kind, nodePath, scriptPath, iconPath, pwshPath) {
-  // generate / snippet 仅 HTML 文件显示
   if (kind === 'html') {
+    // HTML：作为模板生成
     const genKey = `${containerPath}\\shell\\${SUBCMDS.generate}`;
     regAdd(genKey, 'MUIVerb', 'REG_SZ', '📄 作为模板，生成邮件 HTML');
     regAdd(genKey, 'Icon', 'REG_SZ', iconPath);
     regAdd(`${genKey}\\command`, '', 'REG_SZ', `"${nodePath}" "${scriptPath}" -f %1`);
 
+    // HTML：作为片段拼接
     const snipKey = `${containerPath}\\shell\\${SUBCMDS.snippet}`;
     regAdd(snipKey, 'MUIVerb', 'REG_SZ', '🧩 作为片段，拼接邮件 HTML');
     regAdd(snipKey, 'Icon', 'REG_SZ', iconPath);
     regAdd(`${snipKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-s %1'));
+  } else {
+    // YAML：作为配置拼接
+    const cfgKey = `${containerPath}\\shell\\${SUBCMDS.config}`;
+    regAdd(cfgKey, 'MUIVerb', 'REG_SZ', '⚙️ 作为配置，拼接邮件 HTML');
+    regAdd(cfgKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${cfgKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-c %1'));
   }
 
-  // config — HTML 和 YAML 都显示
-  const cfgKey = `${containerPath}\\shell\\${SUBCMDS.config}`;
-  regAdd(cfgKey, 'MUIVerb', 'REG_SZ', '⚙️ 作为配置，拼接邮件 HTML');
-  regAdd(cfgKey, 'Icon', 'REG_SZ', iconPath);
-  regAdd(`${cfgKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-c %1'));
-
-  // pwsh — HTML 和 YAML 都显示（可选）
+  // pwsh — 始终显示（可选）
   if (pwshPath) {
     const pwshKey = `${containerPath}\\shell\\${SUBCMDS.pwsh}`;
     regAdd(pwshKey, 'MUIVerb', 'REG_SZ', '📂 打开 PowerShell');
@@ -275,7 +275,6 @@ async function registerContextMenu() {
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
     `      ├── 📄 作为模板，生成邮件 HTML  →  juice -f（后台执行）\n` +
     `      ├── 🧩 作为片段，拼接邮件 HTML  →  juice -s（交互选择模板）\n` +
-    `      ├── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
     (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
     `\n  ${chalk.bold('.yaml / .yml')} 文件右键：\n` +
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +

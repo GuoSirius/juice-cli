@@ -13,7 +13,7 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 - `juice` — 全交互模式：逐步选择品牌、模板、片段系列、片段 HTML、配置（同品牌内组合，不会跨品牌）
 - `juice --install` / `juice --uninstall` — Windows 右键菜单注册/卸载（npm install 时自动执行 postinstall）
 - 右键菜单：
-  - `.html`/`.htm` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为模板生成 / 作为片段拼接 / 作为配置拼接 / 打开 PowerShell）
+  - `.html`/`.htm` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为模板生成 / 作为片段拼接 / 打开 PowerShell）
   - `.yaml`/`.yml` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为配置拼接 / 打开 PowerShell）
 
 ## npm 生命周期（自动菜单注册）
