@@ -14,7 +14,7 @@
  *       └── 📂 打开 PowerShell        （可选）
  */
 
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const path = require('path');
 const chalk = require('chalk');
 
@@ -35,40 +35,33 @@ function getIconPath() {
 // ─── 注册表操作封装 ───────────────────────────────────────────────────────────
 
 /**
- * 执行 reg add，失败时打印警告而不中断
+ * 执行 reg add — 使用 spawnSync 直接调用 reg.exe，避免 cmd.exe 解析特殊字符
  */
 function regAdd(key, valueName, type, data) {
-  const vFlag = valueName === '' ? '/ve' : `/v "${valueName}"`;
-  const tFlag = type ? `/t ${type}` : '';
-  const dFlag = data !== undefined ? `/d "${escapeRegData(data)}"` : '';
-  const cmd = `reg add "${key}" ${vFlag} ${tFlag} ${dFlag} /f`.replace(/\s+/g, ' ').trim();
-  try {
-    execSync(cmd, { stdio: 'pipe' });
-    return true;
-  } catch (e) {
-    const msg = e.stderr ? e.stderr.toString().trim() : e.message;
+  const args = ['add', key, '/f'];
+  if (valueName === '') {
+    args.push('/ve');
+  } else {
+    args.push('/v', valueName);
+  }
+  if (type) args.push('/t', type);
+  if (data !== undefined) args.push('/d', data);
+
+  const result = spawnSync('reg', args, { stdio: 'pipe' });
+  if (result.status !== 0) {
+    const msg = result.stderr.toString().trim();
     console.warn(chalk.yellow(`  ⚠  reg add 失败\n     键：${key}\n     原因：${msg}`));
     return false;
   }
+  return true;
 }
 
 /**
- * 执行 reg delete，键不存在时静默忽略，返回是否实际删除了
+ * 执行 reg delete — 键不存在时静默忽略
  */
 function regDelete(key) {
-  try {
-    execSync(`reg delete "${key}" /f`, { stdio: 'pipe' });
-    return true;
-  } catch (_) {
-    return false;
-  }
-}
-
-/**
- * 转义注册表数据中的特殊字符
- */
-function escapeRegData(str) {
-  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/%/g, '%%');
+  const result = spawnSync('reg', ['delete', key, '/f'], { stdio: 'pipe' });
+  return result.status === 0;
 }
 
 // ─── 菜单结构常量 ─────────────────────────────────────────────────────────────
@@ -242,8 +235,9 @@ function resolvePwsh() {
     if (require('fs').existsSync(p)) return p;
   }
   try {
-    const result = execSync('where pwsh', { stdio: 'pipe' }).toString().trim().split('\n')[0].trim();
-    if (result && require('fs').existsSync(result)) return result;
+    const result = require('child_process').spawnSync('where', ['pwsh'], { stdio: 'pipe' });
+    const line = result.stdout.toString().trim().split('\n')[0].trim();
+    if (line && require('fs').existsSync(line)) return line;
   } catch (_) {}
   return null;
 }
