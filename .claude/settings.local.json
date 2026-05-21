@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node bin/juice.js --help)",
+      "Bash(node bin/juice.js -f examples/template.html)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(node bin/juice.js -f edm/elabscience/elabscience-template.html)",
+      "Bash(node bin/juice.js -f edm/procell/procell-template.html)",
+      "Bash(node bin/juice.js --snippet edm/elabscience/literature/snippet.html -f edm/procell/procell-template.html)",
+      "Bash(node bin/juice.js --snippet edm/elabscience/literature/snippet.html -f edm/procell/procell-template.html -c defaults/juice.yaml)",
+      "Bash(mkdir -p dist)",
+      "Bash(rm -f snippet.raw.html snippet.html snippet.output.html snippet.minified.html)",
+      "Bash(node ../bin/juice.js --snippet ../edm/elabscience/literature/snippet.html -f ../edm/procell/procell-template.html)",
+      "Bash(rm -f snippet.*)",
+      "Bash(node ../bin/juice.js --snippet ../edm/elabscience/literature/snippet.html -f ../edm/procell/procell-template.html -c ../defaults/juice.yaml)",
+      "Bash(node ../bin/juice.js -f ../edm/procell/procell-template.html)",
+      "Bash(node -e ' *)",
+      "Bash(node ../bin/juice.js --snippet ../edm/elabscience/literature/snippet.html -f ../edm/elabscience/elabscience-template.html)",
+      "Bash(node bin/juice.js --install)"
+    ]
+  }
+}
