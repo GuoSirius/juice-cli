@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.9](https://github.com/GuoSirius/juice-cli/compare/v2.1.8...v2.1.9) (2026-05-21)
+
+
+### Features
+
+* add right-click menu for .yaml/.yml config files (juice -c interactive mode) ([9f1bc5c](https://github.com/GuoSirius/juice-cli/commit/9f1bc5c4dc1238a47252c998fcf17b29cc5320e3))
+* copy template to CWD when brand has no snippet folders in interactive mode ([d29bb95](https://github.com/GuoSirius/juice-cli/commit/d29bb9597797eca2b546643263a1011ac3a65315))
+
+
+### Bug Fixes
+
+* use conditional padding class in literature snippet instead of hardcoded style ([b58dbf6](https://github.com/GuoSirius/juice-cli/commit/b58dbf6234dcab28d5f913eaf7c5fdccf89b9b30))
+
+
+### Refactoring
+
+* improve context menu — HKCU (no admin), fix %1 quoting, shared constants, legacy cleanup ([9f839b6](https://github.com/GuoSirius/juice-cli/commit/9f839b6aef8c042a2de17c340b26e401a086cf7b))
+
+
+### Documentation
+
+* add project memory files for cross-machine continuity ([cb19f14](https://github.com/GuoSirius/juice-cli/commit/cb19f14fa5904e3dad35ceff5f59d120a0dbacdf))
+* update help and README — context menu no longer requires admin (HKCU) ([d2c2ce5](https://github.com/GuoSirius/juice-cli/commit/d2c2ce5f1dbf9b5464b642be2a1015ee4f56e28c))
+
 ### [2.1.8](https://github.com/GuoSirius/juice-cli/compare/v2.1.7...v2.1.8) (2026-05-21)
 
 
