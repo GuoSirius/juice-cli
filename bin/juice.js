@@ -25,18 +25,18 @@ program
 配置加载顺序（优先级从低到高）：
   1. CLI 内置默认值（defaults/juice.yaml）
   2. 用户主目录 ~/juice.yaml（如果存在）
-  3. 优先配置（-c 指定 或 输入文件同级目录，二者互斥）
+  3. 优先配置（-c 指定 或 输入文件同级目录）
 
-普通模式（直接处理单个 HTML）：
+普通模式（-f 必选，直接处理单个 HTML）：
   juice -f my-email.html
   juice -c project.yaml -f emails/welcome.html
 
-片段组装模式（片段 + 模板拼接）：
+片段组装模式（--snippet + 模板拼接）：
   juice --snippet edm/elabscience/literature/snippet.html -f edm/elabscience/elabscience-template.html
   juice --snippet edm/elabscience/literature/snippet.html          （交互式选择模板）
 
 交互模式（全交互选择）：
-  juice                                                            （逐步选择品牌、片段、配置、模板）
+  juice                                                            （逐步选择品牌、模板、片段、配置）
 
 右键菜单管理：
   juice --install          （管理员权限，注册右键菜单）
@@ -47,8 +47,9 @@ program
   <name>.minified.html   在标准版基础上压缩的精简版
 
 片段模式输出文件（当前工作目录）：
-  <name>.raw.html         原始组装（未处理）
-  <name>.html             处理后（Mustache + Juice）
+  <name>.raw.html         原始组装（Mustache 未渲染，无 CSS 内联）
+  <name>.html             已渲染（Mustache 变量已替换，无 CSS 内联）
+  <name>.output.html      Juice CSS 内联后
   <name>.minified.html    压缩版
 
 更多信息：https://gitee.com/siriussupreme/juice-cli
@@ -93,7 +94,7 @@ program
 
     // 全交互模式：无 --snippet，无 -f
     const { runInteractiveMode } = require('../src/snippet');
-    await runInteractiveMode({ file: options.file, config: options.config });
+    await runInteractiveMode({ config: options.config });
   });
 
 program.allowUnknownOption(false);

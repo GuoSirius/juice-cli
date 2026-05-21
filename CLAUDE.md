@@ -1,4 +1,4 @@
-# juice-cli 项目文档与开发计划
+# juice-cli 项目文档
 
 ## 项目概述
 
@@ -6,15 +6,20 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 
 ## 当前功能
 
-- `juice -c config.yaml -f template.html` — 对 HTML 做 Mustache 变量替换 → juice CSS 内联 → 输出 `.output.html` + `.minified.html`
+- `juice -f template.html` — 对 HTML 做 Mustache 变量替换 → juice CSS 内联 → 输出 `.output.html` + `.minified.html`
+- `juice -c config.yaml -f template.html` — 同上，指定配置文件
+- `juice --snippet snippet.html -f template.html` — 片段组装模式：片段 + 模板拼接，输出 4 个文件
+- `juice --snippet snippet.html` — 片段模式，交互式选择品牌和模板
+- `juice` — 全交互模式：逐步选择品牌、模板、片段系列、片段 HTML、配置
 - `juice --install` / `juice --uninstall` — Windows 右键菜单注册/卸载
-- 右键菜单：在 `.html`/`.htm` 文件上右键 → "📧 用 juice 生成邮件 HTML" → 生成
+- 右键菜单：在 `.html`/`.htm` 文件上右键 → "📧 用 juice 生成邮件 HTML" → 子菜单（生成 / 片段组装）
 
 ## 项目结构
 
 ```
 bin/juice.js              # CLI 入口（Commander.js, CJS）
 src/index.js              # 核心逻辑：配置加载、模板处理、输出
+src/snippet.js            # 片段组装模式逻辑 + 交互式提示
 src/context-menu.js       # Windows 右键菜单注册
 defaults/juice.yaml       # CLI 内置默认配置
 edm/                      # EDM 模板库
@@ -26,34 +31,34 @@ edm/                      # EDM 模板库
 scripts/release.mjs       # 发布脚本（ESM，使用 @inquirer/prompts）
 ```
 
-## 配置优先级（当前）
+## 配置优先级
 
-低 → 高：`defaults/juice.yaml` → `~/juice.yaml` → `-c` 指定或输入文件同级 `juice.yaml`
+### 普通模式（-f）
+
+低 → 高：`defaults/juice.yaml` → `~/juice.yaml` → `-c` 指定 或 输入文件同级 `juice.yaml`（二者互斥，只生效一个）
+
+### 片段模式（--snippet）
+
+低 → 高：`defaults/juice.yaml` → `~/juice.yaml` → 片段目录下的 `juice.yaml`（自动检测）→ `-c` 指定
+
+### 交互模式（无参数）
+
+低 → 高：`defaults/juice.yaml` → `~/juice.yaml` → 项目配置（CWD 优先 → 片段目录回退 → 手动输入，三选一）→ `-c` 指定
 
 ---
 
-## 开发计划：Snippet Mode（片段组装模式）
+## 片段组装模式（Snippet Mode）
 
-### 需求摘要
+### 输出文件（4 个）
 
-1. 新增 `--snippet` 选项，指定片段 HTML，结合 `-f` 指定模板 HTML（含 `id="content"`），拼接生成邮件
-2. 在当前目录输出 **3 个文件**：原始未处理、处理后、压缩后
-3. 未指定片段时，交互式选择：品牌 → 片段目录 → HTML 文件 → YAML 配置 → 模板 → 确认执行
-4. 指定片段但未指定模板时，交互式选择模板 → 确认执行
-5. 配置优先级：当前目录 > 片段目录，支持 `-c` 覆盖和手动输入路径
-6. 右键菜单新增二级选项
+| 文件 | 说明 |
+|---|---|
+| `<name>.raw.html` | 原始组装：未渲染的片段 + 模板（Mustache 标签保留，无 CSS 内联） |
+| `<name>.html` | 已渲染：Mustache 变量已替换，无 CSS 内联 |
+| `<name>.output.html` | Juice CSS 内联后 |
+| `<name>.minified.html` | 压缩版 |
 
-### 新增文件
-
-#### `src/snippet.js`
-
-核心模块，包含所有片段组装逻辑和交互式提示。
-
-**导出函数：**
-- `async runSnippetMode({ snippet, template, config })` — `--snippet` 模式入口
-- `async runInteractiveMode({ file, config })` — 全交互模式入口（无 `--snippet`，无 `-f`）
-
-**内部函数：**
+### `src/snippet.js` 内部函数
 
 | 函数 | 用途 |
 |---|---|
@@ -62,103 +67,68 @@ scripts/release.mjs       # 发布脚本（ESM，使用 @inquirer/prompts）
 | `findSnippetFolders(brandDir)` | 列出品牌目录下的片段子目录 |
 | `findHtmlFiles(dir)` | 列出目录下 `.html`/`.htm` 文件 |
 | `findYamlFiles(dir)` | 列出目录下 `.yaml`/`.yml` 文件 |
-| `buildSnippetConfig(...)` | 5 层配置合并（见下文） |
+| `findLocalConfig(dir)` | 在目录下查找 `juice.yaml`（优先）或 `juice.yml`，不存在返回 null |
+| `buildSnippetConfig({ priorityConfigPath, cliConfigPath })` | 4 层配置合并 |
 | `insertIntoContent(templateHtml, snippetHtml)` | 将片段插入模板的 `<tbody id="content">` 中（深度计数算法） |
-| `resolveSnippetOutputPaths(snippetPath, cwd)` | 生成 3 个输出路径 |
-| `assembleSnippet(...)` | 核心流水线：原始 → 处理后 → 压缩 |
-| `prompt*()` | 各交互步骤的 inquirer 封装 |
+| `resolveSnippetOutputPaths(snippetPath, cwd)` | 生成 4 个输出路径 |
+| `assembleSnippet(...)` | 核心流水线：raw → .html → .output.html → .minified.html |
+| `prompt*()` | 各交互步骤的 @inquirer/prompts 封装 |
 | `promptConfirm(summary)` | 汇总确认 |
 
-**5 层配置合并（`buildSnippetConfig`）：**
+### 配置合并（`buildSnippetConfig`）
 
 | 优先级 | 层 | 来源 |
 |---|---|---|
 | 1 (低) | CLI 内置默认 | `defaults/juice.yaml` |
-| 2 | 用户主目录 | `~/juice.yaml` |
-| 3 | 片段目录 | 片段文件夹中选定的 YAML |
-| 4 | 当前工作目录 | `./juice.yaml`（如存在） |
-| 5 (高) | CLI `-c` | 用户指定路径 |
+| 2 | 用户主目录 | `~/juice.yaml`（如存在） |
+| 3 | 项目配置 | 片段目录 / CWD / 手动输入（三选一，由调用方传入） |
+| 4 (高) | CLI `-c` | 用户指定路径 |
 
-**组装流水线（`assembleSnippet`）：**
+### 组装流水线（`assembleSnippet`）
 
 1. 读取片段 HTML + 模板 HTML
-2. **原始输出**：将未渲染的片段插入模板 `id="content"` → 写入 `<name>.raw.html`
-3. **Mustache 渲染片段**：`Mustache.render(snippetHtml, config.variables)`
-4. 将渲染后的片段插入模板 `id="content"` → 得到合并 HTML
-5. **Mustache 渲染合并 HTML**：处理模板级别变量（如 `{{brandName}}`）
-6. 从模板目录收集额外 CSS（`collectExtraCss`）
-7. **Juice CSS 内联** → 写入 `<name>.html`
-8. **压缩** → 写入 `<name>.minified.html`
-9. 输出报告（文件大小、压缩率、配置层信息）
+2. 未渲染的片段插入模板 `id="content"` → `.raw.html`（Mustache 标签保留，无 juice）
+3. Mustache 渲染合并 HTML → `.html`（变量已替换，无 juice）
+4. 收集模板目录额外 CSS + Juice CSS 内联 → `.output.html`
+5. 压缩 → `.minified.html`
+6. 输出报告
 
-**`insertIntoContent` 算法：** 用正则匹配含 `id="content"` 的 `<tbody`，然后深度计数 `<tbody>` / `</tbody>` 找到匹配闭合标签。无需引入 cheerio 等额外依赖。
+### 交互流程
 
-**输出文件命名**（基于片段文件名 stem）：
-- `<cwd>/<name>.raw.html` — 原始组装（Mustache 标签未替换）
-- `<cwd>/<name>.html` — 处理后（Mustache + Juice）
-- `<cwd>/<name>.minified.html` — 压缩版
-
-**交互流程（`runInteractiveMode`）：**
+**`runInteractiveMode`（无 --snippet，无 -f）：**
 
 ```
 1. 扫描 edm/ → 选择品牌
-2. 扫描品牌目录 → 选择片段文件夹
-3. 扫描片段文件夹 → 选择 HTML 文件（默认：第一个 .html）
-4. 扫描片段文件夹 → 选择 YAML 文件（默认：juice.yaml），可选"跳过"或"输入自定义路径"
-5. 若未指定 -f：扫描品牌目录 → 选择模板 HTML
+2. 扫描品牌目录 → 选择模板 HTML
+3. 扫描品牌目录 → 选择片段系列（为空时优雅提示并退出）
+4. 扫描片段系列 → 选择 HTML 文件（为空时优雅提示并退出，默认：snippet.html）
+5. 选择配置文件：CWD 优先 → 片段目录配置 → 手动输入 → 跳过
 6. 显示汇总 → 确认 → 执行
 ```
 
-**当指定了 `--snippet` 但未指定 `-f`：** 跳到模板选择步骤，然后确认并执行。
-
-每个交互步骤通过动态 `import('@inquirer/prompts')` 实现（ESM 包在 CJS 环境中的用法，与 `scripts/release.mjs` 一致）。
-
-### 修改文件
-
-#### `bin/juice.js`
-
-1. 新增 `--snippet <path>` 选项
-2. 调整 action 路由逻辑：
+**`runSnippetMode`（--snippet 但无 -f）：**
 
 ```
-options.snippet  → runSnippetMode(...)
-options.file     → run(...)          // 向后兼容
-否则             → runInteractiveMode(...)
+1. 使用指定的片段 HTML
+2. 交互式选择：品牌 → 模板 HTML
+3. 配置自动检测（片段目录下的 juice.yaml / juice.yml），-c 可覆盖
+4. 执行
 ```
 
-3. 更新帮助文本，添加片段模式使用示例
+**`runSnippetMode`（--snippet + -f）：**
 
-#### `src/index.js`
-
-新增导出，供 `src/snippet.js` 复用：
-
-```js
-module.exports = { run, findConfigs, buildConfig, processTemplate, minifyHtml, deepMerge, collectExtraCss, loadYaml, fmtSize, savings };
 ```
-
-仅新增导出，不修改任何现有逻辑。
-
-#### `src/context-menu.js`
-
-新增第三个子命令 `JuiceEmail.Snippet`：
-- 标签：`🧩 邮件片段组装（交互选择模板）`
-- 命令：`"<node>" "<juice.js>" --snippet "%1"`
-- 菜单位置：Generate 和 OpenPwsh 之间
-
-`unregisterContextMenu()` 同步清理新 key。
-
-#### `package.json`
-
-将 `@inquirer/prompts` 和 `chalk` 从 `devDependencies` 移至 `dependencies`：
-- `@inquirer/prompts` — 交互模式运行时依赖
-- `chalk` — `src/index.js` 和 `src/context-menu.js` 已在运行时使用（既有问题修正）
+1. 直接使用指定的片段 + 模板
+2. 配置自动检测（片段目录下的 juice.yaml / juice.yml），-c 可覆盖
+3. 执行（无交互提示）
+```
 
 ### 验证清单
 
-- [ ] `juice -f examples/template.html` — 普通模式不变
-- [ ] `juice --snippet edm/elabscience/literature/template.html -f edm/elabscience/elabscience-template.html` — 命令行片段模式，输出 3 文件
-- [ ] `juice --snippet edm/elabscience/literature/template.html` — 片段 + 交互选模板
-- [ ] `juice`（项目根目录）— 全交互模式，走完所有提示
-- [ ] `juice --install` / `juice --uninstall` — 右键菜单含新增选项
-- [ ] `juice -c custom.yaml --snippet ...` — 配置文件覆盖生效
-- [ ] `edm/procell/` 品牌（暂无片段文件夹）— 优雅报错
+- [x] `juice -f edm/procell/procell-template.html` — 普通模式正常
+- [x] `juice --snippet edm/elabscience/literature/snippet.html -f edm/procell/procell-template.html` — 命令行片段模式，输出 4 文件
+- [x] `juice --snippet edm/elabscience/literature/snippet.html` — 片段 + 交互选模板
+- [ ] `juice`（项目根目录）— 全交互模式（需 TTY 终端手动测试）
+- [ ] `juice --install` / `juice --uninstall` — 右键菜单含新增选项（需管理员权限）
+- [x] `juice -c defaults/juice.yaml --snippet ...` — 配置文件覆盖生效
+- [x] `edm/procell/` 品牌（暂无片段文件夹）— 交互模式优雅提示
