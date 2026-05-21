@@ -1,0 +1,93 @@
+# juice.yaml - 用户配置文件示例
+#
+# 放置位置（优先级从低到高）：
+#   ~/juice.yaml          ← 用户主目录，对所有项目生效
+#   <模板文件目录>/juice.yaml ← 仅对当前项目生效（推荐）
+#   juice -c <此文件>       ← 命令行指定
+#
+# 所有配置项均与 CLI 内置默认值深度合并，未填写的字段自动使用内置值。
+# 完整默认配置见：<CLI安装目录>/defaults/juice.yaml
+
+# ─── 模板变量（Mustache 语法）────────────────────────────────────────────────
+variables:
+  brandName: "优品商城"
+  brandColor: "#0066cc"
+  logoUrl: "https://via.placeholder.com/150x50/ffffff/cccccc?text=LOGO"
+  websiteUrl: "https://shop.example.com"
+  recipientName: "张三"
+  subject: "欢迎来到优品商城"
+  previewText: "精选商品优惠中，最高立减 200 元"
+  ctaText: "立即查看"
+  ctaUrl: "https://shop.example.com/action"
+  companyName: "优品商城"
+  companyAddress: "北京市朝阳区建国路 88 号"
+  unsubscribeUrl: "https://shop.example.com/unsubscribe"
+  currentYear: "2026"
+
+  # ── 产品列表 ────────────────────────────────────────────────────────────────
+  # 使用 {{#products}}...{{/products}} 循环遍历
+  # {{#products}}{{name}}{{price}}{{/products}}
+  products:
+    - name: "无线蓝牙耳机"
+      price: "¥299.00"
+      originalPrice: "¥399.00"
+      image: "https://via.placeholder.com/200x120/e74c3c/ffffff?text=耳机"
+      tag: "热卖"
+    - name: "智能手环 Pro"
+      price: "¥199.00"
+      originalPrice: "¥299.00"
+      image: "https://via.placeholder.com/200x120/3498db/ffffff?text=手环"
+      tag: "新品"
+    - name: "便携充电宝"
+      price: "¥89.00"
+      originalPrice: "¥129.00"
+      image: "https://via.placeholder.com/200x120/2ecc71/ffffff?text=充电宝"
+      tag: "特惠"
+    - name: "无线键盘套装"
+      price: "¥159.00"
+      originalPrice: "¥259.00"
+      image: "https://via.placeholder.com/200x120/9b59b6/ffffff?text=键盘"
+      tag: ""
+
+  # ── 功能列表 ────────────────────────────────────────────────────────────────
+  # 嵌套循环示例：{{#features}}{{#items}}{{.}}{{/items}}{{/features}}
+  features:
+    - title: "品质保障"
+      icon: "✓"
+      items:
+        - "正品保证"
+        - "7天无理由退换"
+        - "全国联保"
+    - title: "配送服务"
+      icon: "📦"
+      items:
+        - "次日达"
+        - "包邮到家"
+        - "实时物流"
+    - title: "售后服务"
+      icon: "🎧"
+      items:
+        - "专属客服"
+        - "终身维护"
+        - "极速退款"
+
+# ─── juice CSS 内联选项 ──────────────────────────────────────────────────────
+juice:
+  preserveMediaQueries: true   # 保留 @media（响应式必须）
+  preservedSelectors:          # 保留的选择器（不会被内联）
+    - ".gmail-"
+    - "#outlook-"
+    - "a:hover"                # 链接 hover 效果
+
+# ─── 输出选项 ─────────────────────────────────────────────────────────────────
+# output:
+#   normalSuffix: ".output.html"
+#   minifiedSuffix: ".minified.html"
+#   encoding: "utf8"
+
+# ─── 压缩选项 ─────────────────────────────────────────────────────────────────
+# minify:
+#   collapseWhitespace: true
+#   removeComments: true
+#   minifyCSS: true
+#   minifyJS: false

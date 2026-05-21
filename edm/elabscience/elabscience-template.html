@@ -226,13 +226,28 @@
         vertical-align: middle;
       }
 
+      .lamp {
+        padding-left: 28px;
+        background: url(https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202603251412/lamp.png) 0 4px / 18px 18px no-repeat scroll;
+      }
+
+      .truth {
+        padding-left: 28px;
+        background: url(https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202603251412/true.png) 0 5px / 20px 16px no-repeat scroll;
+      }
+
       .circle {
-        padding-left: 24px;
+        padding-left: 28px;
         background: url(https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202604231652/circle.webp) 0 4px / 18px 18px no-repeat scroll;
       }
 
+      .gold-star {
+        padding-left: 30px;
+        background: url(https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/gold-star.webp) 0 3px / 20px 20px no-repeat scroll;
+      }
+
       .star {
-        padding-left: 24px;
+        padding-left: 28px;
         background: url(https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202604231652/star.webp) 0 0 / 20px 20px no-repeat scroll;
       }
 
@@ -494,8 +509,32 @@
         color: #f88634;
       }
 
+      .color-red {
+        color: #ff0207;
+      }
+
+      .cursor-auto {
+        cursor: auto;
+      }
+
+      .cursor-default {
+        cursor: default;
+      }
+
+      .cursor-pointer {
+        cursor: pointer;
+      }
+
+      .cursor-not-allowed {
+        cursor: not-allowed;
+      }
+
       .decoration-none {
         text-decoration: none;
+      }
+
+      .decoration-underline {
+        text-decoration-line: underline;
       }
 
       .font-bold {
@@ -555,6 +594,23 @@
         border-radius: 10px;
         box-shadow: 0 0 6px 3px #ebf3fe;
         background-image: linear-gradient(180deg, #e7f1ff 0%, #ffffff 100%);
+      }
+
+      .word-cloud-item {
+        margin: 0 6px;
+        line-height: 36px;
+        font-size: 20px;
+        /*font-weight: 500;*/
+        letter-spacing: 0;
+      }
+
+      .word-cloud-item a[href] {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      .word-cloud-item a:hover:not([href]) {
+        text-decoration: none !important;
       }
       /* 页面特定样式区，特定需求页面的定制样式，随便霍霍，满足需求即可 end */
     </style>
@@ -1660,7 +1716,7 @@
                     <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
                       <colgroup>
                         <col />
-                        <col width="40%" />
+                        <col width="30%" />
                       </colgroup>
 
                       <tbody>
