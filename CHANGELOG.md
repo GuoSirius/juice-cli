@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.16](https://github.com/GuoSirius/juice-cli/compare/v2.1.15...v2.1.16) (2026-05-21)
+
+
+### Bug Fixes
+
+* ：stdio: 'ignore' 会关闭 stdin，导致 input: message 无法传入。 ([b23bfa9](https://github.com/GuoSirius/juice-cli/commit/b23bfa947cb48fb08330d299f220eb699dc08e8d))
+
 ### [2.1.15](https://github.com/GuoSirius/juice-cli/compare/v2.1.14...v2.1.15) (2026-05-21)
 
 
