@@ -302,7 +302,7 @@ async function promptConfigForInteractive(snippetDirYamlFiles) {
 
   if (cwdConfig) {
     choices.push({
-      name: `📂 当前目录配置 → ${cwdConfig.name}（优先）`,
+      name: `[当前目录] ${cwdConfig.name} (优先)`,
       value: { type: 'file', path: cwdConfig.path, name: cwdConfig.name },
     });
   }
@@ -312,7 +312,7 @@ async function promptConfigForInteractive(snippetDirYamlFiles) {
   for (const f of snippetDirYamlFiles) {
     const isDefault = f.name === defaultName;
     choices.push({
-      name: `📄 片段目录配置 → ${f.name}${isDefault ? '（默认）' : ''}`,
+      name: `[片段目录] ${f.name}${isDefault ? ' (默认)' : ''}`,
       value: { type: 'file', path: f.path, name: f.name },
     });
     if (isDefault && !cwdConfig) {
@@ -321,8 +321,8 @@ async function promptConfigForInteractive(snippetDirYamlFiles) {
   }
 
   choices.push(
-    { name: '📁 输入自定义路径...', value: { type: 'custom' } },
-    { name: '⊘ 跳过（不使用项目配置）', value: { type: 'skip' } },
+    { name: '[自定义] 输入路径...', value: { type: 'custom' } },
+    { name: '[跳过] 不使用项目配置', value: { type: 'skip' } },
   );
 
   const result = await select({
