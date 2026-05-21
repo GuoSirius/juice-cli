@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.2](https://github.com/GuoSirius/juice-cli/compare/v2.1.1...v2.1.2) (2026-05-21)
+
+
+### Bug Fixes
+
+* remove deprecated husky v8 shim lines from commit-msg hook ([b250d31](https://github.com/GuoSirius/juice-cli/commit/b250d311877bd2981f1f216164d951784e7772c5))
+
 ### [2.1.1](https://github.com/GuoSirius/juice-cli/compare/v2.1.0...v2.1.1) (2026-05-21)
 
 ## [2.1.0](https://github.com/GuoSirius/juice-cli/compare/v2.0.6...v2.1.0) (2026-05-21)
