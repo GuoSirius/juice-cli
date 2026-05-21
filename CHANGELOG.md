@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.6](https://github.com/GuoSirius/juice-cli/compare/v2.1.5...v2.1.6) (2026-05-21)
+
+
+### Bug Fixes
+
+* replace emoji with ASCII labels in interactive prompts for Windows compat ([29ba2ce](https://github.com/GuoSirius/juice-cli/commit/29ba2ce9ba035362f62cce8db3be84c474a01075))
+
 ### [2.1.5](https://github.com/GuoSirius/juice-cli/compare/v2.1.4...v2.1.5) (2026-05-21)
 
 ### [2.1.4](https://github.com/GuoSirius/juice-cli/compare/v2.1.3...v2.1.4) (2026-05-21)
