@@ -14,8 +14,8 @@ program
   .option('-s, --snippet <path>', '片段 HTML 文件路径：将片段内容插入模板 <tbody id="content"> 中')
   .option('-c, --config <path>', '配置文件路径')
   .option('-n, --name <name>', '片段模式输出文件名（不含扩展名）')
-  .option('--install',   '注册 Windows 右键菜单（需管理员权限）')
-  .option('--uninstall', '取消 Windows 右键菜单注册（需管理员权限）')
+  .option('--install',   '注册 Windows 右键菜单（当前用户，无需管理员）')
+  .option('--uninstall', '取消 Windows 右键菜单注册')
   .addHelpText('before', `
 ╔════════════════════════════════════════════════════════════════╗
 ║  juice-email-cli v${pkg.version}                                     ║
@@ -64,8 +64,8 @@ program
 ════════════════════════════════════════════════════════════════
 
   在 .html/.htm 文件上右键即可使用：
-    juice --install          （管理员权限，注册右键菜单）
-    juice --uninstall         （管理员权限，卸载右键菜单）
+    juice --install          （当前用户，注册右键菜单）
+    juice --uninstall         （卸载右键菜单）
 
 更多信息：https://gitee.com/siriussupreme/juice-cli
 `)
