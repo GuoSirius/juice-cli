@@ -10,13 +10,17 @@
  *   - 不依赖 CommandStore（HKCU CommandStore 在某些 Windows 版本下不被正确解析）
  *   - ExtendedSubCommandsKey 指向 Classes 根下的相对路径，子命令内联存储
  *
- * 菜单结构（所有文件类型统一）：
- *   .html / .htm / .yaml / .yml：
+ * 菜单结构（按文件类型区分）：
+ *   .html / .htm：
  *     📧 用 juice 生成邮件 HTML
  *       ├── 📄 作为模板，生成邮件 HTML   → juice -f（后台执行）
  *       ├── 🧩 作为片段，拼接邮件 HTML   → juice -s（交互选择模板）
  *       ├── ⚙️ 作为配置，拼接邮件 HTML   → juice -c（交互选择品牌/模板/片段）
  *       └── 📂 打开 PowerShell        （可选）
+ *
+ *   .yaml / .yml：
+ *     📧 用 juice 生成邮件 HTML
+ *       └── ⚙️ 作为配置，拼接邮件 HTML   → juice -c（交互选择品牌/模板/片段）
  */
 
 const { spawnSync } = require('child_process');
@@ -95,9 +99,9 @@ const SUBCMDS = {
 
 const PARENT_KEY_NAME = 'JuiceEmail';
 
-// ExtendedSubCommandsKey 指向此路径（相对于 HKCU\Software\Classes）
-// 解析结果：HKCU\Software\Classes\JuiceEmail.SubCommands
-const SUB_CMDS_CONTAINER = 'JuiceEmail.SubCommands';
+// ExtendedSubCommandsKey 指向的容器路径（相对于 HKCU\Software\Classes）
+const SUB_CMDS_CONTAINER_HTML = 'JuiceEmail.SubCommands';
+const SUB_CMDS_CONTAINER_YAML = 'JuiceEmail.SubCommands.Yaml';
 
 // ─── 旧版残留清理 ─────────────────────────────────────────────────────────────
 
@@ -178,28 +182,34 @@ function resolvePwsh() {
   return null;
 }
 
-// ─── 注册子命令到共享容器 ────────────────────────────────────────────────────
+// ─── 注册子命令到容器 ────────────────────────────────────────────────────────
 
-function registerSubCommands(containerPath, nodePath, scriptPath, iconPath, pwshPath) {
-  // generate（非交互，无需终端）
-  const genKey = `${containerPath}\\shell\\${SUBCMDS.generate}`;
-  regAdd(genKey, 'MUIVerb', 'REG_SZ', '📄 作为模板，生成邮件 HTML');
-  regAdd(genKey, 'Icon', 'REG_SZ', iconPath);
-  regAdd(`${genKey}\\command`, '', 'REG_SZ', `"${nodePath}" "${scriptPath}" -f %1`);
+/**
+ * 向指定容器注册子命令
+ * @param {string} containerPath - 容器完整注册表路径
+ * @param {'html'|'yaml'} kind - 子命令集合类型
+ */
+function registerSubCommands(containerPath, kind, nodePath, scriptPath, iconPath, pwshPath) {
+  // generate / snippet 仅 HTML 文件显示
+  if (kind === 'html') {
+    const genKey = `${containerPath}\\shell\\${SUBCMDS.generate}`;
+    regAdd(genKey, 'MUIVerb', 'REG_SZ', '📄 作为模板，生成邮件 HTML');
+    regAdd(genKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${genKey}\\command`, '', 'REG_SZ', `"${nodePath}" "${scriptPath}" -f %1`);
 
-  // snippet（交互，需要终端）
-  const snipKey = `${containerPath}\\shell\\${SUBCMDS.snippet}`;
-  regAdd(snipKey, 'MUIVerb', 'REG_SZ', '🧩 作为片段，拼接邮件 HTML');
-  regAdd(snipKey, 'Icon', 'REG_SZ', iconPath);
-  regAdd(`${snipKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-s %1'));
+    const snipKey = `${containerPath}\\shell\\${SUBCMDS.snippet}`;
+    regAdd(snipKey, 'MUIVerb', 'REG_SZ', '🧩 作为片段，拼接邮件 HTML');
+    regAdd(snipKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${snipKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-s %1'));
+  }
 
-  // config（交互，需要终端）
+  // config — HTML 和 YAML 都显示
   const cfgKey = `${containerPath}\\shell\\${SUBCMDS.config}`;
   regAdd(cfgKey, 'MUIVerb', 'REG_SZ', '⚙️ 作为配置，拼接邮件 HTML');
   regAdd(cfgKey, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${cfgKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-c %1'));
 
-  // pwsh（可选）
+  // pwsh — HTML 和 YAML 都显示（可选）
   if (pwshPath) {
     const pwshKey = `${containerPath}\\shell\\${SUBCMDS.pwsh}`;
     regAdd(pwshKey, 'MUIVerb', 'REG_SZ', '📂 打开 PowerShell');
@@ -230,17 +240,28 @@ async function registerContextMenu() {
 
   let ok = true;
 
-  // 子命令注册一次到共享容器（所有文件类型共用）
-  const containerPath = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER}`;
-  registerSubCommands(containerPath, nodePath, scriptPath, iconPath, pwshPath);
+  // HTML 容器：完整菜单（generate + snippet + config + pwsh）
+  const htmlContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`;
+  registerSubCommands(htmlContainer, 'html', nodePath, scriptPath, iconPath, pwshPath);
 
-  // 为每种文件类型注册父菜单，通过 ExtendedSubCommandsKey 引用共享容器
-  const allRoots = [...HTML_ROOTS, ...YAML_ROOTS];
-  for (const root of allRoots) {
+  // YAML 容器：精简菜单（config + pwsh）
+  const yamlContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`;
+  registerSubCommands(yamlContainer, 'yaml', nodePath, scriptPath, iconPath, pwshPath);
+
+  // .html / .htm → 引用 HTML 容器
+  for (const root of HTML_ROOTS) {
     const parentKey = `${root}\\${PARENT_KEY_NAME}`;
     ok = regAdd(parentKey, 'MUIVerb', 'REG_SZ', '📧 用 juice 生成邮件 HTML') && ok;
     regAdd(parentKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(parentKey, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER);
+    regAdd(parentKey, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER_HTML);
+  }
+
+  // .yaml / .yml → 引用 YAML 容器
+  for (const root of YAML_ROOTS) {
+    const parentKey = `${root}\\${PARENT_KEY_NAME}`;
+    ok = regAdd(parentKey, 'MUIVerb', 'REG_SZ', '📧 用 juice 生成邮件 HTML') && ok;
+    regAdd(parentKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(parentKey, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER_YAML);
   }
 
   if (!ok) {
@@ -250,12 +271,15 @@ async function registerContextMenu() {
   console.log(
     '\n' +
     chalk.green('  ✔ 右键菜单注册完成！') + '\n\n' +
-    `  ${chalk.bold('.html / .htm / .yaml / .yml')} 文件右键：\n` +
+    `  ${chalk.bold('.html / .htm')} 文件右键：\n` +
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
     `      ├── 📄 作为模板，生成邮件 HTML  →  juice -f（后台执行）\n` +
     `      ├── 🧩 作为片段，拼接邮件 HTML  →  juice -s（交互选择模板）\n` +
     `      ├── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
     (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
+    `\n  ${chalk.bold('.yaml / .yml')} 文件右键：\n` +
+    `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
+    `      └── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
   );
@@ -279,8 +303,12 @@ async function unregisterContextMenu() {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理共享子命令容器
-  if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER}`)) removed++;
+  // 清理两个子命令容器
+  if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`)) removed++;
+  if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`)) removed++;
+
+  // 清理旧版共享容器（v2.1.14 之前只有一个容器）
+  regDelete(`${HKCU_SHELL}\\JuiceEmail.SubCommands`);
 
   // 清理旧版残留（HKLM 父菜单 + CommandStore）
   cleanLegacyHklmParents();
