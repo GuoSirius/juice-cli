@@ -1,18 +1,21 @@
 # juice-email-cli
 
-> 一个用于生成符合各大邮件平台标准的 HTML 邮件命令行工具，基于 [juice](https://github.com/Automattic/juice) 实现 CSS 内联，支持 Mustache 模板变量替换，同时输出标准版与压缩版两份文件。
+> 一个用于生成符合各大邮件平台标准的 HTML 邮件命令行工具，基于 [juice](https://github.com/Automattic/juice) 实现 CSS 内联，支持 Mustache 模板变量替换，同时输出标准版与压缩版。
 
 ---
 
 ## 功能特性
 
-- ✅ **CSS 内联** —— 将 `<style>` 中的样式全部内联为 `style=""` 属性，兼容 Gmail / Outlook / Apple Mail 等
-- ✅ **Mustache 模板变量** —— 支持 `{{变量名}}` 语法，通过配置文件批量替换
-- ✅ **Mustache 列表循环** —— 支持 `{{#items}}...{{/items}}` 遍历数组，支持嵌套循环
-- ✅ **三层配置合并** —— CLI 默认 < 用户目录 < 优先配置，三者层层合并
-- ✅ **双文件输出** —— 同时生成标准版 `.output.html` 和压缩版 `.minified.html`
-- ✅ **响应式保留** —— `@media`、`@font-face`、`@keyframes` 均不丢失
-- ✅ **Windows 右键菜单（自定义图标）** —— 子菜单层级，一键注册/卸载，支持自定义图标
+- **CSS 内联** —— 将 `<style>` 中的样式全部内联为 `style=""` 属性，兼容 Gmail / Outlook / Apple Mail 等
+- **Mustache 模板变量** —— 支持 `{{变量名}}` 语法，通过配置文件批量替换
+- **Mustache 列表循环** —— 支持 `{{#items}}...{{/items}}` 遍历数组，支持嵌套循环
+- **片段组装** —— 将片段 HTML 插入模板的 `<tbody id="content">`，自动调整缩进，输出 4 个阶段文件
+- **三层配置合并** —— CLI 默认 < 用户目录 < 优先配置，层层合并
+- **HTML 标签渲染** —— 变量值中的 `<sup>`、`<sub>` 等 HTML 标签直接渲染（可通过 `rawHtml` 关闭）
+- **双文件输出** —— 普通模式生成 `.output.html` + `.minified.html`
+- **四文件输出** —— 片段模式生成 `.raw.html` + `.html` + `.output.html` + `.minified.html`
+- **交互模式** —— 无参数运行，逐步选择品牌、模板、片段、配置
+- **Windows 右键菜单** —— 子菜单层级，一键注册/卸载
 
 ---
 
@@ -42,31 +45,78 @@ npm link          # 链接到全局
 
 ## 使用方法
 
+### 普通模式（CSS 内联 + 压缩，输出 2 个文件）
+
 ```bash
-# 最简用法（自动查找配置文件）
+# 最简用法
 juice -f my-email.html
 
 # 指定配置文件
 juice -c project.yaml -f my-email.html
+
+# 使用 EDM 模板库中的模板
+juice -f edm/elabscience/elabscience-template.html
 ```
 
-生成两个文件（与输入文件同目录）：
+生成文件（与输入文件同目录）：
 
 | 文件 | 说明 |
 |------|------|
-| `my-email.output.html` | CSS 内联 + 变量替换标准版 |
-| `my-email.minified.html` | 在标准版基础上压缩的精简版 |
+| `<name>.output.html` | CSS 内联 + 变量替换后的标准版 |
+| `<name>.minified.html` | 压缩版 |
+
+### 片段模式（片段 + 模板拼接，输出 4 个文件）
+
+```bash
+# 完整指定片段和模板
+juice -s edm/elabscience/literature/snippet.html -f edm/elabscience/elabscience-template.html
+
+# 只指定片段，交互式选择模板
+juice -s edm/elabscience/literature/snippet.html
+
+# 自定义输出文件名
+juice -s snippet.html -f template.html -n my-output
+```
+
+生成文件（当前工作目录）：
+
+| 文件 | 说明 |
+|------|------|
+| `<name>.raw.html` | 原始组装（Mustache 未渲染，无 CSS 内联） |
+| `<name>.html` | 已渲染（Mustache 变量已替换，无 CSS 内联） |
+| `<name>.output.html` | Juice CSS 内联后 |
+| `<name>.minified.html` | 压缩版 |
+
+输出文件名默认为模板文件名（不含扩展名）。如果文件冲突，交互模式下可选择覆盖、自动版本号（`-v1`、`-v2`...）或重新输入。
+
+### 交互模式（逐步选择）
+
+```bash
+juice
+```
+
+流程：选择品牌 → 模板 → 片段文件夹 → 片段 HTML → 配置文件 → 输出文件名 → 确认执行。
 
 ### 参数说明
 
 | 参数 | 简写 | 说明 |
 |------|------|------|
-| `--file <path>` | `-f` | 输入 HTML 模板文件路径（必填） |
-| `--config <path>` | `-c` | 配置文件路径，不指定时自动查找输入文件同级目录 |
+| `--file <path>` | `-f` | 输入 HTML 模板文件路径 |
+| `--snippet <path>` | `-s` | 片段 HTML 文件路径：插入到模板 `<tbody id="content">` |
+| `--config <path>` | `-c` | 配置文件路径，不指定时自动查找 |
+| `--name <name>` | `-n` | 片段模式输出文件名（不含扩展名） |
 | `--install` | | 注册 Windows 右键菜单（需管理员权限） |
 | `--uninstall` | | 取消 Windows 右键菜单注册（需管理员权限） |
 | `--version` | `-v` | 查看版本号 |
 | `--help` | `-h` | 查看帮助 |
+
+### CLI 执行模式
+
+| `-s` | `-f` | `-c` | 执行模式 |
+|------|------|------|----------|
+| ✓ | * | * | 片段模式（-s 指定片段，-f 可选指定模板） |
+| ✗ | ✓ | * | 普通模式（生成 .output.html + .minified.html） |
+| ✗ | ✗ | * | 交互式片段模式（逐步选择） |
 
 ---
 
@@ -97,11 +147,17 @@ juice -c project.yaml -f my-email.html
 juice -c project.yaml -f email.html
 
 # 使用输入文件同级目录配置（与用户目录合并）
-# → email.html 同目录下有 juice.yaml
 juice -f email.html
+```
 
-# 无优先配置时，仅使用用户目录配置
-juice -f email.html
+### 片段模式配置
+
+片段模式下，会自动检测片段目录下的 `juice.yaml` / `juice.yml` 作为项目配置参与合并：
+
+```
+优先级 低 ──────────────────────────────────────────────────────── 高
+
+  内置默认  <  ~/juice.yaml  <  片段目录 juice.yaml  <  -c 指定
 ```
 
 ---
@@ -111,6 +167,9 @@ juice -f email.html
 用户配置文件（`~/juice.yaml` 或项目目录 `juice.yaml`）只需填写需要覆盖的字段，其余自动继承：
 
 ```yaml
+# 设为 false 时，变量值中的 HTML 标签会被转义
+rawHtml: true
+
 variables:
   brandName: "我的品牌"
   brandColor: "#ff6600"
@@ -127,28 +186,17 @@ variables:
       tag: "热销"
     - name: "产品 B"
       price: "¥199.00"
-    - name: "产品 C"
-      price: "¥299.00"
 
-  features:
-    - title: "特性一"
-      items:
-        - "优势 A"
-        - "优势 B"
-    - title: "特性二"
-      items:
-        - "优势 C"
-        - "优势 D"
+  # 变量值支持 HTML 标签（rawHtml: true 时）
+  overview:
+    title: "CD38-NAD<sup>+</sup> Axis Study"
+    keywords: "Immune Thrombocytopenia, NMN, NAD<sup>+</sup>"
 
 # juice 选项（全部可选，均有内置默认值）
 # juice:
 #   removeStyleTags: true
 #   preserveMediaQueries: true
-#   preservePseudos: true           # 保留 hover 等伪类
-#   preservedSelectors:             # 保留的选择器（不会被内联）
-#     - "a:hover"
-#   extraCssFiles:
-#     - email-reset.css
+#   preservePseudos: true
 
 # 输出后缀（可选）
 # output:
@@ -169,12 +217,26 @@ variables:
 <a href="{{ctaUrl}}" style="background-color: {{brandColor}};">{{ctaText}}</a>
 ```
 
+### HTML 标签在变量中
+
+当 `rawHtml: true`（默认）时，变量值中的 HTML 标签直接渲染：
+
+```yaml
+variables:
+  overview:
+    keywords: "CD38-NAD<sup>+</sup> Axis, NO<sub>3</sub><sup>-</sup>"
+```
+
+```html
+<p>{{overview.keywords}}</p>
+<!-- 渲染为：CD38-NAD<sup>+</sup> Axis, NO<sub>3</sub><sup>-</sup> -->
+```
+
 ### Mustache 列表循环
 
 支持 `{{#items}}...{{/items}}` 语法遍历数组数据：
 
 ```yaml
-# juice.yaml - 配置列表数据
 variables:
   products:
     - name: "产品 A"
@@ -182,12 +244,9 @@ variables:
       tag: "热销"
     - name: "产品 B"
       price: "¥199.00"
-    - name: "产品 C"
-      price: "¥299.00"
 ```
 
 ```html
-<!-- HTML 模板 -->
 {{#products}}
 <div class="product-item">
   <h3>{{name}}</h3>
@@ -196,55 +255,79 @@ variables:
 </div>
 {{/products}}
 
-<!-- 空列表备选内容 -->
 {{^products}}
 <p>暂无商品</p>
 {{/products}}
-
-<!-- 嵌套循环示例 -->
-{{#features}}
-<div class="feature-column">
-  <h4>{{title}}</h4>
-  <ul>
-    {{#items}}
-    <li>{{.}}</li>
-    {{/items}}
-  </ul>
-</div>
-{{/features}}
 ```
 
 | 语法 | 说明 | 示例 |
 |------|------|------|
 | `{{#list}}{{/list}}` | 循环遍历 | `{{#products}}{{name}}{{/products}}` |
 | `{{^list}}{{/list}}` | 反向（空列表时显示） | `{{^products}}暂无{{/products}}` |
-| `{{.}}` | 当前元素 | `{{#.}}{{.}}{{/}}` |
+| `{{.}}` | 当前元素 | `{{#items}}{{.}}{{/items}}` |
 | `{{#var}}{{/var}}` | 条件渲染（仅当有值时显示） | `{{#tag}}{{tag}}{{/tag}}` |
 
 ---
 
-## Windows 右键菜单（自定义图标）
+## 片段组装
 
-注册后，在 `.html` / `.htm` 文件上右键可看到级联子菜单（带自定义图标）：
+### EDM 目录结构
+
+```
+edm/
+├── <brand>/                       # 品牌目录
+│   ├── <brand>-template.html      #   品牌模板（含 <tbody id="content">）
+│   └── <series>/                  #   片段系列目录
+│       ├── snippet.html           #     片段 HTML（Mustache 模板片段）
+│       └── juice.yaml             #     片段配置（variables）
+```
+
+### 片段 HTML 格式
+
+片段是模板中 `<tbody id="content">` 内的内容片段，会被自动插入并调整缩进：
+
+```html
+<!-- edm/elabscience/literature/snippet.html -->
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table>
+      <tbody>
+        <tr>
+          <td><img src="{{overview.image}}" /></td>
+          <td><strong>{{overview.title}}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
+```
+
+### 跨品牌检查
+
+片段和模板来自不同品牌时，会输出警告但仍继续执行，避免样式错乱。
+
+---
+
+## Windows 右键菜单
+
+注册后，在 `.html` / `.htm` 文件上右键可看到级联子菜单：
 
 ```
 📧 用 juice 生成邮件 HTML
-  ├── ⚡ 生成邮件 HTML（标准 + 压缩）
-  └── 📂 在此目录打开 PowerShell 7   ← 仅在系统已安装 pwsh 时出现
+  ├── ⚡ 生成邮件 HTML（标准 + 压缩）    →  juice -f
+  ├── 🧩 邮件片段组装（交互选择模板）    →  juice -s
+  └── 📂 在此目录打开 PowerShell 7      ← 仅在已安装 pwsh 时出现
 ```
 
 ```bash
-# 以管理员身份运行 PowerShell，然后：
-juice --install
-
-# 卸载：
-juice --uninstall
+# 以管理员身份运行
+juice --install    # 注册
+juice --uninstall   # 卸载
 ```
 
-> **注意**：注册/卸载需要 **管理员权限**，请右键"以管理员身份运行"命令行。
-> 注册成功后如菜单未立即出现，重启文件资源管理器（`explorer.exe`）即可。
-
-> **图标说明**：自定义图标位于 `icons/juice-icon.ico`，支持 16x16 到 256x256 多种尺寸。
+> **注意**：注册/卸载需要**管理员权限**。注册成功后如菜单未立即出现，重启文件资源管理器（`explorer.exe`）即可。
 
 ---
 
@@ -256,26 +339,24 @@ juice-cli/
 │   └── juice.js               # CLI 入口
 ├── src/
 │   ├── index.js               # 核心逻辑（配置合并、模板处理、双输出）
-│   └── context-menu.js        # Windows 右键菜单注册（自定义图标）
+│   ├── snippet.js             # 片段组装模式 + 交互式提示
+│   └── context-menu.js        # Windows 右键菜单注册
 ├── defaults/
-│   └── juice.yaml             # CLI 内置默认配置（最低优先级基准）
-├── examples/
-│   ├── juice.yaml             # 用户配置示例（含列表数据）
-│   ├── template.html           # HTML 邮件模板示例（含列表循环）
-│   └── *.css                   # 附加样式文件
+│   └── juice.yaml             # CLI 内置默认配置
+├── edm/                       # EDM 模板库（npm 发布时包含）
+│   ├── elabscience/
+│   │   ├── elabscience-template.html
+│   │   └── literature/
+│   │       ├── snippet.html
+│   │       └── juice.yaml
+│   └── procell/
+│       └── procell-template.html
 ├── icons/
-│   └── juice-icon.ico          # 右键菜单自定义图标
+│   └── juice-icon.ico          # 右键菜单图标
 ├── scripts/
-│   ├── generate-icon.js        # 图标生成脚本
 │   └── release.mjs            # 发布脚本
-├── .husky/
-│   └── commit-msg              # Git hooks - 提交信息校验
-├── .commitlintrc.json          # Commitlint 配置
-├── .versionrc                  # Standard-version 配置
-├── .npmrc                      # npm 发布配置
 ├── CHANGELOG.md                # 变更日志（自动生成）
 ├── LICENSE                     # MIT
-├── README.md
 └── package.json
 ```
 
@@ -283,54 +364,23 @@ juice-cli/
 
 ## 发布说明
 
-本项目使用自动化发布流程，包含以下功能：
-
 ### 提交信息规范
 
 使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
 
 ```
-<type>(<scope>): <subject>
-
 feat: 添加新功能
 fix: 修复 bug
 docs: 更新文档
-style: 代码格式调整
-refactor: 重构代码
-perf: 性能优化
-test: 添加测试
-build: 构建系统变更
-ci: CI/CD 配置变更
 chore: 其他变更
-revert: 回退提交
 ```
 
 ### 自动化发布
 
 ```bash
-# 执行一键发布（自动引导整个流程）
-npm run release
-
-# 预览发布（不实际执行）
-npm run release:dry
+npm run release        # 一键发布
+npm run release:dry    # 预览
 ```
-
-**发布流程：**
-1. 检测未提交的文件，询问是否提交
-2. 选择版本更新类型（Major / Minor / Patch）
-3. 确认版本号
-4. 自动更新版本号、生成 CHANGELOG、打 tag
-5. 推送到 origin 和 github 远程仓库
-6. GitHub Actions 自动发布到 npm
-
-### 配置文件
-
-| 文件 | 说明 |
-|------|------|
-| `.commitlintrc.json` | 提交信息校验规则 |
-| `.versionrc` | 版本更新和 CHANGELOG 生成规则 |
-| `.npmrc` | npm 发布配置 |
-| `.husky/commit-msg` | Git hooks 配置 |
 
 ---
 
