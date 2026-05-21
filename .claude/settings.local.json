@@ -17,7 +17,9 @@
       "Bash(node ../bin/juice.js -f ../edm/procell/procell-template.html)",
       "Bash(node -e ' *)",
       "Bash(node ../bin/juice.js --snippet ../edm/elabscience/literature/snippet.html -f ../edm/elabscience/elabscience-template.html)",
-      "Bash(node bin/juice.js --install)"
+      "Bash(node bin/juice.js --install)",
+      "Bash(ls icons/)",
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('files:', JSON.stringify\\(pkg.files, null, 2\\)\\)\")"
     ]
   }
 }
