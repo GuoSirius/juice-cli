@@ -240,11 +240,15 @@ async function registerContextMenu() {
 
   let ok = true;
 
-  // HTML 容器：完整菜单（generate + snippet + config + pwsh）
+  // 先删除旧容器再重建，避免注册残留旧子命令（如旧版 HTML 容器的 WithConfig）
+  regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`);
+  regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`);
+
+  // HTML 容器：generate + snippet + pwsh
   const htmlContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`;
   registerSubCommands(htmlContainer, 'html', nodePath, scriptPath, iconPath, pwshPath);
 
-  // YAML 容器：精简菜单（config + pwsh）
+  // YAML 容器：config + pwsh
   const yamlContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`;
   registerSubCommands(yamlContainer, 'yaml', nodePath, scriptPath, iconPath, pwshPath);
 
@@ -278,7 +282,10 @@ async function registerContextMenu() {
     (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
     `\n  ${chalk.bold('.yaml / .yml')} 文件右键：\n` +
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
-    `      └── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
+    (pwshPath
+      ? `      ├── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
+        `      └── 📂 打开 PowerShell\n`
+      : `      └── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n`) +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
   );
