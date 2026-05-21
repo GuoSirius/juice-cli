@@ -1,1822 +1,1958 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="IE=Edge,chrome=1" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,viewport-fit=cover" />
-    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <meta name="render" content="webkit|ie-comp|ie-stand" />
-
-    <!-- 禁止页面缓存 -->
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Cache-Control" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-
-    <!-- IE10 and IE11 on Windows Phone have a small tap highlight when you tap an element. Adding this meta tag removes this. -->
-    <meta name="msapplication-tap-highlight" content="no" />
-
-    <title></title>
-    <meta name="keywords" content="" />
-    <meta name="description" content="" />
-
-    <link rel="shortcut icon" href="favicon.ico" />
-
-    <style>
-      /* 默认样式重置区，确保所有浏览器默认样式统一，没事别乱动 start */
-      html, body {
-        width: 100%;
-        height: 100%;
-        line-height: 1.5;
-        color: #000;
-        font-size: 16px;
-      }
-
-      *, *::before, *::after {
-        margin: 0;
-        padding: 0;
-        line-height: 1.5;
-        word-break: break-word;
-        box-sizing: border-box;
-      }
-
-      table {
-        width: 100%;
-        table-layout: fixed;
-        border-collapse: collapse;
-      }
-
-      span {
-        display: inline-block;
-      }
-
-      img {
-        display: inline-block;
-        max-width: 100%;
-        max-height: 100%;
-      }
-
-      a {
-        display: inline-block;
-        color: #000;
-        cursor: pointer;
-      }
-
-      a:hover {
-        text-decoration: underline !important;
-      }
-      /* 默认样式重置区，确保所有浏览器默认样式统一，没事别乱动 end */
-
-      /* 公用样式区，模板样式，适合所有需求，三思而后行 start */
-      .app {
-        max-width: 750px;
-        min-width: 320px;
-        /*min-height: 100%;*/
-        margin: 0 auto;
-        box-shadow: 0.5px 0.666px 14.1px 0.9px rgba(13, 2, 3, 0.1);
-      }
-
-      .header {}
-
-      .header .banner {}
-
-      .header .banner img {
-        width: 100%;
-      }
-
-      .header .navigation {}
-
-      .header .navigation a {
-        color: #2ebac0;
-      }
-
-      .header .navigation a:hover {
-        color: #1f7e82 !important;
-      }
-
-      .main {}
-
-      .footer {}
-
-      .footer .connect-us {}
-
-      .footer .connect-us-title {
-        padding-bottom: 5px;
-      }
-
-      .footer .connect-us-separator {
-        padding-top: 8px;
-        border-bottom: 1px dashed #828282;
-      }
-
-      .footer .contact-us {}
-
-      .footer .contact-us-qrcode {}
-
-      .footer .contact-us-qrcode img {
-        width: 60px;
-      }
-
-      .footer .contact-us-whatsApp {
-        padding: 5px 0;
-        margin-top: 6px;
-        color: #fff;
-        font-size: 12px;
-        border-radius: 12px;
-        background-color: rgb(43, 176, 181);
-      }
-
-      .table-bordered {
-        color: #2c2c2c;
-        border: 1px solid #dedede;
-        border-radius: 3px;
-      }
-
-      .table-bordered.no-border {
-        border-color: transparent;
-      }
-
-      .table-bordered thead {
-        border-radius: 3px 3px 0 0;
-        background-color: #eaeaea;
-      }
-
-      .table-bordered th, .table-bordered td {
-        padding: 16px;
-        border: 1px solid #dedede;
-      }
-
-      .table-bordered.no-border th, .table-bordered.no-border td {
-        border-color: transparent;
-      }
-
-      .table-bordered.condensed th, .table-bordered.condensed td {
-        padding: 5px 8px;
-        /*border: 1px solid #dedede;*/
-      }
-
-      .table-stripe {
-        border: 1px solid #7dc0bb;
-      }
-
-      .table-stripe thead {}
-
-      .table-stripe tbody tr:nth-child(2n) {
-        background-color: #e6f3f2;
-      }
-
-      .table-stripe th, .table-stripe td {
-        padding: 5px 8px;
-        border: 1px solid #7dc0bb;
-      }
-
-      .table-dashed {
-        border: 1px dashed #5AAFA9;
-        border-radius: 20px;
-      }
-
-      .square-title {
-        font-size: 18px;
-        font-weight: bold;
-      }
-
-      .square-title::before {
-        content: '';
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        margin-right: 6px;
-        margin-bottom: -1px;
-        background-color: #5AAFA9;
-      }
-
-      .rectangle-title {
-        color: #16585d;
-        font-size: 24px;
-        font-weight: bold;
-      }
-
-      .rectangle-title::before {
-        content: '';
-        display: inline-block;
-        width: 8px;
-        height: 22px;
-        margin-right: 8px;
-        margin-bottom: -2px;
-        background-color: #fd8b37;
-      }
-
-      .title-slash {
-        /*line-height: 42px;*/
-        line-height: 1.3;
-        padding-top: 6px;
-        padding-bottom: 6px;
-        padding-right: 81px;
-        color: #fff;
-        font-size: 20px;
-        font-weight: bold;
-        background: #32afb4 url('https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202603301420/slash-bg.jpg') no-repeat scroll right center / 49px 100%;
-        /*background: #32afb4 url('https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202603301420/title-icon.png') no-repeat scroll right center / auto 100%;*/
-      }
-
-      .dot {
-        margin-top: -2px;
-        font-size: 12px;
-        vertical-align: middle;
-      }
-
-      .image-box {
-        line-height: 0;
-        font-size: 0;
-        user-select: none;
-      }
-
-      .button {
-        padding: 6px 16px;
-        color: #fff;
-        font-size: 16px;
-        border-radius: 6px;
-        background-color: #32afb4;
-      }
-
-      .button-orange {
-        padding: 8px 16px;
-        color: #fff;
-        font-size: 16px;
-        border-radius: 6px;
-        background-color: #fd8b37;
-      }
-
-      .text-link {
-        color: #32afb4;
-      }
-
-      .text-link:hover, .text-link-hover:hover {
-        color: #1f7e82 !important;
-      }
-
-      .text-link-light {
-        color: #18c0b0;
-      }
-
-      .text-link-light:hover, .text-link-light-hover:hover {
-        color: #18c0b0 !important;
-      }
-
-      .bg-primary {
-        background-color: #32afb4;
-      }
-
-      .bg-light-primary {
-        background-color: #3ac2c5;
-      }
-
-      .bg-secondary {
-        background-color: #18c0b0;
-      }
-
-      .bg-white {
-        background-color: #fff;
-      }
-
-      .border {
-        border: 1px solid #dedede;
-      }
-
-      .border-dashed {
-        border: 1px dashed #5AAFA9;
-      }
-
-      .relative {
-        position: relative;
-      }
-
-      .absolute {
-        position: absolute;
-      }
-
-      .table-auto {
-        table-layout: auto;
-      }
-
-      .border-separate {
-        border-collapse: separate;
-      }
-
-      .h-a {
-        height: auto;
-      }
-
-      .h-0 {
-        height: 0;
-      }
-
-      .h-12 {
-        height: 12px;
-      }
-
-      .h-16 {
-        height: 16px;
-      }
-
-      .h-18 {
-        height: 18px;
-      }
-
-      .h-24 {
-        height: 24px;
-      }
-
-      .h-32 {
-        height: 32px;
-      }
-
-      .h-36 {
-        height: 36px;
-      }
-
-      .h-48 {
-        height: 48px;
-      }
-
-      .px-5 {
-        padding-inline: 5px !important;
-      }
-
-      .py-8 {
-        padding-block: 8px !important;
-      }
-
-      .pt-3 {
-        padding-top: 3px !important;
-      }
-
-      .pb-3 {
-        padding-bottom: 3px !important;
-      }
-
-      .pt-5 {
-        padding-top: 5px !important;
-      }
-
-      .pb-5 {
-        padding-bottom: 5px !important;
-      }
-
-      .pt-6 {
-        padding-top: 6px !important;
-      }
-
-      .pb-6 {
-        padding-bottom: 6px !important;
-      }
-
-      .pt-8 {
-        padding-top: 8px !important;
-      }
-
-      .pb-8 {
-        padding-bottom: 8px !important;
-      }
-
-      .pt-10 {
-        padding-top: 10px !important;
-      }
-
-      .pb-10 {
-        padding-bottom: 10px !important;
-      }
-
-      .pt-12 {
-        padding-top: 12px !important;
-      }
-
-      .pb-12 {
-        padding-bottom: 12px !important;
-      }
-
-      .pt-16 {
-        padding-top: 16px !important;
-      }
-
-      .pb-16 {
-        padding-bottom: 16px !important;
-      }
-
-      .pt-18 {
-        padding-top: 18px !important;
-      }
-
-      .pb-18 {
-        padding-bottom: 18px !important;
-      }
-
-      .pt-20 {
-        padding-top: 20px !important;
-      }
-
-      .pb-20 {
-        padding-bottom: 20px !important;
-      }
-
-      .pt-24 {
-        padding-top: 24px !important;
-      }
-
-      .pb-24 {
-        padding-bottom: 24px !important;
-      }
-
-      .line-height-0 {
-        line-height: 0;
-      }
-
-      .align-top {
-        vertical-align: top;
-      }
-
-      .align-text-top {
-        vertical-align: text-top;
-      }
-
-      .align-mid, .align-middle {
-        vertical-align: middle;
-      }
-
-      .align-bottom {
-        vertical-align: bottom;
-      }
-
-      .align-text-bottom {
-        vertical-align: text-bottom;
-      }
-
-      .text-left {
-        text-align: left;
-      }
-
-      .text-center {
-        text-align: center;
-      }
-
-      .text-right {
-        text-align: right;
-      }
-
-      .color-primary {
-        color: #32afb4;
-      }
-
-      .color-secondary {
-        color: #18c0b0;
-      }
-
-      .color-white {
-        color: #fff;
-      }
-
-      .color-orange {
-        color: #f7750b;
-      }
-
-      .color-red {
-        color: #ff0207;
-      }
-
-      .cursor-auto {
-        cursor: auto;
-      }
-
-      .cursor-default {
-        cursor: default;
-      }
-
-      .cursor-pointer {
-        cursor: pointer;
-      }
-
-      .cursor-not-allowed {
-        cursor: not-allowed;
-      }
-
-      .decoration-none {
-        text-decoration: none;
-      }
-
-      .decoration-underline {
-        text-decoration-line: underline;
-      }
-
-      .font-bold {
-        font-weight: bold;
-      }
-
-      .text-size-0 {
-        font-size: 0;
-      }
-
-      .text-size-\[10px\] {
-        font-size: 10px;
-      }
-
-      .text-size-\[12px\] {
-        font-size: 12px;
-      }
-
-      .text-size-\[14px\] {
-        font-size: 14px;
-      }
-
-      .text-size-base {
-        font-size: 16px;
-      }
-
-      .text-size-\[16px\] {
-        font-size: 16px;
-      }
-
-      .text-size-\[18px\] {
-        font-size: 18px;
-      }
-
-      .text-size-\[20px\] {
-        font-size: 20px;
-      }
-
-      .text-size-\[22px\] {
-        font-size: 22px;
-      }
-
-      .text-size-\[24px\] {
-        font-size: 24px;
-      }
-
-      .text-size-\[26px\] {
-        font-size: 26px;
-      }
-      /* 公用样式区，模板样式，适合所有需求，三思而后行 end */
-
-      /* 页面特定样式区，特定需求页面的定制样式，随便霍霍，满足需求即可 start */
-      /* TODO */
-      /* 页面特定样式区，特定需求页面的定制样式，随便霍霍，满足需求即可 end */
-    </style>
-  </head>
-
-  <body>
-    <table cellspacing="0" cellpadding="0" border="0" id="app" class="app">
-      <tbody>
-        <tr>
-          <td>
-            <!-- 页头 start -->
-            <table cellspacing="0" cellpadding="0" border="0" class="header">
-              <colgroup>
-                <col width="10px" />
-                <col />
-                <col />
-                <col width="10px" />
-              </colgroup>
-
-              <tbody>
-                <tr>
-                  <td colspan="4" class="banner image-box">
-                    <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/header.webp" alt="Procell" />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="navigation text-center">
-                      <tbody>
-                        <tr>
-                          <td>
-                            <a href="https://www.procellsystem.com/search-category=cell-culture-media">Cell Culture Media</a>
-                          </td>
-                          <td>
-                            <a href="https://www.procellsystem.com/search-category=auxiliary-reagents">Auxiliary Reagents</a>
-                          </td>
-                          <td>
-                            <a href="https://www.procellsystem.com/search-category=cell-function-research-kits">Cell Function Research Kits</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
-              </tbody>
-            </table>
-            <!-- 页头 end -->
-
-            <!-- 主体 start -->
-            <table cellspacing="0" cellpadding="0" border="0" class="main">
-              <colgroup>
-                <col width="10px" />
-                <col />
-                <col />
-                <col width="10px" />
-              </colgroup>
-
-              <tbody id="content">
-                <tr>
-                  <td colspan="4" class="image-box">
-                    <a href="https://www.procellsystem.com/service/research">
-                      <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/banner.webp" />
-                    </a>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">Achieving high-purity neuronal cultures with long-term viability remains one of the most significant challenges in neuroscience. To support your research precision, we have refined our Neurobasal media series to cater to specific developmental stages of the central nervous system (CNS).</td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2" class="text-center">
-                    <a href="https://www.procellsystem.com/service/research" class="button-orange decoration-none text-center" style="min-width: 240px;">View Service Details</a>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-bordered condensed no-border text-center text-size-[14px]">
-                      <colgroup>
-                        <col />
-                        <col />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td colspan="2" class="text-left">
-                            <span class="rectangle-title">Technical Insight: Optimizing Your MSC Workflow</span>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2" class="h-16"></td>
-                        </tr>
-
-                        <tr>
-                          <td class="image-box">
-                            <a href="https://www.procellsystem.com/resources/cell-culture-academy/unlocking-the-hidden-potential-of-mesenchymal-stem-cells-efficient-culture-and-stable-expansion-2137">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Advanced Expansion.webp" />
-                            </a>
-                          </td>
-                          <td class="image-box">
-                            <a href="https://www.procellsystem.com/resources/cell-culture-academy/unlocking-the-hidden-potential-of-mesenchymal-stem-cells-decoding-the-trilineage-differentiation-and-key-applications-2139">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Multipotency Mastery.webp" />
-                            </a>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td>
-                            <strong>Advanced Expansion:<br />Maximizing Yield while Preserving Stemness</strong>
-                          </td>
-                          <td>
-                            <strong>Multipotency Mastery:<br />Decoding Trilineage Differentiation</strong>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td>
-                            Achieve robust, large-scale expansion through optimized media formulations that maintain stable growth kinetics and phenotypic integrity.
-                          </td>
-                          <td>
-                            Explore standardized protocols and validation methods for adipogenic, osteogenic, and chondrogenic induction to confirm functional potency.
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td style="padding-top: 12px; padding-bottom: 12px;">
-                            <a href="https://www.procellsystem.com/resources/cell-culture-academy/unlocking-the-hidden-potential-of-mesenchymal-stem-cells-efficient-culture-and-stable-expansion-2137" class="decoration-none font-bold color-secondary text-size-[14px]">Read more</a>
-                          </td>
-                          <td style="padding-top: 12px; padding-bottom: 12px;">
-                            <a href="https://www.procellsystem.com/resources/cell-culture-academy/unlocking-the-hidden-potential-of-mesenchymal-stem-cells-decoding-the-trilineage-differentiation-and-key-applications-2139" class="decoration-none font-bold color-secondary text-size-[14px]">Read more</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-bordered condensed no-border text-center text-size-[14px]">
-                      <colgroup>
-                        <col />
-                        <col />
-                        <col />
-                        <col />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td colspan="4" class="text-left">
-                            <span class="rectangle-title">Recommended Solutions for Your Lab</span>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="4" class="h-16"></td>
-                        </tr>
-
-                        <tr class="align-top">
-                          <td>
-                            <a href="https://www.procellsystem.com/search-category=complete-growth-media&keywords=Mesenchymal Stem" class="decoration-none color-secondary">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Complete Growth Media.webp" style="height: 120px;" />
-
-                              <p class="color-secondary font-bold pt-8">Complete Growth Media</p>
-                            </a>
-                          </td>
-                          <td>
-                            <a href="https://www.procellsystem.com/search-category=serum-free-media&keywords=Mesenchymal Stem" class="decoration-none color-secondary">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Serum-free Media.webp" style="height: 120px;" />
-
-                              <p class="color-secondary font-bold pt-8">Serum-free Media</p>
-                            </a>
-                          </td>
-                          <td>
-                            <a href="https://www.procellsystem.com/search-category=serums&keywords=Mesenchymal Stem" class="decoration-none color-secondary">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Fetal Bovine Serum for Mesenchymal Stem Cells.webp" style="height: 120px;" />
-
-                              <p class="color-secondary font-bold pt-8">Fetal Bovine Serum for Mesenchymal Stem Cells</p>
-                            </a>
-                          </td>
-                          <td>
-                            <a href="https://www.procellsystem.com/search-category=induced-differentiation-media&keywords=Mesenchymal Stem" class="decoration-none color-secondary">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Induced Differentiation Media.webp" style="height: 120px;" />
-
-                              <p class="color-secondary font-bold pt-8">Induced Differentiation Media</p>
-                            </a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0">
-                      <colgroup>
-                        <col width="40%" />
-                        <col />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td colspan="2">
-                            <span class="rectangle-title">Ready to Upgrade Your Culture? Get a Free Sample</span>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2" class="h-12"></td>
-                        </tr>
-
-                        <tr>
-                          <td rowspan="2" class="image-box" style="padding-right: 12px;">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Claim My Free Sample.webp" />
-                          </td>
-                          <td class="h-0 text-size-[14px]" style="padding-bottom: 16px;">See how our media and serum can enhance your results. Validate the performance in your own lab.</td>
-                        </tr>
-
-                        <tr>
-                          <td class="text-right h-0" style="padding: 12px 24px 12px 0;">
-                            <a href="https://www.procellsystem.com/promotions/get-free-sample" class="button-orange decoration-none text-center text-size-[14px] bg-secondary">Claim My Free Sample</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0">
-                      <colgroup>
-                        <col width="18%" />
-                        <col />
-                        <col width="18%" />
-                        <col />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td colspan="4">
-                            <span class="rectangle-title">Why Partner with Procell for Custom Media?</span>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="4" class="h-12"></td>
-                        </tr>
-
-                        <tr>
-                          <td rowspan="2" class="image-box" style="padding-right: 12px;">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Low MOQ.webp" />
-                          </td>
-                          <td class="h-0"><strong>Low MOQ</strong></td>
-
-                          <td rowspan="2" class="image-box" style="padding-right: 12px;">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Flexible Formats.webp" />
-                          </td>
-                          <td class="h-0"><strong>Flexible Formats</strong></td>
-                        </tr>
-
-                        <tr>
-                          <td class="h-0 text-size-[14px]" style="padding-right: 16px;">Only 2 bottles (500 mL) to start, ideal for pilot studies.</td>
-                          <td class="h-0 text-size-[14px]">Choose between Ready-to-use Liquid or Dry Powder.</td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="4" class="h-24"></td>
-                        </tr>
-
-                        <tr>
-                          <td rowspan="2" class="image-box" style="padding-right: 12px;">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Certified Quality.webp" />
-                          </td>
-                          <td class="h-0"><strong>Certified Quality</strong></td>
-
-                          <td rowspan="2" class="image-box" style="padding-right: 12px;">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Rapid Response.webp" />
-                          </td>
-                          <td class="h-0"><strong>Rapid Response</strong></td>
-                        </tr>
-
-                        <tr>
-                          <td class="h-0 text-size-[14px]" style="padding-right: 16px;">10+ years of expertise with ISO 9001: 2015 & 13485 compliance.</td>
-                          <td class="h-0 text-size-[14px]">Get a technical review and quote within 24 hours.</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-36"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0">
-                      <colgroup>
-                        <col width="40%" />
-                        <col />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td colspan="2">
-                            <span class="rectangle-title">Streamline Your Workflow with Our Online Tool</span>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2" class="h-12"></td>
-                        </tr>
-
-                        <tr>
-                          <td rowspan="2" class="image-box" style="padding-right: 12px;">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Streamline Your Workflow.webp" />
-                          </td>
-                          <td class="h-0 text-size-[14px]" style="padding-bottom: 16px;">Our Online Formulation Tool allows you to select a basal media (e.g., DMEM, RPMI-1640, Ham's F-12) and modify its components directly on our platform.</td>
-                        </tr>
-
-                        <tr>
-                          <td class="text-right h-0" style="padding: 12px 24px 12px 0;">
-                            <a href="https://www.procellsystem.com/service/custom" class="button-orange decoration-none text-center text-size-[14px]">Start Your Formula Design</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0">
-                      <colgroup>
-                        <col width="25%" />
-                        <col />
-                      </colgroup>
-
-                      <tbody class="align-top">
-                        <tr>
-                          <td rowspan="2" style="padding-right: 12px;" class="image-box">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/Ischemic stroke.webp" />
-                          </td>
-                          <td style="padding-bottom: 24px;" class="h-0">
-                            <a href="https://www.nature.com/articles/s41467-026-70340-3" class="decoration-none">
-                              <strong>Dual-stiffness nanoparticles for compartment-specific drug delivery in stroke</strong>
-                            </a>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td>
-                            <p style="margin-bottom: 12px;"><strong>Publication Date:</strong> 12 March 2026</p>
-                            <p style="margin-bottom: 12px;"><strong>Journal:</strong> <i>Nature Communications</i></p>
-                            <p style="margin-bottom: 12px;"><strong>Impact Factor:</strong> 15.7</p>
-                            <p><strong>DOI:</strong> 10.1038/s41467-026-70340-3</p>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2"><strong>Keywords:</strong>  Ischemic stroke, Dual-stiffness nanoparticles,  Systemic inflammation,  Neural microenvironment</td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-dashed border-separate" style="padding: 16px;">
-                      <colgroup>
-                        <col width="40%" />
-                        <col />
-                      </colgroup>
-
-                      <tbody class="align-top">
-                        <tr>
-                          <td colspan="2"></td>
-                        </tr>
-
-                        <tr>
-                          <td rowspan="2" style="padding-right: 12px;" class="image-box align-middle">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/View More Publications.webp" />
-                          </td>
-                          <td style="padding-bottom: 24px;" class="h-0">
-                            <p>
-                              This study presents a spatially tiered drug delivery strategy using dual-stiffness nanoparticles (NPs) for compartment-specific therapy. Stiff NPs, loaded with the anti-inflammatory agent piceatannol (Pic), suppress systemic immune overactivation and limit neutrophil and monocyte infiltration into the brain. In contrast, soft NPs deliver the neuroprotective compound DL-3-n-butylphthalide (NBP), enabling efficient BBB penetration while promoting neural repair and local microenvironment restoration. This approach addresses the spatial heterogeneity of ischemic stroke and establishes a versatile, stiffness-graded platform for other spatially complex diseases, including Alzheimer's disease and cerebral gliomas.
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="IE=Edge,chrome=1" />
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,viewport-fit=cover" />
+  <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <meta name="render" content="webkit|ie-comp|ie-stand" />
+
+  <!-- 禁止页面缓存 -->
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <!-- IE10 and IE11 on Windows Phone have a small tap highlight when you tap an element. Adding this meta tag removes this. -->
+  <meta name="msapplication-tap-highlight" content="no" />
+
+  <title></title>
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+
+  <link rel="shortcut icon" href="favicon.ico" />
+
+  <style>
+    /* 默认样式重置区，确保所有浏览器默认样式统一，没事别乱动 start */
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      line-height: 1.5;
+      color: #000;
+      font-size: 16px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+      word-break: break-word;
+      box-sizing: border-box;
+    }
+
+    table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+
+    span {
+      display: inline-block;
+    }
+
+    img {
+      display: inline-block;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    a {
+      display: inline-block;
+      color: #000;
+      cursor: pointer;
+    }
+
+    a:hover {
+      text-decoration: underline !important;
+    }
+
+    /* 默认样式重置区，确保所有浏览器默认样式统一，没事别乱动 end */
+
+    /* 公用样式区，模板样式，适合所有需求，三思而后行 start */
+    .app {
+      max-width: 750px;
+      min-width: 320px;
+      /*min-height: 100%;*/
+      margin: 0 auto;
+      box-shadow: 0.5px 0.666px 14.1px 0.9px rgba(13, 2, 3, 0.1);
+    }
+
+    .header {}
+
+    .header .banner {}
+
+    .header .banner img {
+      width: 100%;
+    }
+
+    .header .navigation {}
+
+    .header .navigation a {
+      color: #2ebac0;
+    }
+
+    .header .navigation a:hover {
+      color: #1f7e82 !important;
+    }
+
+    .main {}
+
+    .footer {}
+
+    .footer .connect-us {}
+
+    .footer .connect-us-title {
+      padding-bottom: 5px;
+    }
+
+    .footer .connect-us-separator {
+      padding-top: 8px;
+      border-bottom: 1px dashed #828282;
+    }
+
+    .footer .contact-us {}
+
+    .footer .contact-us-qrcode {}
+
+    .footer .contact-us-qrcode img {
+      width: 60px;
+    }
+
+    .footer .contact-us-whatsApp {
+      padding: 5px 0;
+      margin-top: 6px;
+      color: #fff;
+      font-size: 12px;
+      border-radius: 12px;
+      background-color: rgb(43, 176, 181);
+    }
+
+    .table-bordered {
+      color: #2c2c2c;
+      border: 1px solid #dedede;
+      border-radius: 3px;
+    }
+
+    .table-bordered.no-border {
+      border-color: transparent;
+    }
+
+    .table-bordered thead {
+      border-radius: 3px 3px 0 0;
+      background-color: #eaeaea;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+      padding: 16px;
+      border: 1px solid #dedede;
+    }
+
+    .table-bordered.no-border th,
+    .table-bordered.no-border td {
+      border-color: transparent;
+    }
+
+    .table-bordered.condensed th,
+    .table-bordered.condensed td {
+      padding: 5px 8px;
+      /*border: 1px solid #dedede;*/
+    }
+
+    .table-stripe {
+      border: 1px solid #7dc0bb;
+    }
+
+    .table-stripe thead {}
+
+    .table-stripe tbody tr:nth-child(2n) {
+      background-color: #e6f3f2;
+    }
+
+    .table-stripe th,
+    .table-stripe td {
+      padding: 5px 8px;
+      border: 1px solid #7dc0bb;
+    }
+
+    .table-dashed {
+      border: 1px dashed #5AAFA9;
+      border-radius: 20px;
+    }
+
+    .square-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .square-title::before {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      margin-bottom: -1px;
+      background-color: #5AAFA9;
+    }
+
+    .rectangle-title {
+      color: #16585d;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .rectangle-title::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 22px;
+      margin-right: 8px;
+      margin-bottom: -2px;
+      background-color: #fd8b37;
+    }
+
+    .title-slash {
+      /*line-height: 42px;*/
+      line-height: 1.3;
+      padding-top: 6px;
+      padding-bottom: 6px;
+      padding-right: 81px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      background: #32afb4 url('https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202603301420/slash-bg.jpg') no-repeat scroll right center / 49px 100%;
+      /*background: #32afb4 url('https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202603301420/title-icon.png') no-repeat scroll right center / auto 100%;*/
+    }
+
+    .dot {
+      margin-top: -2px;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    .image-box {
+      line-height: 0;
+      font-size: 0;
+      user-select: none;
+    }
+
+    .button {
+      padding: 6px 16px;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 6px;
+      background-color: #32afb4;
+    }
+
+    .button-orange {
+      padding: 8px 16px;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 6px;
+      background-color: #fd8b37;
+    }
+
+    .text-link {
+      color: #32afb4;
+    }
+
+    .text-link:hover,
+    .text-link-hover:hover {
+      color: #1f7e82 !important;
+    }
+
+    .text-link-light {
+      color: #18c0b0;
+    }
+
+    .text-link-light:hover,
+    .text-link-light-hover:hover {
+      color: #18c0b0 !important;
+    }
+
+    .bg-primary {
+      background-color: #32afb4;
+    }
+
+    .bg-light-primary {
+      background-color: #3ac2c5;
+    }
+
+    .bg-secondary {
+      background-color: #18c0b0;
+    }
+
+    .bg-white {
+      background-color: #fff;
+    }
+
+    .border {
+      border: 1px solid #dedede;
+    }
+
+    .border-dashed {
+      border: 1px dashed #5AAFA9;
+    }
+
+    .relative {
+      position: relative;
+    }
+
+    .absolute {
+      position: absolute;
+    }
+
+    .table-auto {
+      table-layout: auto;
+    }
+
+    .border-separate {
+      border-collapse: separate;
+    }
+
+    .h-a {
+      height: auto;
+    }
+
+    .h-0 {
+      height: 0;
+    }
+
+    .h-12 {
+      height: 12px;
+    }
+
+    .h-16 {
+      height: 16px;
+    }
+
+    .h-18 {
+      height: 18px;
+    }
+
+    .h-24 {
+      height: 24px;
+    }
+
+    .h-32 {
+      height: 32px;
+    }
+
+    .h-36 {
+      height: 36px;
+    }
+
+    .h-48 {
+      height: 48px;
+    }
+
+    .px-5 {
+      padding-inline: 5px !important;
+    }
+
+    .py-8 {
+      padding-block: 8px !important;
+    }
+
+    .pt-3 {
+      padding-top: 3px !important;
+    }
+
+    .pb-3 {
+      padding-bottom: 3px !important;
+    }
+
+    .pt-5 {
+      padding-top: 5px !important;
+    }
+
+    .pb-5 {
+      padding-bottom: 5px !important;
+    }
+
+    .pt-6 {
+      padding-top: 6px !important;
+    }
+
+    .pb-6 {
+      padding-bottom: 6px !important;
+    }
+
+    .pt-8 {
+      padding-top: 8px !important;
+    }
+
+    .pb-8 {
+      padding-bottom: 8px !important;
+    }
+
+    .pt-10 {
+      padding-top: 10px !important;
+    }
+
+    .pb-10 {
+      padding-bottom: 10px !important;
+    }
+
+    .pt-12 {
+      padding-top: 12px !important;
+    }
+
+    .pb-12 {
+      padding-bottom: 12px !important;
+    }
+
+    .pt-16 {
+      padding-top: 16px !important;
+    }
+
+    .pb-16 {
+      padding-bottom: 16px !important;
+    }
+
+    .pt-18 {
+      padding-top: 18px !important;
+    }
+
+    .pb-18 {
+      padding-bottom: 18px !important;
+    }
+
+    .pt-20 {
+      padding-top: 20px !important;
+    }
+
+    .pb-20 {
+      padding-bottom: 20px !important;
+    }
+
+    .pt-24 {
+      padding-top: 24px !important;
+    }
+
+    .pb-24 {
+      padding-bottom: 24px !important;
+    }
+
+    .line-height-0 {
+      line-height: 0;
+    }
+
+    .align-top {
+      vertical-align: top;
+    }
+
+    .align-text-top {
+      vertical-align: text-top;
+    }
+
+    .align-mid,
+    .align-middle {
+      vertical-align: middle;
+    }
+
+    .align-bottom {
+      vertical-align: bottom;
+    }
+
+    .align-text-bottom {
+      vertical-align: text-bottom;
+    }
+
+    .text-left {
+      text-align: left;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .color-primary {
+      color: #32afb4;
+    }
+
+    .color-secondary {
+      color: #18c0b0;
+    }
+
+    .color-white {
+      color: #fff;
+    }
+
+    .color-orange {
+      color: #f7750b;
+    }
+
+    .color-red {
+      color: #ff0207;
+    }
+
+    .cursor-auto {
+      cursor: auto;
+    }
+
+    .cursor-default {
+      cursor: default;
+    }
+
+    .cursor-pointer {
+      cursor: pointer;
+    }
+
+    .cursor-not-allowed {
+      cursor: not-allowed;
+    }
+
+    .decoration-none {
+      text-decoration: none;
+    }
+
+    .decoration-underline {
+      text-decoration-line: underline;
+    }
+
+    .font-bold {
+      font-weight: bold;
+    }
+
+    .text-size-0 {
+      font-size: 0;
+    }
+
+    .text-size-\[10px\] {
+      font-size: 10px;
+    }
+
+    .text-size-\[12px\] {
+      font-size: 12px;
+    }
+
+    .text-size-\[14px\] {
+      font-size: 14px;
+    }
+
+    .text-size-base {
+      font-size: 16px;
+    }
+
+    .text-size-\[16px\] {
+      font-size: 16px;
+    }
+
+    .text-size-\[18px\] {
+      font-size: 18px;
+    }
+
+    .text-size-\[20px\] {
+      font-size: 20px;
+    }
+
+    .text-size-\[22px\] {
+      font-size: 22px;
+    }
+
+    .text-size-\[24px\] {
+      font-size: 24px;
+    }
+
+    .text-size-\[26px\] {
+      font-size: 26px;
+    }
+
+    /* 公用样式区，模板样式，适合所有需求，三思而后行 end */
+
+    /* 页面特定样式区，特定需求页面的定制样式，随便霍霍，满足需求即可 start */
+    /* TODO */
+    /* 页面特定样式区，特定需求页面的定制样式，随便霍霍，满足需求即可 end */
+  </style>
+</head>
+
+<body>
+  <table cellspacing="0" cellpadding="0" border="0" id="app" class="app">
+    <tbody>
+      <tr>
+        <td>
+          <!-- 页头 start -->
+          <table cellspacing="0" cellpadding="0" border="0" class="header">
+            <colgroup>
+              <col width="10px" />
+              <col />
+              <col />
+              <col width="10px" />
+            </colgroup>
+
+            <tbody>
+              <tr>
+                <td colspan="4" class="banner image-box">
+                  <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/header.webp" alt="Procell" />
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0" class="navigation text-center">
+                    <tbody>
+                      <tr>
+                        <td>
+                          <a href="https://www.procellsystem.com/search-category=cell-culture-media">Cell Culture
+                            Media</a>
+                        </td>
+                        <td>
+                          <a href="https://www.procellsystem.com/search-category=auxiliary-reagents">Auxiliary
+                            Reagents</a>
+                        </td>
+                        <td>
+                          <a href="https://www.procellsystem.com/search-category=cell-function-research-kits">Cell
+                            Function Research Kits</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- 页头 end -->
+
+          <!-- 主体 start -->
+          <table cellspacing="0" cellpadding="0" border="0" class="main">
+            <colgroup>
+              <col width="10px" />
+              <col />
+              <col />
+              <col width="10px" />
+            </colgroup>
+
+            <tbody id="content">
+              <tr>
+                <td colspan="4" class="image-box">
+                  <a href="https://www.procellsystem.com/service/research">
+                    <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/banner.webp" />
+                  </a>
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">Achieving high-purity neuronal cultures with long-term viability remains one of the most
+                  significant challenges in neuroscience. To support your research precision, we have refined our
+                  Neurobasal media series to cater to specific developmental stages of the central nervous system (CNS).
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2" class="text-center">
+                  <a href="https://www.procellsystem.com/service/research"
+                    class="button-orange decoration-none text-center" style="min-width: 240px;">View Service Details</a>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0"
+                    class="table-bordered condensed no-border text-center text-size-[14px]">
+                    <colgroup>
+                      <col />
+                      <col />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td colspan="2" class="text-left">
+                          <span class="rectangle-title">Technical Insight: Optimizing Your MSC Workflow</span>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2" class="h-16"></td>
+                      </tr>
+
+                      <tr>
+                        <td class="image-box">
+                          <a
+                            href="https://www.procellsystem.com/resources/cell-culture-academy/unlocking-the-hidden-potential-of-mesenchymal-stem-cells-efficient-culture-and-stable-expansion-2137">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Advanced Expansion.webp" />
+                          </a>
+                        </td>
+                        <td class="image-box">
+                          <a
+                            href="https://www.procellsystem.com/resources/cell-culture-academy/unlocking-the-hidden-potential-of-mesenchymal-stem-cells-decoding-the-trilineage-differentiation-and-key-applications-2139">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Multipotency Mastery.webp" />
+                          </a>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td>
+                          <strong>Advanced Expansion:<br />Maximizing Yield while Preserving Stemness</strong>
+                        </td>
+                        <td>
+                          <strong>Multipotency Mastery:<br />Decoding Trilineage Differentiation</strong>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td>
+                          Achieve robust, large-scale expansion through optimized media formulations that maintain
+                          stable growth kinetics and phenotypic integrity.
+                        </td>
+                        <td>
+                          Explore standardized protocols and validation methods for adipogenic, osteogenic, and
+                          chondrogenic induction to confirm functional potency.
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td class="pt-12 pb-12">
+                          <a href="https://www.procellsystem.com/resources/cell-culture-academy/unlocking-the-hidden-potential-of-mesenchymal-stem-cells-efficient-culture-and-stable-expansion-2137"
+                            class="decoration-none font-bold color-secondary text-size-[14px]">Read more</a>
+                        </td>
+                        <td class="pt-12 pb-12">
+                          <a href="https://www.procellsystem.com/resources/cell-culture-academy/unlocking-the-hidden-potential-of-mesenchymal-stem-cells-decoding-the-trilineage-differentiation-and-key-applications-2139"
+                            class="decoration-none font-bold color-secondary text-size-[14px]">Read more</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0"
+                    class="table-bordered condensed no-border text-center text-size-[14px]">
+                    <colgroup>
+                      <col />
+                      <col />
+                      <col />
+                      <col />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td colspan="4" class="text-left">
+                          <span class="rectangle-title">Recommended Solutions for Your Lab</span>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="4" class="h-16"></td>
+                      </tr>
+
+                      <tr class="align-top">
+                        <td>
+                          <a href="https://www.procellsystem.com/search-category=complete-growth-media&keywords=Mesenchymal Stem"
+                            class="decoration-none color-secondary">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Complete Growth Media.webp"
+                              style="height: 120px;" />
+
+                            <p class="color-secondary font-bold pt-8">Complete Growth Media</p>
+                          </a>
+                        </td>
+                        <td>
+                          <a href="https://www.procellsystem.com/search-category=serum-free-media&keywords=Mesenchymal Stem"
+                            class="decoration-none color-secondary">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Serum-free Media.webp"
+                              style="height: 120px;" />
+
+                            <p class="color-secondary font-bold pt-8">Serum-free Media</p>
+                          </a>
+                        </td>
+                        <td>
+                          <a href="https://www.procellsystem.com/search-category=serums&keywords=Mesenchymal Stem"
+                            class="decoration-none color-secondary">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Fetal Bovine Serum for Mesenchymal Stem Cells.webp"
+                              style="height: 120px;" />
+
+                            <p class="color-secondary font-bold pt-8">Fetal Bovine Serum for Mesenchymal Stem Cells</p>
+                          </a>
+                        </td>
+                        <td>
+                          <a href="https://www.procellsystem.com/search-category=induced-differentiation-media&keywords=Mesenchymal Stem"
+                            class="decoration-none color-secondary">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Induced Differentiation Media.webp"
+                              style="height: 120px;" />
+
+                            <p class="color-secondary font-bold pt-8">Induced Differentiation Media</p>
+                          </a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                    <colgroup>
+                      <col width="40%" />
+                      <col />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td colspan="2">
+                          <span class="rectangle-title">Ready to Upgrade Your Culture? Get a Free Sample</span>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2" class="h-12"></td>
+                      </tr>
+
+                      <tr>
+                        <td rowspan="2" class="image-box" style="padding-right: 12px;">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605141323/Claim My Free Sample.webp" />
+                        </td>
+                        <td class="h-0 text-size-[14px] pb-16">See how our media and serum can enhance your results.
+                          Validate the performance in your own lab.</td>
+                      </tr>
+
+                      <tr>
+                        <td class="text-right h-0" style="padding: 12px 24px 12px 0;">
+                          <a href="https://www.procellsystem.com/promotions/get-free-sample"
+                            class="button-orange decoration-none text-center text-size-[14px] bg-secondary">Claim My
+                            Free Sample</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                    <colgroup>
+                      <col width="18%" />
+                      <col />
+                      <col width="18%" />
+                      <col />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td colspan="4">
+                          <span class="rectangle-title">Why Partner with Procell for Custom Media?</span>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="4" class="h-12"></td>
+                      </tr>
+
+                      <tr>
+                        <td rowspan="2" class="image-box" style="padding-right: 12px;">
+                          <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Low MOQ.webp" />
+                        </td>
+                        <td class="h-0"><strong>Low MOQ</strong></td>
+
+                        <td rowspan="2" class="image-box" style="padding-right: 12px;">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Flexible Formats.webp" />
+                        </td>
+                        <td class="h-0"><strong>Flexible Formats</strong></td>
+                      </tr>
+
+                      <tr>
+                        <td class="h-0 text-size-[14px]" style="padding-right: 16px;">Only 2 bottles (500 mL) to start,
+                          ideal for pilot studies.</td>
+                        <td class="h-0 text-size-[14px]">Choose between Ready-to-use Liquid or Dry Powder.</td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="4" class="h-24"></td>
+                      </tr>
+
+                      <tr>
+                        <td rowspan="2" class="image-box" style="padding-right: 12px;">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Certified Quality.webp" />
+                        </td>
+                        <td class="h-0"><strong>Certified Quality</strong></td>
+
+                        <td rowspan="2" class="image-box" style="padding-right: 12px;">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Rapid Response.webp" />
+                        </td>
+                        <td class="h-0"><strong>Rapid Response</strong></td>
+                      </tr>
+
+                      <tr>
+                        <td class="h-0 text-size-[14px]" style="padding-right: 16px;">10+ years of expertise with ISO
+                          9001: 2015 & 13485 compliance.</td>
+                        <td class="h-0 text-size-[14px]">Get a technical review and quote within 24 hours.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-36"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                    <colgroup>
+                      <col width="40%" />
+                      <col />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td colspan="2">
+                          <span class="rectangle-title">Streamline Your Workflow with Our Online Tool</span>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2" class="h-12"></td>
+                      </tr>
+
+                      <tr>
+                        <td rowspan="2" class="image-box" style="padding-right: 12px;">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202605061643/Streamline Your Workflow.webp" />
+                        </td>
+                        <td class="h-0 text-size-[14px] pb-16">Our Online Formulation Tool allows you to select a basal
+                          media (e.g., DMEM, RPMI-1640, Ham's F-12) and modify its components directly on our platform.
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td class="text-right h-0" style="padding: 12px 24px 12px 0;">
+                          <a href="https://www.procellsystem.com/service/custom"
+                            class="button-orange decoration-none text-center text-size-[14px]">Start Your Formula
+                            Design</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                    <colgroup>
+                      <col width="25%" />
+                      <col />
+                    </colgroup>
+
+                    <tbody class="align-top">
+                      <tr>
+                        <td rowspan="2" style="padding-right: 12px;" class="image-box">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/Ischemic stroke.webp" />
+                        </td>
+                        <td class="h-0 pb-24">
+                          <a href="https://www.nature.com/articles/s41467-026-70340-3" class="decoration-none">
+                            <strong>Dual-stiffness nanoparticles for compartment-specific drug delivery in
+                              stroke</strong>
+                          </a>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td>
+                          <p style="margin-bottom: 12px;"><strong>Publication Date:</strong> 12 March 2026</p>
+                          <p style="margin-bottom: 12px;"><strong>Journal:</strong> <i>Nature Communications</i></p>
+                          <p style="margin-bottom: 12px;"><strong>Impact Factor:</strong> 15.7</p>
+                          <p><strong>DOI:</strong> 10.1038/s41467-026-70340-3</p>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2"><strong>Keywords:</strong> Ischemic stroke, Dual-stiffness nanoparticles, Systemic
+                  inflammation, Neural microenvironment</td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0" class="table-dashed border-separate"
+                    style="padding: 16px;">
+                    <colgroup>
+                      <col width="40%" />
+                      <col />
+                    </colgroup>
+
+                    <tbody class="align-top">
+                      <tr>
+                        <td colspan="2"></td>
+                      </tr>
+
+                      <tr>
+                        <td rowspan="2" style="padding-right: 12px;" class="image-box align-middle">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/View More Publications.webp" />
+                        </td>
+                        <td class="h-0 pb-24">
+                          <p>
+                            This study presents a spatially tiered drug delivery strategy using dual-stiffness
+                            nanoparticles (NPs) for compartment-specific therapy. Stiff NPs, loaded with the
+                            anti-inflammatory agent piceatannol (Pic), suppress systemic immune overactivation and limit
+                            neutrophil and monocyte infiltration into the brain. In contrast, soft NPs deliver the
+                            neuroprotective compound DL-3-n-butylphthalide (NBP), enabling efficient BBB penetration
+                            while promoting neural repair and local microenvironment restoration. This approach
+                            addresses the spatial heterogeneity of ischemic stroke and establishes a versatile,
+                            stiffness-graded platform for other spatially complex diseases, including Alzheimer's
+                            disease and cerebral gliomas.
+                          </p>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td>
+                          <a href="https://www.procellsystem.com/resources/publications"
+                            class="button decoration-none">View More Publications</a>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td class="bg-primary"></td>
+                <td colspan="3">
+                  <span class="title-slash">Procell Featured Basal Media Solutions</span>
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0"
+                    class="table-bordered condensed no-border text-center text-size-[14px]">
+                    <colgroup>
+                      <col />
+                      <col />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td class="image-box">
+                          <a href="https://www.procellsystem.com/products/liquid-basal-media">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604201000/Liquid Basal Media.webp" />
+                          </a>
+                        </td>
+                        <td class="image-box">
+                          <a href="https://www.procellsystem.com/products/powder-basal-media">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604201000/Powder Basal Media.webp" />
+                          </a>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td class="color-primary font-bold text-size-[18px]">Liquid Basal Media</td>
+                        <td class="color-primary font-bold text-size-[18px]">Powder Basal Media</td>
+                      </tr>
+
+                      <tr>
+                        <td class="text-left">
+                          <p style="margin-bottom: 10px;"><span class="color-primary text-size-[12px]"
+                              style="margin-right: 6px;">●</span><strong>0.1μm Sterile Filtration:</strong> Pre-filtered
+                            through 0.1μm membranes to ensure sterility and minimize the risk of laboratory
+                            contamination.</p>
+
+                          <p><span class="color-primary text-size-[12px]"
+                              style="margin-right: 6px;">●</span><strong>Comprehensive Portfolio:</strong> Includes 19
+                            major categories and nearly 300 products, covering both classical and specialized
+                            formulations.</p>
+                        </td>
+                        <td class="text-left">
+                          <p style="margin-bottom: 10px;"><span class="color-primary text-size-[12px]"
+                              style="margin-right: 6px;">●</span><strong>Extended Storage Life:</strong> Offers 36
+                            months stability, making it ideal for long-term research planning.</p>
+
+                          <p><span class="color-primary text-size-[12px]"
+                              style="margin-right: 6px;">●</span><strong>Logistical Efficiency:</strong> Designed for
+                            easy storage and cost-effective shipping, maximizing laboratory space and budget.</p>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td class="pt-12 pb-12">
+                          <a href="https://www.procellsystem.com/products/liquid-basal-media"
+                            class="button-orange decoration-none text-size-[14px]">View Liquid Media Specifications</a>
+                        </td>
+                        <td class="pt-12 pb-12">
+                          <a href="https://www.procellsystem.com/products/powder-basal-media"
+                            class="button-orange decoration-none text-size-[14px]">View Powder Media Specifications</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td class="bg-primary"></td>
+                <td colspan="3">
+                  <span class="title-slash">Performance Validation Data</span>
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0"
+                    class="table-bordered condensed no-border text-center text-size-[14px]">
+                    <colgroup>
+                      <col width="60%" />
+                      <col />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td class="image-box">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604201000/Proliferation of Renca cells.webp" />
+                        </td>
+                        <td class="image-box">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604201000/Cell growth.webp" />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td class="text-left align-top">
+                          <p>Proliferation of Renca cells in Procell RPMI-1640 Medium over a 3-day culture period.</p>
+                        </td>
+                        <td class="text-left align-top">
+                          <p>Cell growth in Procell RPMI-1640 Medium</p>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <span class="rectangle-title">Selecting the Optimal Foundation for Your Cells</span>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0"
+                    class="table-bordered condensed text-center text-size-[14px]">
+                    <colgroup>
+                      <col width="35%" />
+                      <col width="15%" />
+                      <col width="35%" />
+                      <col width="15%" />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td colspan="2" class="image-box">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/neural-basal-media.png" />
+                        </td>
+                        <td colspan="2" class="image-box">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/complete-growth-media.png" />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2" class="bg-light-primary color-white font-bold text-size-[18px]">Neural Basal
+                          Media</td>
+                        <td colspan="2" class="bg-light-primary color-white font-bold text-size-[18px]">Complete Growth
+                          Media</td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2" class="text-left">Basal media providing essential nutrients for neural cell
+                          cultivation.</td>
+                        <td colspan="2" class="text-left">Ready-to-use systems for stable proliferation and morphology.
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td>Neurobasal medium</td>
+                        <td>PM151223</td>
+                        <td>Neuronal Medium (NM)</td>
+                        <td>CM-ZY003</td>
+                      </tr>
+
+                      <tr>
+                        <td>Neurobasal-A medium</td>
+                        <td>PM151236</td>
+                        <td>Neural Stem Cell Medium (NSCM)</td>
+                        <td>CM-ZY004</td>
+                      </tr>
+
+                      <tr>
+                        <td>DMEM/F12</td>
+                        <td>PM150312</td>
+                        <td>Rat Neural Stem Cell Complete Medium</td>
+                        <td>CM-R139</td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2" class="pt-12 pb-12">
+                          <a href="https://www.procellsystem.com/search-category=liquid-basal-media&product-series=neurobasal"
+                            class="button-orange decoration-none text-size-[14px]">Explore more Neural Basal Media</a>
+                        </td>
+                        <td colspan="2" class="pt-12 pb-12">
+                          <a href="https://www.procellsystem.com/search-keywords=Neural"
+                            class="button-orange decoration-none text-size-[14px]">Explore more Complete Growth
+                            Media</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <span class="rectangle-title">Explore Our Neural Research Resources</span>
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="4" class="h-12"></td>
+              </tr>
+
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                    <colgroup>
+                      <col />
+                      <col width="12px" />
+                      <col />
+                      <col width="12px" />
+                      <col />
+                    </colgroup>
+
+                    <tbody>
+                      <tr>
+                        <td>
+                          <div class="bg-white" style="padding: 8px; box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);">
+                            <div class="image-box" style="padding-bottom: 10px; border-bottom: 1px solid #e8e8e8;">
+                              <img
+                                src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/resource-01.png" />
+                            </div>
+                            <p class="text-size-[14px]" style="min-height: 59px; margin-top: 10px; line-height: 1.4;">
+                              Primary Brain Cell Isolation: From Neurons to Blood-brain Barrier Cells</p>
+                            <p style="margin-top: 5px;">
+                              <a href="https://www.procellsystem.com/resources/cell-culture-academy/primary-brain-cell-isolation-2179"
+                                class="decoration-none text-link-light text-size-[18px]">Read more</a>
                             </p>
-                          </td>
-                        </tr>
+                          </div>
+                        </td>
 
-                        <tr>
-                          <td>
-                            <a href="https://www.procellsystem.com/resources/publications" class="button decoration-none">View More Publications</a>
-                          </td>
-                        </tr>
+                        <td></td>
 
-                        <tr>
-                          <td colspan="2"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td class="bg-primary"></td>
-                  <td colspan="3">
-                    <span class="title-slash">Procell Featured Basal Media Solutions</span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-bordered condensed no-border text-center text-size-[14px]">
-                      <colgroup>
-                        <col />
-                        <col />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td class="image-box">
-                            <a href="https://www.procellsystem.com/products/liquid-basal-media">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604201000/Liquid Basal Media.webp" />
-                            </a>
-                          </td>
-                          <td class="image-box">
-                            <a href="https://www.procellsystem.com/products/powder-basal-media">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604201000/Powder Basal Media.webp" />
-                            </a>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td class="color-primary font-bold text-size-[18px]">Liquid Basal Media</td>
-                          <td class="color-primary font-bold text-size-[18px]">Powder Basal Media</td>
-                        </tr>
-
-                        <tr>
-                          <td class="text-left">
-                            <p style="margin-bottom: 10px;"><span class="color-primary text-size-[12px]" style="margin-right: 6px;">●</span><strong>0.1μm Sterile Filtration:</strong> Pre-filtered through 0.1μm membranes to ensure sterility and minimize the risk of laboratory contamination.</p>
-
-                            <p><span class="color-primary text-size-[12px]" style="margin-right: 6px;">●</span><strong>Comprehensive Portfolio:</strong> Includes 19 major categories and nearly 300 products, covering both classical and specialized formulations.</p>
-                          </td>
-                          <td class="text-left">
-                            <p style="margin-bottom: 10px;"><span class="color-primary text-size-[12px]" style="margin-right: 6px;">●</span><strong>Extended Storage Life:</strong> Offers 36 months stability, making it ideal for long-term research planning.</p>
-
-                            <p><span class="color-primary text-size-[12px]" style="margin-right: 6px;">●</span><strong>Logistical Efficiency:</strong> Designed for easy storage and cost-effective shipping, maximizing laboratory space and budget.</p>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td style="padding-top: 12px; padding-bottom: 12px;">
-                            <a href="https://www.procellsystem.com/products/liquid-basal-media" class="button-orange decoration-none text-size-[14px]">View Liquid Media Specifications</a>
-                          </td>
-                          <td style="padding-top: 12px; padding-bottom: 12px;">
-                            <a href="https://www.procellsystem.com/products/powder-basal-media" class="button-orange decoration-none text-size-[14px]">View Powder Media Specifications</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td class="bg-primary"></td>
-                  <td colspan="3">
-                    <span class="title-slash">Performance Validation Data</span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-bordered condensed no-border text-center text-size-[14px]">
-                      <colgroup>
-                        <col width="60%" />
-                        <col />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td class="image-box">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604201000/Proliferation of Renca cells.webp" />
-                          </td>
-                          <td class="image-box">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604201000/Cell growth.webp" />
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td class="text-left align-top">
-                            <p>Proliferation of Renca cells in Procell RPMI-1640 Medium over a 3-day culture period.</p>
-                          </td>
-                          <td class="text-left align-top">
-                            <p>Cell growth in Procell RPMI-1640 Medium</p>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <span class="rectangle-title">Selecting the Optimal Foundation for Your Cells</span>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-bordered condensed text-center text-size-[14px]">
-                      <colgroup>
-                        <col width="35%" />
-                        <col width="15%" />
-                        <col width="35%" />
-                        <col width="15%" />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td colspan="2" class="image-box">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/neural-basal-media.png" />
-                          </td>
-                          <td colspan="2" class="image-box">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/complete-growth-media.png" />
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2" class="bg-light-primary color-white font-bold text-size-[18px]">Neural Basal Media</td>
-                          <td colspan="2" class="bg-light-primary color-white font-bold text-size-[18px]">Complete Growth Media</td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2" class="text-left">Basal media providing essential nutrients for neural  cell cultivation.</td>
-                          <td colspan="2" class="text-left">Ready-to-use systems for stable proliferation and morphology.</td>
-                        </tr>
-
-                        <tr>
-                          <td>Neurobasal medium</td>
-                          <td>PM151223</td>
-                          <td>Neuronal Medium (NM)</td>
-                          <td>CM-ZY003</td>
-                        </tr>
-
-                        <tr>
-                          <td>Neurobasal-A medium</td>
-                          <td>PM151236</td>
-                          <td>Neural Stem Cell Medium (NSCM)</td>
-                          <td>CM-ZY004</td>
-                        </tr>
-
-                        <tr>
-                          <td>DMEM/F12</td>
-                          <td>PM150312</td>
-                          <td>Rat Neural Stem Cell Complete Medium</td>
-                          <td>CM-R139</td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2" style="padding-top: 12px; padding-bottom: 12px;">
-                            <a href="https://www.procellsystem.com/search-category=liquid-basal-media&product-series=neurobasal" class="button-orange decoration-none text-size-[14px]">Explore more Neural Basal Media</a>
-                          </td>
-                          <td colspan="2" style="padding-top: 12px; padding-bottom: 12px;">
-                            <a href="https://www.procellsystem.com/search-keywords=Neural" class="button-orange decoration-none text-size-[14px]">Explore more Complete Growth Media</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <span class="rectangle-title">Explore Our Neural Research Resources</span>
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td colspan="4" class="h-12"></td>
-                </tr>
-
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0">
-                      <colgroup>
-                        <col />
-                        <col width="12px" />
-                        <col />
-                        <col width="12px" />
-                        <col />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td>
-                            <div class="bg-white" style="padding: 8px; box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);">
-                              <div class="image-box" style="padding-bottom: 10px; border-bottom: 1px solid #e8e8e8;">
-                                <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/resource-01.png" />
-                              </div>
-                              <p class="text-size-[14px]" style="min-height: 59px; margin-top: 10px; line-height: 1.4;">Primary Brain Cell Isolation: From Neurons to Blood-brain Barrier Cells</p>
-                              <p style="margin-top: 5px;">
-                                <a href="https://www.procellsystem.com/resources/cell-culture-academy/primary-brain-cell-isolation-2179" class="decoration-none text-link-light text-size-[18px]">Read more</a>
-                              </p>
+                        <td>
+                          <div class="bg-white" style="padding: 8px; box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);">
+                            <div class="image-box" style="padding-bottom: 10px; border-bottom: 1px solid #e8e8e8;">
+                              <img
+                                src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/resource-02.png" />
                             </div>
-                          </td>
+                            <p class="text-size-[14px]" style="min-height: 59px; margin-top: 10px; line-height: 1.4;">A
+                              Practical Guide to Isolation and Culture of Rat Cortical Neurons</p>
+                            <p style="margin-top: 5px;">
+                              <a href="https://www.procellsystem.com/resources/cell-culture-academy/a-practical-guide-to-isolation-and-culture-of-rat-cortical-neurons-2162"
+                                class="decoration-none text-link-light text-size-[18px]">Read more</a>
+                            </p>
+                          </div>
+                        </td>
 
-                          <td></td>
+                        <td></td>
 
-                          <td>
-                            <div class="bg-white" style="padding: 8px; box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);">
-                              <div class="image-box" style="padding-bottom: 10px; border-bottom: 1px solid #e8e8e8;">
-                                <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/resource-02.png" />
-                              </div>
-                              <p class="text-size-[14px]" style="min-height: 59px; margin-top: 10px; line-height: 1.4;">A Practical Guide to Isolation and Culture of Rat Cortical Neurons</p>
-                              <p style="margin-top: 5px;">
-                                <a href="https://www.procellsystem.com/resources/cell-culture-academy/a-practical-guide-to-isolation-and-culture-of-rat-cortical-neurons-2162" class="decoration-none text-link-light text-size-[18px]">Read more</a>
-                              </p>
+                        <td>
+                          <div class="bg-white" style="padding: 8px; box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);">
+                            <div class="image-box" style="padding-bottom: 10px; border-bottom: 1px solid #e8e8e8;">
+                              <img
+                                src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/resource-03.png" />
                             </div>
-                          </td>
+                            <p class="text-size-[14px]" style="min-height: 59px; margin-top: 10px; line-height: 1.4;">
+                              From Challenges to Breakthroughs in Culturing Neurons</p>
+                            <p style="margin-top: 5px;">
+                              <a href="https://www.procellsystem.com/resources/cell-culture-academy/from-challenges-to-breakthroughs-in-culturing-neurons-2092"
+                                class="decoration-none text-link-light text-size-[18px]">Read more</a>
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
 
-                          <td></td>
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
 
-                          <td>
-                            <div class="bg-white" style="padding: 8px; box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);">
-                              <div class="image-box" style="padding-bottom: 10px; border-bottom: 1px solid #e8e8e8;">
-                                <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/resource-03.png" />
-                              </div>
-                              <p class="text-size-[14px]" style="min-height: 59px; margin-top: 10px; line-height: 1.4;">From Challenges to Breakthroughs in Culturing Neurons</p>
-                              <p style="margin-top: 5px;">
-                                <a href="https://www.procellsystem.com/resources/cell-culture-academy/from-challenges-to-breakthroughs-in-culturing-neurons-2092" class="decoration-none text-link-light text-size-[18px]">Read more</a>
-                              </p>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <span class="rectangle-title">Current Promotion</span>
+                </td>
+                <td></td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
+              <tr>
+                <td colspan="4" class="h-12"></td>
+              </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <span class="rectangle-title">Current Promotion</span>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                    <colgroup>
+                      <col />
+                      <col />
+                    </colgroup>
 
-                <tr>
-                  <td colspan="4" class="h-12"></td>
-                </tr>
+                    <tbody>
+                      <tr>
+                        <td rowspan="3" class="image-box">
+                          <img
+                            src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/current-promotion.png" />
+                        </td>
+                        <td class="h-0 pb-16"><strong>Request Your Free Sample Today</strong></td>
+                      </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0">
-                      <colgroup>
-                        <col />
-                        <col />
-                      </colgroup>
+                      <tr>
+                        <td class="h-0 text-size-[14px]">Validate our high-purity neural solutions in your own lab.
+                          Apply for a free sample to ensure consistent, reliable results for your next breakthrough.
+                        </td>
+                      </tr>
 
-                      <tbody>
-                        <tr>
-                          <td rowspan="3" class="image-box">
-                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604100851/current-promotion.png" />
-                          </td>
-                          <td class="h-0" style="padding-bottom: 16px;"><strong>Request Your Free Sample Today</strong></td>
-                        </tr>
+                      <tr>
+                        <td class="text-right">
+                          <a href="https://www.procellsystem.com/promotions/get-free-sample"
+                            class="button bg-light-primary decoration-none text-center">Request Free Samples</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
 
-                        <tr>
-                          <td class="h-0 text-size-[14px]">Validate our high-purity neural solutions in your own lab. Apply for a free sample to ensure consistent, reliable results for your next breakthrough.</td>
-                        </tr>
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
 
-                        <tr>
-                          <td class="text-right">
-                            <a href="https://www.procellsystem.com/promotions/get-free-sample" class="button bg-light-primary decoration-none text-center">Request Free Samples</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td class="bg-primary"></td>
+                <td colspan="3">
+                  <span class="title-slash">Current Promotion</span>
+                </td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
 
-                <tr>
-                  <td class="bg-primary"></td>
-                  <td colspan="3">
-                    <span class="title-slash">Current Promotion</span>
-                  </td>
-                </tr>
+              <tr>
+                <td colspan="4" class="image-box relative">
+                  <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202603301420/current-promotion.jpg" />
+                  <a href="https://www.procellsystem.com/promotions/get-free-sample"
+                    class="button absolute decoration-none text-size-[14px]" style="left: 5%; bottom: 16px;">Request
+                    Free Samples</a>
+                </td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="image-box relative">
-                    <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202603301420/current-promotion.jpg" />
-                    <a href="https://www.procellsystem.com/promotions/get-free-sample" class="button absolute decoration-none text-size-[14px]" style="left: 5%; bottom: 16px;">Request Free Samples</a>
-                  </td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <span class="square-title">Cited Product</span>
+                </td>
+                <td></td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
+              <tr>
+                <td colspan="4" class="h-12"></td>
+              </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <span class="square-title">Cited Product</span>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+                    <colgroup>
+                      <col />
+                      <col />
+                      <col />
+                    </colgroup>
 
-                <tr>
-                  <td colspan="4" class="h-12"></td>
-                </tr>
+                    <thead>
+                      <tr>
+                        <th>Product Name</th>
+                        <th>Cat. No.</th>
+                        <th>Product Type</th>
+                      </tr>
+                    </thead>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
-                      <colgroup>
-                        <col />
-                        <col />
-                        <col />
-                      </colgroup>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <a href="" class="text-link">MEM (with NEAA)</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">PM150410</a>
+                        </td>
+                        <td rowspan="3">
+                          <a href="" class="text-link">Liquid Basal Medium</a>
+                        </td>
+                      </tr>
 
-                      <thead>
-                        <tr>
-                          <th>Product Name</th>
-                          <th>Cat. No.</th>
-                          <th>Product Type</th>
-                        </tr>
-                      </thead>
+                      <tr>
+                        <td>
+                          <a href="" class="text-link">MEM (with NEAA)</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">PM150410</a>
+                        </td>
+                      </tr>
 
-                      <tbody>
-                        <tr>
-                          <td>
-                            <a href="" class="text-link">MEM  (with NEAA)</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">PM150410</a>
-                          </td>
-                          <td rowspan="3">
-                            <a href="" class="text-link">Liquid Basal Medium</a>
-                          </td>
-                        </tr>
+                      <tr>
+                        <td>
+                          <a href="" class="text-link">MEM (with NEAA)</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">PM150410</a>
+                        </td>
+                      </tr>
 
-                        <tr>
-                          <td>
-                            <a href="" class="text-link">MEM  (with NEAA)</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">PM150410</a>
-                          </td>
-                        </tr>
+                      <tr>
+                        <td>
+                          <a href="" class="text-link">MEM (with NEAA)</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">PM150410</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">Liquid Basal Medium</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
 
-                        <tr>
-                          <td>
-                            <a href="" class="text-link">MEM  (with NEAA)</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">PM150410</a>
-                          </td>
-                        </tr>
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
 
-                        <tr>
-                          <td>
-                            <a href="" class="text-link">MEM  (with NEAA)</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">PM150410</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">Liquid Basal Medium</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <span class="square-title">Recommended for you</span>
+                </td>
+                <td></td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
+              <tr>
+                <td colspan="4" class="h-16"></td>
+              </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <span class="square-title">Recommended for you</span>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+                    <colgroup>
+                      <col />
+                      <col />
+                      <col />
+                    </colgroup>
 
-                <tr>
-                  <td colspan="4" class="h-16"></td>
-                </tr>
+                    <tbody>
+                      <tr>
+                        <td><strong>Product Name</strong></td>
+                        <td><strong>Cat. No.</strong></td>
+                        <td><strong>Product Type</strong></td>
+                      </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
-                      <colgroup>
-                        <col />
-                        <col />
-                        <col />
-                      </colgroup>
+                      <tr>
+                        <td>
+                          <a href="" class="text-link">MEM (with NEAA)</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">PM150410</a>
+                        </td>
+                        <td rowspan="3">
+                          <a href="" class="text-link">Liquid Basal Medium</a>
+                        </td>
+                      </tr>
 
-                      <tbody>
-                        <tr>
-                          <td><strong>Product Name</strong></td>
-                          <td><strong>Cat. No.</strong></td>
-                          <td><strong>Product Type</strong></td>
-                        </tr>
+                      <tr>
+                        <td>
+                          <a href="" class="text-link">MEM (with NEAA)</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">PM150410</a>
+                        </td>
+                      </tr>
 
-                        <tr>
-                          <td>
-                            <a href="" class="text-link">MEM  (with NEAA)</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">PM150410</a>
-                          </td>
-                          <td rowspan="3">
-                            <a href="" class="text-link">Liquid Basal Medium</a>
-                          </td>
-                        </tr>
+                      <tr>
+                        <td>
+                          <a href="" class="text-link">MEM (with NEAA)</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">PM150410</a>
+                        </td>
+                      </tr>
 
-                        <tr>
-                          <td>
-                            <a href="" class="text-link">MEM  (with NEAA)</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">PM150410</a>
-                          </td>
-                        </tr>
+                      <tr>
+                        <td>
+                          <a href="" class="text-link">MEM (with NEAA)</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">PM150410</a>
+                        </td>
+                        <td>
+                          <a href="" class="text-link">Liquid Basal Medium</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
 
-                        <tr>
-                          <td>
-                            <a href="" class="text-link">MEM  (with NEAA)</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">PM150410</a>
-                          </td>
-                        </tr>
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
 
-                        <tr>
-                          <td>
-                            <a href="" class="text-link">MEM  (with NEAA)</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">PM150410</a>
-                          </td>
-                          <td>
-                            <a href="" class="text-link">Liquid Basal Medium</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <span class="square-title">Cited Product</span>
+                </td>
+                <td></td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
+              <tr>
+                <td colspan="4" class="h-12"></td>
+              </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <span class="square-title">Cited Product</span>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+                    <colgroup>
+                      <col />
+                      <col width="30%" />
+                    </colgroup>
 
-                <tr>
-                  <td colspan="4" class="h-12"></td>
-                </tr>
+                    <tbody>
+                      <tr>
+                        <td>Product Name</td>
+                        <td>Cat. No.</td>
+                      </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
-                      <colgroup>
-                        <col />
-                        <col width="30%" />
-                      </colgroup>
+                      <tr>
+                        <td>
+                          <a href="https://www.procellsystem.com/p/rpmi-1640-pm150110-71499"
+                            class="text-link">RPMI-1640</a>
+                        </td>
+                        <td>
+                          <a href="https://www.procellsystem.com/p/rpmi-1640-pm150110-71499"
+                            class="text-link">PM150110</a>
+                        </td>
+                      </tr>
 
-                      <tbody>
-                        <tr>
-                          <td>Product Name</td>
-                          <td>Cat. No.</td>
-                        </tr>
+                      <tr>
+                        <td>
+                          <a href="https://www.procellsystem.com/p/dmem-high-glucose-pm150210-69874"
+                            class="text-link">DMEM (High glucose)</a>
+                        </td>
+                        <td>
+                          <a href="https://www.procellsystem.com/p/dmem-high-glucose-pm150210-69874"
+                            class="text-link">PM150210</a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
 
-                        <tr>
-                          <td>
-                            <a href="https://www.procellsystem.com/p/rpmi-1640-pm150110-71499" class="text-link">RPMI-1640</a>
-                          </td>
-                          <td>
-                            <a href="https://www.procellsystem.com/p/rpmi-1640-pm150110-71499" class="text-link">PM150110</a>
-                          </td>
-                        </tr>
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
 
-                        <tr>
-                          <td>
-                            <a href="https://www.procellsystem.com/p/dmem-high-glucose-pm150210-69874" class="text-link">DMEM (High glucose)</a>
-                          </td>
-                          <td>
-                            <a href="https://www.procellsystem.com/p/dmem-high-glucose-pm150210-69874" class="text-link">PM150210</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <span class="square-title">Recommended for you</span>
+                </td>
+                <td></td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
+              <tr>
+                <td colspan="4" class="h-12"></td>
+              </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <span class="square-title">Recommended for you</span>
-                  </td>
-                  <td></td>
-                </tr>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+                    <colgroup>
+                      <col />
+                      <col />
+                      <col />
+                    </colgroup>
 
-                <tr>
-                  <td colspan="4" class="h-12"></td>
-                </tr>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <a href="https://www.procellsystem.com/p/dmem-f12-pm150312-68139"
+                            class="decoration-none text-link-hover">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150312-500mL-cropped.webp"
+                              style="height: 108px;" />
+                            <p>DMEM/F12</p>
+                            <p>Cat. No.: PM150312</p>
+                          </a>
+                        </td>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
-                      <colgroup>
-                        <col />
-                        <col />
-                        <col />
-                      </colgroup>
+                        <td>
+                          <a href="https://www.procellsystem.com/p/dmem-low-glucose-pm150220-70471"
+                            class="decoration-none text-link-hover">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150220-500mL-cropped.webp"
+                              style="height: 108px;" />
+                            <p>DMEM (Low glucose)</p>
+                            <p>Cat. No.: PM150220</p>
+                          </a>
+                        </td>
 
-                      <tbody>
-                        <tr>
-                          <td>
-                            <a href="https://www.procellsystem.com/p/dmem-f12-pm150312-68139" class="decoration-none text-link-hover">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150312-500mL-cropped.webp" style="height: 108px;" />
-                              <p>DMEM/F12</p>
-                              <p>Cat. No.: PM150312</p>
-                            </a>
-                          </td>
+                        <td>
+                          <a href="https://www.procellsystem.com/p/mem-with-neaa-pm150410-71162"
+                            class="decoration-none text-link-hover">
+                            <img
+                              src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150410-500mL-cropped.webp"
+                              style="height: 108px;" />
+                            <p>MEM, with NEAA</p>
+                            <p>Cat. No.: PM150410</p>
+                          </a>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- 主体 end -->
 
-                          <td>
-                            <a href="https://www.procellsystem.com/p/dmem-low-glucose-pm150220-70471" class="decoration-none text-link-hover">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150220-500mL-cropped.webp" style="height: 108px;" />
-                              <p>DMEM (Low glucose)</p>
-                              <p>Cat. No.: PM150220</p>
-                            </a>
-                          </td>
+          <!-- 页尾 start -->
+          <table cellspacing="0" cellpadding="0" border="0" class="footer">
+            <colgroup>
+              <col width="10px" />
+              <col />
+              <col />
+              <col width="10px" />
+            </colgroup>
 
-                          <td>
-                            <a href="https://www.procellsystem.com/p/mem-with-neaa-pm150410-71162" class="decoration-none text-link-hover">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150410-500mL-cropped.webp" style="height: 108px;" />
-                              <p>MEM, with NEAA</p>
-                              <p>Cat. No.: PM150410</p>
-                            </a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
-            <!-- 主体 end -->
+            <tbody>
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
 
-            <!-- 页尾 start -->
-            <table cellspacing="0" cellpadding="0" border="0" class="footer">
-              <colgroup>
-                <col width="10px" />
-                <col />
-                <col />
-                <col width="10px" />
-              </colgroup>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0" class="connect-us text-center">
+                    <colgroup>
+                      <col width="20%" />
+                      <col />
+                      <col />
+                      <col />
+                      <col />
+                      <!-- <col /> -->
+                      <col />
+                      <col />
+                      <col width="20%" />
+                    </colgroup>
 
-              <tbody>
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
+                    <tbody>
+                      <tr>
+                        <td></td>
+                        <td colspan="6" class="connect-us-title font-bold text-size-[14px]">Connect with us</td>
+                        <td></td>
+                      </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="connect-us text-center">
-                      <colgroup>
-                        <col width="20%" />
-                        <col />
-                        <col />
-                        <col />
-                        <col />
-                        <!-- <col /> -->
-                        <col />
-                        <col />
-                        <col width="20%" />
-                      </colgroup>
-
-                      <tbody>
-                        <tr>
-                          <td></td>
-                          <td colspan="6" class="connect-us-title font-bold text-size-[14px]">Connect with us</td>
-                          <td></td>
-                        </tr>
-
-                        <tr>
-                          <td></td>
-                          <td class="line-height-0 font-size-0">
-                            <a href="https://www.linkedin.com/company/procellsystem" class="image-box">
-                              <img src="https://oss.pri-cella.com/edm/edmfooter/2.png" alt="" />
-                            </a>
-                          </td>
-                          <td class="line-height-0 font-size-0">
-                            <a href="https://www.youtube.com/channel/UCONFhi6cGpDFfZlKBG65J6g" class="image-box">
-                              <img src="https://oss.pri-cella.com/edm/edmfooter/1.png" alt="" />
-                            </a>
-                          </td>
-                          <td class="line-height-0 font-size-0">
-                            <a href="https://www.facebook.com/procellsystem" class="image-box">
-                              <img src="https://oss.pri-cella.com/edm/edmfooter/3.png" alt="" />
-                            </a>
-                          </td>
-                          <td class="line-height-0 font-size-0">
-                            <a href="https://www.instagram.com/procellsystem" class="image-box">
-                              <img src="https://oss.pri-cella.com/edm/edmfooter/5.png" alt="" />
-                            </a>
-                          </td>
-                          <!-- <td class="line-height-0 font-size-0">
+                      <tr>
+                        <td></td>
+                        <td class="line-height-0 font-size-0">
+                          <a href="https://www.linkedin.com/company/procellsystem" class="image-box">
+                            <img src="https://oss.pri-cella.com/edm/edmfooter/2.png" alt="" />
+                          </a>
+                        </td>
+                        <td class="line-height-0 font-size-0">
+                          <a href="https://www.youtube.com/channel/UCONFhi6cGpDFfZlKBG65J6g" class="image-box">
+                            <img src="https://oss.pri-cella.com/edm/edmfooter/1.png" alt="" />
+                          </a>
+                        </td>
+                        <td class="line-height-0 font-size-0">
+                          <a href="https://www.facebook.com/procellsystem" class="image-box">
+                            <img src="https://oss.pri-cella.com/edm/edmfooter/3.png" alt="" />
+                          </a>
+                        </td>
+                        <td class="line-height-0 font-size-0">
+                          <a href="https://www.instagram.com/procellsystem" class="image-box">
+                            <img src="https://oss.pri-cella.com/edm/edmfooter/5.png" alt="" />
+                          </a>
+                        </td>
+                        <!-- <td class="line-height-0 font-size-0">
                             <a href="https://www.pinterest.com/procellsystem" class="image-box">
                               <img src="https://oss.pri-cella.com/edm/edmfooter/6.png" alt="" />
                             </a>
                           </td> -->
-                          <td class="line-height-0 font-size-0">
-                            <a href="https://www.tiktok.com/@procellsystem" class="image-box">
-                              <img src="https://oss.pri-cella.com/edm/edmfooter/7.png" alt="" />
-                            </a>
-                          </td>
-                          <td class="line-height-0 font-size-0">
-                            <a href="https://wa.me/13466669098" class="image-box">
-                              <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/edmfooter/what'sup.webp" alt="" />
-                            </a>
-                          </td>
-                          <td></td>
-                        </tr>
+                        <td class="line-height-0 font-size-0">
+                          <a href="https://www.tiktok.com/@procellsystem" class="image-box">
+                            <img src="https://oss.pri-cella.com/edm/edmfooter/7.png" alt="" />
+                          </a>
+                        </td>
+                        <td class="line-height-0 font-size-0">
+                          <a href="https://wa.me/13466669098" class="image-box">
+                            <img src="https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/edmfooter/what'sup.webp"
+                              alt="" />
+                          </a>
+                        </td>
+                        <td></td>
+                      </tr>
 
-                        <tr>
-                          <td></td>
-                          <td colspan="6" class="connect-us-separator"></td>
-                          <td></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
+                      <tr>
+                        <td></td>
+                        <td colspan="6" class="connect-us-separator"></td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-24"></td>
-                </tr>
+              <tr>
+                <td colspan="4" class="h-24"></td>
+              </tr>
 
-                <tr>
-                  <td></td>
-                  <td colspan="2">
-                    <table cellspacing="0" cellpadding="0" border="0" class="contact-us text-center align-middle">
-                      <colgroup>
-                        <!-- <col width="25%" /> -->
-                        <col />
-                        <!-- <col width="25%" /> -->
-                      </colgroup>
+              <tr>
+                <td></td>
+                <td colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0" class="contact-us text-center align-middle">
+                    <colgroup>
+                      <!-- <col width="25%" /> -->
+                      <col />
+                      <!-- <col width="25%" /> -->
+                    </colgroup>
 
-                      <tbody>
-                        <tr>
-                          <!-- <td></td> -->
-                          <td>
-                            <strong>Procell Biotechnology Co.,Ltd.</strong>
-                          </td>
-                          <!-- <td rowspan="4">
+                    <tbody>
+                      <tr>
+                        <!-- <td></td> -->
+                        <td>
+                          <strong>Procell Biotechnology Co.,Ltd.</strong>
+                        </td>
+                        <!-- <td rowspan="4">
                             <div class="contact-us-qrcode image-box">
                               <img src="https://oss.pri-cella.com/images/edmewm.png" alt="" />
                             </div>
                             <p class="contact-us-whatsApp">WhatsApp Business Account</p>
                           </td> -->
-                        </tr>
+                      </tr>
 
-                        <tr>
-                          <!-- <td></td> -->
-                          <td>
-                            <img src="https://file.elabscience.com/edm/edm2024491632/电话.png" alt="" class="align-middle" />
-                            <span class="align-middle">Toll-free: 1-888-852-8623</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <!-- <td></td> -->
-                          <td>
-                            <img src="https://file.elabscience.com/edm/edm2024491632/地球.png" alt="" class="align-middle" />
-                            <span class="align-middle">Web: <a href="https://www.procellsystem.com/">www.procellsystem.com</a></span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <!-- <td></td> -->
-                          <td>
-                            <img src="https://file.elabscience.com/edm/edm2024491632/邮件.png" alt="" class="align-middle" />
-                            <span class="align-middle">Email: <a href="mailto:orders@procellsystem.com" class="decoration-none">orders@procellsystem.com</a>;</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <!-- <td></td> -->
-                          <td>
-                            <a href="mailto:techsupport@procellsystem.com" class="decoration-none" style="padding-left: 13px;">techsupport@procellsystem.com</a>
-                          </td>
-                          <!-- <td></td> -->
-                        </tr>
-                        <tr>
-                          <td colspan="1" style="padding-top: 12px;">14780 Memorial Drive, Suite 105, Houston, Texas, 77079, USA</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td></td>
-                </tr>
+                      <tr>
+                        <!-- <td></td> -->
+                        <td>
+                          <img src="https://file.elabscience.com/edm/edm2024491632/电话.png" alt=""
+                            class="align-middle" />
+                          <span class="align-middle">Toll-free: 1-888-852-8623</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <!-- <td></td> -->
+                        <td>
+                          <img src="https://file.elabscience.com/edm/edm2024491632/地球.png" alt=""
+                            class="align-middle" />
+                          <span class="align-middle">Web: <a
+                              href="https://www.procellsystem.com/">www.procellsystem.com</a></span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <!-- <td></td> -->
+                        <td>
+                          <img src="https://file.elabscience.com/edm/edm2024491632/邮件.png" alt=""
+                            class="align-middle" />
+                          <span class="align-middle">Email: <a href="mailto:orders@procellsystem.com"
+                              class="decoration-none">orders@procellsystem.com</a>;</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <!-- <td></td> -->
+                        <td>
+                          <a href="mailto:techsupport@procellsystem.com" class="decoration-none"
+                            style="padding-left: 13px;">techsupport@procellsystem.com</a>
+                        </td>
+                        <!-- <td></td> -->
+                      </tr>
+                      <tr>
+                        <td colspan="1" class="pt-12">14780 Memorial Drive, Suite 105, Houston, Texas,
+                          77079, USA</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td></td>
+              </tr>
 
-                <tr>
-                  <td colspan="4" class="h-32"></td>
-                </tr>
-              </tbody>
-            </table>
-            <!-- 页尾 end -->
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </body>
+              <tr>
+                <td colspan="4" class="h-32"></td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- 页尾 end -->
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+
 </html>
