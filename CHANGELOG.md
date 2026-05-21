@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.11](https://github.com/GuoSirius/juice-cli/compare/v2.1.10...v2.1.11) (2026-05-21)
+
+
+### Bug Fixes
+
+* use spawnSync for reg.exe to avoid cmd.exe & character parsing ([7c4c41b](https://github.com/GuoSirius/juice-cli/commit/7c4c41baf085fcf069b3b676aad0e2782456822a))
+
 ### [2.1.10](https://github.com/GuoSirius/juice-cli/compare/v2.1.9...v2.1.10) (2026-05-21)
 
 
