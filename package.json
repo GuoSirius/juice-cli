@@ -53,6 +53,7 @@
     "src/",
     "defaults/",
     "edm/",
+    "icons/",
     "README.md"
   ],
   "devDependencies": {
