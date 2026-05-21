@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/GuoSirius/juice-cli/compare/v2.0.6...v2.1.0) (2026-05-21)
+
+
+### Features
+
+* add cross-brand warning, npm global install support, and auto menu registration ([3b7bf29](https://github.com/GuoSirius/juice-cli/commit/3b7bf29445855209ef8dd5f2706568e731b10849))
+* add snippet mode for fragment + template email assembly ([3d2dc5f](https://github.com/GuoSirius/juice-cli/commit/3d2dc5f551c223f4f440993ef36c44db4c5e94da))
+
+
+### Bug Fixes
+
+* correct snippet mode to 4-file pipeline with proper handling ([1be068f](https://github.com/GuoSirius/juice-cli/commit/1be068f94083c09465b4b991b5f8f8a4a5067815))
+
+
+### Chores
+
+* update EDM templates and config ([70a175d](https://github.com/GuoSirius/juice-cli/commit/70a175d60c8c5c64817ec39480b2c2bf497d48fd))
+
+
+### Documentation
+
+* update ([eda95f7](https://github.com/GuoSirius/juice-cli/commit/eda95f77052846471d87bebfdc0759ca7160eb9c))
+
 ### [2.0.6](https://github.com/GuoSirius/juice-cli/compare/v2.0.5...v2.0.6) (2026-05-19)
 
 
