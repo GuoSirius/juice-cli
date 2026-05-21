@@ -1,6 +1,6 @@
 {
   "name": "juice-email-cli",
-  "version": "1.3.0",
+  "version": "2.0.6",
   "description": "CLI tool to generate email-client-compatible HTML with juice (CSS inlining) + Mustache templating + minification",
   "main": "src/index.js",
   "bin": {
@@ -10,7 +10,10 @@
     "start": "node bin/juice.js",
     "test": "node bin/juice.js --help",
     "postinstall": "node bin/juice.js --install",
-    "preuninstall": "node bin/juice.js --uninstall"
+    "preuninstall": "node bin/juice.js --uninstall",
+    "prepare": "husky install",
+    "release": "node scripts/release.mjs",
+    "release:dry": "standard-version --dry-run"
   },
   "keywords": [
     "email",
@@ -24,16 +27,15 @@
   ],
   "author": "",
   "license": "MIT",
-  "homepage": "https://gitee.com/siriussupreme/juice-cli",
+  "homepage": "https://github.com/GuoSirius/juice-cli",
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/siriussupreme/juice-cli.git"
+    "url": "https://github.com/GuoSirius/juice-cli.git"
   },
   "bugs": {
-    "url": "https://gitee.com/siriussupreme/juice-cli/issues"
+    "url": "https://github.com/GuoSirius/juice-cli/issues"
   },
   "dependencies": {
-    "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "html-minifier-terser": "^7.2.0",
     "js-yaml": "^4.1.0",
@@ -47,6 +49,16 @@
   "files": [
     "bin/",
     "src/",
-    "defaults/"
-  ]
+    "defaults/",
+    "README.md"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
+    "chalk": "^4.1.2",
+    "husky": "^9.1.7",
+    "@inquirer/prompts": "^5.0.2",
+    "inquirer": "^13.4.3",
+    "standard-version": "^9.5.0"
+  }
 }

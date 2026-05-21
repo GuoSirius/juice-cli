@@ -1,32 +1,13 @@
-# Dependencies
-node_modules/
-
 # Git
 .git
 .gitignore
+.husky/
 
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-npm-debug.log*
-
-# Test
+# Dev
+.workbuddy/
 coverage/
+*.bak
+*.tmp
 
 # Docs
 *.md
-!README.md
-
-# Dev
-examples/
-.workbuddy/
