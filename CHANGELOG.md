@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.13](https://github.com/GuoSirius/juice-cli/compare/v2.1.12...v2.1.13) (2026-05-21)
+
+
+### Bug Fixes
+
+* clean legacy HKLM registry entries to prevent old menu names from persisting ([dd147f8](https://github.com/GuoSirius/juice-cli/commit/dd147f84040aefa26d191fa86c020ee4945bdf0f))
+
+
+### Chores
+
+* update local permissions for additional Bash commands ([e33e099](https://github.com/GuoSirius/juice-cli/commit/e33e0999a8dbd1bb10c55edc3eeb024573de892f))
+
 ### [2.1.12](https://github.com/GuoSirius/juice-cli/compare/v2.1.11...v2.1.12) (2026-05-21)
 
 
