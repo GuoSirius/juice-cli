@@ -574,9 +574,19 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
     templatePath = chosen.path;
   }
 
-  // 自动检测片段目录下的配置文件（juice.yaml 优先，juice.yml 次之）
+  // 配置文件：非交互模式自动检测片段目录，交互模式提示用户选择
   const snippetDir = path.dirname(snippetPath);
-  const priorityConfigPath = findLocalConfig(snippetDir);
+  let priorityConfigPath;
+
+  if (template) {
+    // 命令行完整指定（-s + -f），自动检测
+    priorityConfigPath = findLocalConfig(snippetDir);
+  } else {
+    // 交互模式（只有 -s），提示选择配置
+    const yamlFiles = findYamlFiles(snippetDir);
+    const configChoice = await promptConfigForInteractive(yamlFiles);
+    priorityConfigPath = (configChoice.type === 'file') ? configChoice.path : null;
+  }
 
   // 跨品牌检查：片段和模板品牌不一致时给出警告
   try {
