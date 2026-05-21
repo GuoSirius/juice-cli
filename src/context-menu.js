@@ -102,12 +102,25 @@ const SUBCMDS = {
 const PARENT_KEY_NAME = 'JuiceEmail';
 
 /**
- * 为需要交互式终端输入的命令包一层 powershell -NoExit，
- * 从右键菜单启动时才能正常显示 inquirer 提示。
- * -f 命令不需要（非交互模式，直接生成文件）
+ * 为交互式命令包一层 PowerShell：
+ * - 成功：窗口自动关闭
+ * - 失败：窗口保持开启，显示重新执行的命令
  */
 function wrapInteractive(nodePath, scriptPath, cliArgs) {
-  return `powershell.exe -NoExit -Command "& '${nodePath}' '${scriptPath}' ${cliArgs}"`;
+  const node = nodePath.replace(/'/g, "''");
+  const script = scriptPath.replace(/'/g, "''");
+  // %1 由 Windows 在 CreateProcess 前展开为实际文件路径
+  const ps = [
+    `& '${node}' '${script}' ${cliArgs}`,
+    `if ($LASTEXITCODE) {`,
+    `  Write-Host ''`,
+    `  Write-Host '[Failed] Exit code:' $LASTEXITCODE`,
+    `  Write-Host '[Re-run] juice ${cliArgs}'`,
+    `  Write-Host ''`,
+    `  Read-Host 'Press Enter to close'`,
+    `}`,
+  ].join('; ');
+  return `powershell.exe -Command "${ps}"`;
 }
 
 // ─── 注册 ─────────────────────────────────────────────────────────────────────
