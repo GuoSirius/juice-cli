@@ -51,7 +51,7 @@ function checkUnstagedFiles() {
 function commitFiles(message) {
   try {
     execSync('git add .', { stdio: 'ignore' });
-    execSync(`git commit -F -`, { input: message, stdio: 'ignore' });
+    execSync(`git commit -F -`, { input: message, stdio: ['pipe', 'pipe', 'pipe'] });
     console.log(chalk.green('Files committed successfully'));
   } catch (error) {
     console.error(chalk.red('Error committing files:', error.message));
