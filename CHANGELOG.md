@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.15](https://github.com/GuoSirius/juice-cli/compare/v2.1.14...v2.1.15) (2026-05-21)
+
+
+### Features
+
+* show different sub-menus based on file extension ([8916a88](https://github.com/GuoSirius/juice-cli/commit/8916a88b0a6e4bc90e76be762fab515e65654f53))
+
+
+### Bug Fixes
+
+* delete old containers before re-registering to avoid stale sub-commands ([b92e60f](https://github.com/GuoSirius/juice-cli/commit/b92e60f1bbcb57449bdbebf30a9eba0313d3f8f2))
+* remove config option from HTML context menu, keep only on YAML ([fb936e2](https://github.com/GuoSirius/juice-cli/commit/fb936e24c0981ebef38e45b93e0e0a26e8b95cad))
+
 ### [2.1.14](https://github.com/GuoSirius/juice-cli/compare/v2.1.13...v2.1.14) (2026-05-21)
 
 
