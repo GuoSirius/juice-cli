@@ -69,6 +69,29 @@ function regDelete(key) {
   return result.status === 0;
 }
 
+/**
+ * 清理旧版本残留在 HKLM 的注册表项（v1 使用 HKCR/HKLM，需要管理员权限）
+ *
+ * 旧版本用管理员权限安装时写入 HKLM，升级到 HKCU 版本后这些残留不会被自动清理。
+ * Windows 合并 HKLM + HKCU 注册表视图时，HKLM 里的旧菜单名可能覆盖 HKCU 的新菜单名，
+ * 导致用户更新后重启电脑仍然看到旧版菜单。
+ *
+ * 没有管理员权限时 reg delete 静默失败，不影响后续 HKCU 写入。
+ */
+function cleanLegacyHklmEntries() {
+  if (!isWindows) return;
+
+  // 清理旧版父菜单（HKLM\Software\Classes\SystemFileAssociations\.*\shell\JuiceEmail）
+  for (const root of LEGACY_HKLM_ROOTS) {
+    regDelete(`${root}\\${PARENT_KEY_NAME}`);
+  }
+
+  // 清理旧版子命令（HKLM\...\CommandStore\shell\JuiceEmail.*）
+  for (const name of Object.values(SUBCMDS)) {
+    regDelete(`${LEGACY_HKLM_SUBCMD_SPACE}\\${name}`);
+  }
+}
+
 // ─── 菜单结构常量 ─────────────────────────────────────────────────────────────
 
 // 使用 HKCU，无需管理员权限
@@ -88,6 +111,17 @@ const YAML_ROOTS = [
 
 // CommandStore 子命令注册空间
 const SUBCMD_SPACE = 'HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell';
+
+// 旧版本可能残留在 HKLM 的路径（v1 使用 HKCR/HKLM，需要管理员权限）
+// 这些残留不清理会导致 Windows 合并注册表视图时显示旧菜单名
+const LEGACY_HKLM_ROOTS = [
+  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.html\\shell',
+  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.htm\\shell',
+  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.yaml\\shell',
+  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.yml\\shell',
+];
+
+const LEGACY_HKLM_SUBCMD_SPACE = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell';
 
 // 子命令名称常量（register / unregister 共用，避免硬编码不一致）
 const SUBCMDS = {
@@ -130,6 +164,9 @@ async function registerContextMenu() {
   }
 
   console.log(chalk.cyan('\n  注册 juice 右键菜单（当前用户，无需管理员权限）...\n'));
+
+  // 先清理旧版本可能残留在 HKLM 的注册表项，避免新旧菜单名冲突
+  cleanLegacyHklmEntries();
 
   const nodePath = getNodePath();
   const scriptPath = getJuiceScript();
@@ -216,20 +253,23 @@ async function unregisterContextMenu() {
 
   let removed = 0;
 
-  // 清理 HTML 父菜单
+  // 清理 HKCU 父菜单
   for (const root of HTML_ROOTS) {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理 YAML 父菜单
+  // 清理 HKCU YAML 父菜单
   for (const root of YAML_ROOTS) {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理子命令
+  // 清理 HKCU 子命令
   for (const name of Object.values(SUBCMDS)) {
     regDelete(`${SUBCMD_SPACE}\\${name}`);
   }
+
+  // 同时清理旧版本可能残留在 HKLM 的注册表项
+  cleanLegacyHklmEntries();
 
   if (removed > 0) {
     console.log(chalk.green(`  ✔ 已移除 ${removed} 个右键菜单项。\n`));
