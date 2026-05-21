@@ -1,0 +1,3 @@
+- [auto-commit](feedback_auto-commit.md) — 完成后自动提交，用户自行发布
+- [juice-cli 概述](juice-cli-overview.md) — HTML 邮件生成 CLI 工具，CSS 内联 + Mustache + 压缩
+- [2026-05-21 更新](juice-cli-changes-2026-05-21.md) — rawHtml 配置、-s 简写、自定义输出名、缩进修复
