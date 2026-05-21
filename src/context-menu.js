@@ -3,7 +3,12 @@
 /**
  * Windows 右键菜单注册 / 取消注册
  *
- * 使用 HKEY_CURRENT_USER，无需管理员权限，仅对当前用户生效。
+ * 使用 ExtendedSubCommandsKey 实现级联菜单（参考 WinRAR 和 Windows Defender 的实现）。
+ * 子命令存储在 Classes 根下的共享容器中，各文件类型父菜单通过 ExtendedSubCommandsKey 引用。
+ *
+ * 与旧版 SubCommands + CommandStore 方案的区别：
+ *   - 不依赖 CommandStore（HKCU CommandStore 在某些 Windows 版本下不被正确解析）
+ *   - ExtendedSubCommandsKey 指向 Classes 根下的相对路径，子命令内联存储
  *
  * 菜单结构（所有文件类型统一）：
  *   .html / .htm / .yaml / .yml：
@@ -37,9 +42,6 @@ function getIconPath() {
 
 const isWindows = process.platform === 'win32';
 
-/**
- * 执行 reg add — 使用 spawnSync 直接调用 reg.exe，避免 cmd.exe 解析特殊字符
- */
 function regAdd(key, valueName, type, data) {
   if (!isWindows) return false;
   const args = ['add', key, '/f'];
@@ -60,36 +62,10 @@ function regAdd(key, valueName, type, data) {
   return true;
 }
 
-/**
- * 执行 reg delete — 键不存在时静默忽略
- */
 function regDelete(key) {
   if (!isWindows) return false;
   const result = spawnSync('reg', ['delete', key, '/f'], { stdio: 'pipe' });
   return result.status === 0;
-}
-
-/**
- * 清理旧版本残留在 HKLM 的注册表项（v1 使用 HKCR/HKLM，需要管理员权限）
- *
- * 旧版本用管理员权限安装时写入 HKLM，升级到 HKCU 版本后这些残留不会被自动清理。
- * Windows 合并 HKLM + HKCU 注册表视图时，HKLM 里的旧菜单名可能覆盖 HKCU 的新菜单名，
- * 导致用户更新后重启电脑仍然看到旧版菜单。
- *
- * 没有管理员权限时 reg delete 静默失败，不影响后续 HKCU 写入。
- */
-function cleanLegacyHklmEntries() {
-  if (!isWindows) return;
-
-  // 清理旧版父菜单（HKLM\Software\Classes\SystemFileAssociations\.*\shell\JuiceEmail）
-  for (const root of LEGACY_HKLM_ROOTS) {
-    regDelete(`${root}\\${PARENT_KEY_NAME}`);
-  }
-
-  // 清理旧版子命令（HKLM\...\CommandStore\shell\JuiceEmail.*）
-  for (const name of Object.values(SUBCMDS)) {
-    regDelete(`${LEGACY_HKLM_SUBCMD_SPACE}\\${name}`);
-  }
 }
 
 // ─── 菜单结构常量 ─────────────────────────────────────────────────────────────
@@ -109,21 +85,7 @@ const YAML_ROOTS = [
   `${HKCU_SHELL}\\SystemFileAssociations\\.yml\\shell`,
 ];
 
-// CommandStore 子命令注册空间
-const SUBCMD_SPACE = 'HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell';
-
-// 旧版本可能残留在 HKLM 的路径（v1 使用 HKCR/HKLM，需要管理员权限）
-// 这些残留不清理会导致 Windows 合并注册表视图时显示旧菜单名
-const LEGACY_HKLM_ROOTS = [
-  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.html\\shell',
-  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.htm\\shell',
-  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.yaml\\shell',
-  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.yml\\shell',
-];
-
-const LEGACY_HKLM_SUBCMD_SPACE = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell';
-
-// 子命令名称常量（register / unregister 共用，避免硬编码不一致）
+// 子命令名称常量
 const SUBCMDS = {
   generate: 'JuiceEmail.Generate',
   snippet:  'JuiceEmail.Snippet',
@@ -133,6 +95,48 @@ const SUBCMDS = {
 
 const PARENT_KEY_NAME = 'JuiceEmail';
 
+// ExtendedSubCommandsKey 指向此路径（相对于 HKCU\Software\Classes）
+// 解析结果：HKCU\Software\Classes\JuiceEmail.SubCommands
+const SUB_CMDS_CONTAINER = 'JuiceEmail.SubCommands';
+
+// ─── 旧版残留清理 ─────────────────────────────────────────────────────────────
+
+// 旧版 HKLM 父菜单路径（v1 使用 HKCR/HKLM，需管理员权限写入）
+const LEGACY_HKLM_ROOTS = [
+  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.html\\shell',
+  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.htm\\shell',
+  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.yaml\\shell',
+  'HKEY_LOCAL_MACHINE\\Software\\Classes\\SystemFileAssociations\\.yml\\shell',
+];
+
+// 旧版 CommandStore 子命令路径（v1-v2.1.12 使用 SubCommands + CommandStore 方案）
+const LEGACY_HKCU_CMDSTORE = 'HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell';
+const LEGACY_HKLM_CMDSTORE = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell';
+
+/**
+ * 清理旧版本残留在 HKLM 的父菜单（v1 使用 HKCR/HKLM，需要管理员权限）
+ * 没有管理员权限时静默失败，不影响后续 HKCU 写入
+ */
+function cleanLegacyHklmParents() {
+  if (!isWindows) return;
+  for (const root of LEGACY_HKLM_ROOTS) {
+    regDelete(`${root}\\${PARENT_KEY_NAME}`);
+  }
+}
+
+/**
+ * 清理旧版本 CommandStore 子命令残留（HKCU + HKLM）
+ */
+function cleanLegacyCommandStore() {
+  if (!isWindows) return;
+  for (const name of Object.values(SUBCMDS)) {
+    regDelete(`${LEGACY_HKCU_CMDSTORE}\\${name}`);
+    regDelete(`${LEGACY_HKLM_CMDSTORE}\\${name}`);
+  }
+}
+
+// ─── PowerShell 包装 ──────────────────────────────────────────────────────────
+
 /**
  * 为交互式命令包一层 PowerShell：
  * - 成功：窗口自动关闭
@@ -141,7 +145,7 @@ const PARENT_KEY_NAME = 'JuiceEmail';
 function wrapInteractive(nodePath, scriptPath, cliArgs) {
   const node = nodePath.replace(/'/g, "''");
   const script = scriptPath.replace(/'/g, "''");
-  // %1 由 Windows 在 CreateProcess 前展开为实际文件路径
+  // %1 由 Windows Explorer 在 CreateProcess 前展开为实际文件路径
   const ps = [
     `& '${node}' '${script}' ${cliArgs}`,
     `if ($LASTEXITCODE) {`,
@@ -155,6 +159,56 @@ function wrapInteractive(nodePath, scriptPath, cliArgs) {
   return `powershell.exe -Command "${ps}"`;
 }
 
+// ─── 工具：查找 PowerShell 7 ─────────────────────────────────────────────────
+
+function resolvePwsh() {
+  const candidates = [
+    'C:\\Program Files\\PowerShell\\7\\pwsh.exe',
+    'C:\\Program Files (x86)\\PowerShell\\7\\pwsh.exe',
+    path.join(process.env['LOCALAPPDATA'] || '', 'Microsoft', 'PowerShell', 'pwsh.exe'),
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+  try {
+    const result = spawnSync('where', ['pwsh'], { stdio: 'pipe' });
+    const line = result.stdout.toString().trim().split('\n')[0].trim();
+    if (line && fs.existsSync(line)) return line;
+  } catch (_) {}
+  return null;
+}
+
+// ─── 注册子命令到共享容器 ────────────────────────────────────────────────────
+
+function registerSubCommands(containerPath, nodePath, scriptPath, iconPath, pwshPath) {
+  // generate（非交互，无需终端）
+  const genKey = `${containerPath}\\shell\\${SUBCMDS.generate}`;
+  regAdd(genKey, 'MUIVerb', 'REG_SZ', '📄 作为模板，生成邮件 HTML');
+  regAdd(genKey, 'Icon', 'REG_SZ', iconPath);
+  regAdd(`${genKey}\\command`, '', 'REG_SZ', `"${nodePath}" "${scriptPath}" -f %1`);
+
+  // snippet（交互，需要终端）
+  const snipKey = `${containerPath}\\shell\\${SUBCMDS.snippet}`;
+  regAdd(snipKey, 'MUIVerb', 'REG_SZ', '🧩 作为片段，拼接邮件 HTML');
+  regAdd(snipKey, 'Icon', 'REG_SZ', iconPath);
+  regAdd(`${snipKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-s %1'));
+
+  // config（交互，需要终端）
+  const cfgKey = `${containerPath}\\shell\\${SUBCMDS.config}`;
+  regAdd(cfgKey, 'MUIVerb', 'REG_SZ', '⚙️ 作为配置，拼接邮件 HTML');
+  regAdd(cfgKey, 'Icon', 'REG_SZ', iconPath);
+  regAdd(`${cfgKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-c %1'));
+
+  // pwsh（可选）
+  if (pwshPath) {
+    const pwshKey = `${containerPath}\\shell\\${SUBCMDS.pwsh}`;
+    regAdd(pwshKey, 'MUIVerb', 'REG_SZ', '📂 打开 PowerShell');
+    regAdd(pwshKey, 'Icon', 'REG_SZ', pwshPath);
+    regAdd(`${pwshKey}\\command`, '', 'REG_SZ',
+      `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath (Split-Path '%1')"`);
+  }
+}
+
 // ─── 注册 ─────────────────────────────────────────────────────────────────────
 
 async function registerContextMenu() {
@@ -165,64 +219,30 @@ async function registerContextMenu() {
 
   console.log(chalk.cyan('\n  注册 juice 右键菜单（当前用户，无需管理员权限）...\n'));
 
-  // 先清理旧版本可能残留在 HKLM 的注册表项，避免新旧菜单名冲突
-  cleanLegacyHklmEntries();
+  // 清理所有旧版残留，避免新旧方案冲突
+  cleanLegacyHklmParents();
+  cleanLegacyCommandStore();
 
   const nodePath = getNodePath();
   const scriptPath = getJuiceScript();
   const iconPath = getIconPath();
+  const pwshPath = resolvePwsh();
 
   let ok = true;
 
-  // ── 子命令 1：普通模式 - juice 生成（非交互，不需终端）─────────────────
-  const generateCmd = `"${nodePath}" "${scriptPath}" -f %1`;
-  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}`, '', 'REG_SZ', '📄 作为模板，生成邮件 HTML') && ok;
-  regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}`, 'Icon', 'REG_SZ', iconPath);
-  regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}\\command`, '', 'REG_SZ', generateCmd);
+  // 子命令注册一次到共享容器（所有文件类型共用）
+  const containerPath = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER}`;
+  registerSubCommands(containerPath, nodePath, scriptPath, iconPath, pwshPath);
 
-  // ── 子命令 2：片段模式 - 片段组装（交互，需要终端）────────────────────────
-  const snippetCmd = wrapInteractive(nodePath, scriptPath, '-s %1');
-  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}`, '', 'REG_SZ', '🧩 作为片段，拼接邮件 HTML') && ok;
-  regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}`, 'Icon', 'REG_SZ', iconPath);
-  regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}\\command`, '', 'REG_SZ', snippetCmd);
-
-  // ── 子命令 3：配置文件模式 - 交互式生成（交互，需要终端）──────────────────
-  const configCmd = wrapInteractive(nodePath, scriptPath, '-c %1');
-  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, '', 'REG_SZ', '⚙️ 作为配置，拼接邮件 HTML') && ok;
-  regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, 'Icon', 'REG_SZ', iconPath);
-  regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}\\command`, '', 'REG_SZ', configCmd);
-
-  // ── 子命令 4：在文件目录打开 pwsh（可选）──────────────────────────────────
-  const pwshPath = resolvePwsh();
-  if (pwshPath) {
-    const pwshCmd = `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath (Split-Path '%1')"`;
-    ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.pwsh}`, '', 'REG_SZ', '📂 打开 PowerShell') && ok;
-    regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.pwsh}`, 'Icon', 'REG_SZ', pwshPath);
-    regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.pwsh}\\command`, '', 'REG_SZ', pwshCmd);
-  }
-
-  // ── 所有文件类型共用同一套子命令 ────────────────────────────────────────
-  const allSubs = pwshPath
-    ? `${SUBCMDS.generate};${SUBCMDS.snippet};${SUBCMDS.config};${SUBCMDS.pwsh}`
-    : `${SUBCMDS.generate};${SUBCMDS.snippet};${SUBCMDS.config}`;
-
-  // .html / .htm
-  for (const root of HTML_ROOTS) {
+  // 为每种文件类型注册父菜单，通过 ExtendedSubCommandsKey 引用共享容器
+  const allRoots = [...HTML_ROOTS, ...YAML_ROOTS];
+  for (const root of allRoots) {
     const parentKey = `${root}\\${PARENT_KEY_NAME}`;
     ok = regAdd(parentKey, 'MUIVerb', 'REG_SZ', '📧 用 juice 生成邮件 HTML') && ok;
     regAdd(parentKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(parentKey, 'SubCommands', 'REG_SZ', allSubs);
+    regAdd(parentKey, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER);
   }
 
-  // .yaml / .yml（与 .html 共享同一套子命令）
-  for (const root of YAML_ROOTS) {
-    const parentKey = `${root}\\${PARENT_KEY_NAME}`;
-    ok = regAdd(parentKey, 'MUIVerb', 'REG_SZ', '📧 用 juice 生成邮件 HTML') && ok;
-    regAdd(parentKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(parentKey, 'SubCommands', 'REG_SZ', allSubs);
-  }
-
-  // ── 输出 ──────────────────────────────────────────────────────────────────
   if (!ok) {
     console.log(chalk.yellow('  ⚠  部分注册表项写入失败，右键菜单可能不完整。\n'));
   }
@@ -253,48 +273,24 @@ async function unregisterContextMenu() {
 
   let removed = 0;
 
-  // 清理 HKCU 父菜单
-  for (const root of HTML_ROOTS) {
+  // 清理 HKCU 父菜单（4 个文件类型）
+  const allRoots = [...HTML_ROOTS, ...YAML_ROOTS];
+  for (const root of allRoots) {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理 HKCU YAML 父菜单
-  for (const root of YAML_ROOTS) {
-    if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
-  }
+  // 清理共享子命令容器
+  if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER}`)) removed++;
 
-  // 清理 HKCU 子命令
-  for (const name of Object.values(SUBCMDS)) {
-    regDelete(`${SUBCMD_SPACE}\\${name}`);
-  }
-
-  // 同时清理旧版本可能残留在 HKLM 的注册表项
-  cleanLegacyHklmEntries();
+  // 清理旧版残留（HKLM 父菜单 + CommandStore）
+  cleanLegacyHklmParents();
+  cleanLegacyCommandStore();
 
   if (removed > 0) {
     console.log(chalk.green(`  ✔ 已移除 ${removed} 个右键菜单项。\n`));
   } else {
     console.log(chalk.gray('  ℹ  未找到已注册的右键菜单，无需卸载。\n'));
   }
-}
-
-// ─── 工具：查找 PowerShell 7 ─────────────────────────────────────────────────
-
-function resolvePwsh() {
-  const candidates = [
-    'C:\\Program Files\\PowerShell\\7\\pwsh.exe',
-    'C:\\Program Files (x86)\\PowerShell\\7\\pwsh.exe',
-    path.join(process.env['LOCALAPPDATA'] || '', 'Microsoft', 'PowerShell', 'pwsh.exe'),
-  ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) return p;
-  }
-  try {
-    const result = spawnSync('where', ['pwsh'], { stdio: 'pipe' });
-    const line = result.stdout.toString().trim().split('\n')[0].trim();
-    if (line && fs.existsSync(line)) return line;
-  } catch (_) {}
-  return null;
 }
 
 module.exports = { registerContextMenu, unregisterContextMenu };
