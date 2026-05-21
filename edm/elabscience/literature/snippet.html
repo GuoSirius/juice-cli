@@ -1,0 +1,145 @@
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0">
+      <colgroup>
+        <col width="25%" />
+        <col />
+      </colgroup>
+
+      <tbody class="align-top">
+        <tr>
+          <td rowspan="2" style="padding-right: 12px;" class="image-box">
+            <img src="{{overview.image}}" />
+          </td>
+          <td style="padding-bottom: 24px;" class="h-0">
+            <a href="{{overview.link}}" class="decoration-none">
+              <strong>{{overview.title}}</strong>
+            </a>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <p style="margin-bottom: 12px;"><strong>Publication Date:</strong> {{overview.publicationDate}}</p>
+            <p style="margin-bottom: 12px;"><strong>Journal:</strong> <i>{{overview.journal}}</i></p>
+            <p style="margin-bottom: 12px;"><strong>Impact Factor:</strong> {{overview.impactFactor}}</p>
+            <p><strong>DOI:</strong> {{overview.doi}}</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2"><strong>Keywords:</strong> {{overview.keywords}}</td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0" class="table-dashed border-separate" style="padding: 16px;">
+      <colgroup>
+        <col width="40%" />
+        <col />
+      </colgroup>
+
+      <tbody class="align-top">
+        <tr>
+          <td colspan="2"></td>
+        </tr>
+
+        <tr>
+          <td rowspan="2" style="padding-right: 12px;" class="image-box align-middle">
+            <img src="{{information.image}}" />
+          </td>
+          <td style="padding-bottoms: 24px;" class="h-0">
+            <p>{{information.content}}</p>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            {{#information.link}}
+            <a href="{{information.link}}" class="button decoration-none">{{information.buttonText}}</a>
+            {{/information.link}}
+          </td>
+        </tr>
+
+        <tr>
+          <td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">{{information.summary}}</td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <span class="square-title">Elabscience<sup>&reg;</sup> Product Cited in This Literature</span>
+  </td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-12"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0" class="table-stripe text-center">
+      <colgroup>
+        <col />
+        <col width="30%" />
+      </colgroup>
+
+      <tbody>
+        <tr>
+          <td>Product</td>
+          <td>Cat. No.</td>
+        </tr>
+
+        {{#productLists}}
+        <tr>
+          <td>
+            <a href="{{link}}" class="text-link">{{name}}</a>
+          </td>
+          <td>
+            <a href="{{link}}" class="text-link">{{catNo}}</a>
+          </td>
+        </tr>
+        {{/productLists}}
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>

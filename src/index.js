@@ -261,4 +261,4 @@ function savings(original, minified) {
   return (((orig - mini) / orig) * 100).toFixed(1) + '%';
 }
 
-module.exports = { run, findConfigs, buildConfig, processTemplate };
+module.exports = { run, findConfigs, buildConfig, processTemplate, minifyHtml, deepMerge, collectExtraCss, loadYaml, fmtSize, savings };

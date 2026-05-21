@@ -10,7 +10,8 @@
  *
  * 菜单结构：
  *   📧 用 juice 生成邮件 HTML
- *     ├── ⚡ 生成（标准 + 压缩）
+ *     ├── ⚡ 生成邮件 HTML（标准 + 压缩）
+ *     ├── 🧩 邮件片段组装（交互选择模板）
  *     └── 📂 在此目录打开 PowerShell
  *
  * 需要以管理员权限运行。
@@ -94,8 +95,10 @@ async function registerContextMenu() {
 
   // 子命令 1：生成（标准 + 压缩）
   const subCmd1 = `JuiceEmail.Generate`;
-  // 子命令 2：在此打开 PowerShell（可选便利项）
-  const subCmd2 = `JuiceEmail.OpenPwsh`;
+  // 子命令 2：片段组装
+  const subCmd2 = `JuiceEmail.Snippet`;
+  // 子命令 3：在此打开 PowerShell（可选便利项）
+  const subCmd3 = `JuiceEmail.OpenPwsh`;
 
   // ── 注册子命令到 CommandStore ─────────────────────────────────────────────
 
@@ -105,18 +108,25 @@ async function registerContextMenu() {
   regAdd(`${SUBCMD_SPACE}\\${subCmd1}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${subCmd1}\\command`, '', 'REG_SZ', generateCmd);
 
-  // 子命令 2：在文件目录打开 pwsh（如果安装了 PowerShell 7）
+  // 子命令 2：片段组装
+  const snippetCmd = `"${nodePath}" "${scriptPath}" --snippet "%1"`;
+  regAdd(`${SUBCMD_SPACE}\\${subCmd2}`, '', 'REG_SZ', '🧩 邮件片段组装（交互选择模板）');
+  regAdd(`${SUBCMD_SPACE}\\${subCmd2}`, 'Icon', 'REG_SZ', iconPath);
+  regAdd(`${SUBCMD_SPACE}\\${subCmd2}\\command`, '', 'REG_SZ', snippetCmd);
+
+  // 子命令 3：在文件目录打开 pwsh（如果安装了 PowerShell 7）
   const pwshPath = resolvePwsh();
   if (pwshPath) {
     const pwshCmd = `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath '%W'"`;
-    regAdd(`${SUBCMD_SPACE}\\${subCmd2}`, '', 'REG_SZ', '📂 在此目录打开 PowerShell 7');
-    regAdd(`${SUBCMD_SPACE}\\${subCmd2}`, 'Icon', 'REG_SZ', pwshPath);
-    regAdd(`${SUBCMD_SPACE}\\${subCmd2}\\command`, '', 'REG_SZ', pwshCmd);
+    regAdd(`${SUBCMD_SPACE}\\${subCmd3}`, '', 'REG_SZ', '📂 在此目录打开 PowerShell 7');
+    regAdd(`${SUBCMD_SPACE}\\${subCmd3}`, 'Icon', 'REG_SZ', pwshPath);
+    regAdd(`${SUBCMD_SPACE}\\${subCmd3}\\command`, '', 'REG_SZ', pwshCmd);
   }
 
   // ── 注册父菜单到 SystemFileAssociations ──────────────────────────────────
 
-  const subCommands = pwshPath ? `${subCmd1};${subCmd2}` : subCmd1;
+  let subCommands = `${subCmd1};${subCmd2}`;
+  if (pwshPath) subCommands += `;${subCmd3}`;
 
   for (const root of ROOTS) {
     const parentKey = `${root}\\${PARENT_KEY_NAME}`;
@@ -137,6 +147,7 @@ async function registerContextMenu() {
     `  在 ${chalk.cyan('.html')} / ${chalk.cyan('.htm')} 文件上右键即可看到：\n` +
     `  ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
     `    ├── ⚡ 生成邮件 HTML（标准 + 压缩）\n` +
+    `    ├── 🧩 邮件片段组装（交互选择模板）\n` +
     (pwshPath ? `    └── 📂 在此目录打开 PowerShell 7\n` : '') +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n') +
@@ -155,6 +166,7 @@ async function unregisterContextMenu() {
   }
 
   regDelete(`${SUBCMD_SPACE}\\JuiceEmail.Generate`);
+  regDelete(`${SUBCMD_SPACE}\\JuiceEmail.Snippet`);
   regDelete(`${SUBCMD_SPACE}\\JuiceEmail.OpenPwsh`);
 
   console.log(chalk.green('  ✔ 右键菜单已移除。\n'));

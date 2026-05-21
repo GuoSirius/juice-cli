@@ -10,84 +10,31 @@
 
 # ─── 模板变量（Mustache 语法）────────────────────────────────────────────────
 variables:
-  brandName: "优品商城"
-  brandColor: "#0066cc"
-  logoUrl: "https://via.placeholder.com/150x50/ffffff/cccccc?text=LOGO"
-  websiteUrl: "https://shop.example.com"
-  recipientName: "张三"
-  subject: "欢迎来到优品商城"
-  previewText: "精选商品优惠中，最高立减 200 元"
-  ctaText: "立即查看"
-  ctaUrl: "https://shop.example.com/action"
-  companyName: "优品商城"
-  companyAddress: "北京市朝阳区建国路 88 号"
-  unsubscribeUrl: "https://shop.example.com/unsubscribe"
-  currentYear: "2026"
+  overview:
+    image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605211020/Nature Medicine.webp
+    title: "Low-dose oral nicotinamide mononucleotide for immune thrombocytopenia: a phase 1/2 trial"
+    link: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605211020/Nature Medicine.webp
+    publicationDate: April 29 2026
+    journal: Nature Medicine
+    impactFactor: 50.0
+    doi: 10.1038/s41591-026-04366-x
+    keywords: Immune Thrombocytopenia (ITP), Nicotinamide Mononucleotide (NMN), CD38-NAD<sup>+</sup> Axis
+
+  information:
+    image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605211020/CD38-NAD.webp
+    content: "This study identifies the CD38-NAD<sup>+</sup> axis as an immunometabolic checkpoint in ITP. Anti-CD38 antibodies deplete NAD<sup>+</sup>, driving M1 macrophages and FcγRI upregulation, which increases platelet phagocytosis. Restoring NAD<sup>+</sup> via CD38 inhibition or NMN reprograms macrophages to a resting state and blocks platelet destruction without affecting humoral immunity. In 25 refractory ITP patients, low-dose NMN (450 mg bid × 2 weeks) was well tolerated: 20% achieved platelets ≥50×10<sup>9</sup>/L, and 52% maintained response at week 8, with stable immunoglobulin levels. Thus, targeting CD38-NAD<sup>+</sup> metabolism offers a non-antibody-depleting therapeutic strategy."
+    link: https://www.procellsystem.com/resources/publications
+    buttonText: View More Publications
+    summary: Human plasma and mouse cell supernatant iNOS level were measured using Elabscience<sup>&reg;</sup> Human/Mouse NOS2/iNOS(Nitric Oxide Synthase 2, Inducible) ELISA Kit, respectively.
 
   # ── 产品列表 ────────────────────────────────────────────────────────────────
-  # 使用 {{#products}}...{{/products}} 循环遍历
-  # {{#products}}{{name}}{{price}}{{/products}}
-  products:
-    - name: "无线蓝牙耳机"
-      price: "¥299.00"
-      originalPrice: "¥399.00"
-      image: "https://via.placeholder.com/200x120/e74c3c/ffffff?text=耳机"
-      tag: "热卖"
-    - name: "智能手环 Pro"
-      price: "¥199.00"
-      originalPrice: "¥299.00"
-      image: "https://via.placeholder.com/200x120/3498db/ffffff?text=手环"
-      tag: "新品"
-    - name: "便携充电宝"
-      price: "¥89.00"
-      originalPrice: "¥129.00"
-      image: "https://via.placeholder.com/200x120/2ecc71/ffffff?text=充电宝"
-      tag: "特惠"
-    - name: "无线键盘套装"
-      price: "¥159.00"
-      originalPrice: "¥259.00"
-      image: "https://via.placeholder.com/200x120/9b59b6/ffffff?text=键盘"
-      tag: ""
+  # 使用 {{#productLists}}...{{/productLists}} 循环遍历
+  # {{#productLists}}{{name}}{{catNo}}{{/productLists}}
+  productLists:
+    - name: Human NOS2/iNOS(Nitric Oxide Synthase 2, Inducible) ELISA Kit
+      catNo: E-EL-H0753
+      link: https://www.elabscience.cn/p-human-nos2-inos-nitric-oxide-synthase-2-inducible-elisa-kit-e-el-h0753-12953
 
-  # ── 功能列表 ────────────────────────────────────────────────────────────────
-  # 嵌套循环示例：{{#features}}{{#items}}{{.}}{{/items}}{{/features}}
-  features:
-    - title: "品质保障"
-      icon: "✓"
-      items:
-        - "正品保证"
-        - "7天无理由退换"
-        - "全国联保"
-    - title: "配送服务"
-      icon: "📦"
-      items:
-        - "次日达"
-        - "包邮到家"
-        - "实时物流"
-    - title: "售后服务"
-      icon: "🎧"
-      items:
-        - "专属客服"
-        - "终身维护"
-        - "极速退款"
-
-# ─── juice CSS 内联选项 ──────────────────────────────────────────────────────
-juice:
-  preserveMediaQueries: true   # 保留 @media（响应式必须）
-  preservedSelectors:          # 保留的选择器（不会被内联）
-    - ".gmail-"
-    - "#outlook-"
-    - "a:hover"                # 链接 hover 效果
-
-# ─── 输出选项 ─────────────────────────────────────────────────────────────────
-# output:
-#   normalSuffix: ".output.html"
-#   minifiedSuffix: ".minified.html"
-#   encoding: "utf8"
-
-# ─── 压缩选项 ─────────────────────────────────────────────────────────────────
-# minify:
-#   collapseWhitespace: true
-#   removeComments: true
-#   minifyCSS: true
-#   minifyJS: false
+    - name: Mouse NOS2/iNOS(Nitric Oxide Synthase 2, Inducible) ELISA Kit
+      catNo: E-EL-M0696
+      link: https://www.elabscience.cn/p-mouse-nos2-inos-nitric-oxide-synthase-2-inducible-elisa-kit-e-el-m0696-15743
