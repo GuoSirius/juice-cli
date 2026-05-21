@@ -19,7 +19,8 @@
       "Bash(node ../bin/juice.js --snippet ../edm/elabscience/literature/snippet.html -f ../edm/elabscience/elabscience-template.html)",
       "Bash(node bin/juice.js --install)",
       "Bash(ls icons/)",
-      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('files:', JSON.stringify\\(pkg.files, null, 2\\)\\)\")"
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('files:', JSON.stringify\\(pkg.files, null, 2\\)\\)\")",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('name:', p.name\\); console.log\\('version:', p.version\\); console.log\\('files:', JSON.stringify\\(p.files\\)\\);\")"
     ]
   }
 }
