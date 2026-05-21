@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.12](https://github.com/GuoSirius/juice-cli/compare/v2.1.11...v2.1.12) (2026-05-21)
+
+
+### Bug Fixes
+
+* skip context menu registration on non-Windows platforms ([388b3b8](https://github.com/GuoSirius/juice-cli/commit/388b3b8ea648eef262f322ebc0c6eb53cf0c4b53))
+
 ### [2.1.11](https://github.com/GuoSirius/juice-cli/compare/v2.1.10...v2.1.11) (2026-05-21)
 
 
