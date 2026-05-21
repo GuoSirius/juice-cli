@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.8](https://github.com/GuoSirius/juice-cli/compare/v2.1.7...v2.1.8) (2026-05-21)
+
+
+### Documentation
+
+* backfill missing commits in CHANGELOG for v1.3.0 and v2.1.0 ([df27712](https://github.com/GuoSirius/juice-cli/commit/df27712110c0fafb8e47f1e9074a9e4472284469))
+* update README with snippet mode, -s shorthand, rawHtml, and usage examples ([c02ec16](https://github.com/GuoSirius/juice-cli/commit/c02ec1669b425ee3099c20b38239c8e27f7c7a6b))
+
+
+### Chores
+
+* update local settings permissions for git log and node commands ([8ef28ee](https://github.com/GuoSirius/juice-cli/commit/8ef28eef74e253486a27c60def6e1b6d0f54029c))
+
 ### [2.1.7](https://github.com/GuoSirius/juice-cli/compare/v2.1.6...v2.1.7) (2026-05-21)
 
 
