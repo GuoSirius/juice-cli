@@ -24,7 +24,12 @@
       "Bash(git commit *)",
       "Bash(git log *)",
       "Bash(node *)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Bash(tasklist /FI \"IMAGENAME eq pwsh.exe\" /FO TABLE)",
+      "Bash(tasklist /FI \"IMAGENAME eq node.exe\" /FO TABLE)",
+      "Bash(tasklist /FI \"IMAGENAME eq cmd.exe\" /FO TABLE)",
+      "Bash(cmd.exe *)",
+      "Bash(git check-ignore *)"
     ]
   }
 }
