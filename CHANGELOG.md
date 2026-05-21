@@ -68,6 +68,11 @@ All notable changes to this project will be documented in this file. See [standa
 ### Chores
 
 * update EDM templates and config ([70a175d](https://github.com/GuoSirius/juice-cli/commit/70a175d60c8c5c64817ec39480b2c2bf497d48fd))
+* add edm template library and sample templates ([a91e6e3](https://github.com/GuoSirius/juice-cli/commit/a91e6e3741744b89a6911fe15d7e5e4a01a0e64c), [4e9ed05](https://github.com/GuoSirius/juice-cli/commit/4e9ed051aebeb4a285058d517dae765c86d932ae), [917cae0](https://github.com/GuoSirius/juice-cli/commit/917cae0137f1e414647b05831ec1fefac79dd360))
+* update and optimize EDM templates ([95bceca](https://github.com/GuoSirius/juice-cli/commit/95bcecaaced93dfe10a96d11a87f5d1343bce12b), [bdbb9e6](https://github.com/GuoSirius/juice-cli/commit/bdbb9e6b4c7d41c9291d3d43b401f1d6ab521bee), [cccec7f](https://github.com/GuoSirius/juice-cli/commit/cccec7fdc2b5df95006f5792ae22a560aa9e8443), [b8162b6](https://github.com/GuoSirius/juice-cli/commit/b8162b6edfb7b0bd62381908b4a07688d55067d5), [ff1852b](https://github.com/GuoSirius/juice-cli/commit/ff1852b36b81007aae20282419333d22ee35fe1c), [8a457ce](https://github.com/GuoSirius/juice-cli/commit/8a457cee03fc7fd06fadc91505b4fba408ae820a))
+* add favicon.ico ([5a54b5a](https://github.com/GuoSirius/juice-cli/commit/5a54b5aedcc8dcf0dccf0425aa6c6b742e3315))
+* remove unused files ([e132ef0](https://github.com/GuoSirius/juice-cli/commit/e132ef0a7e652fa27f1a757c0ed8f3b11e78e8b2))
+* add ignore files ([b6cefff](https://github.com/GuoSirius/juice-cli/commit/b6cefff72e2375d3f7a1c843f4a5b138599d2ade))
 
 
 ### Documentation
@@ -178,12 +183,25 @@ All notable changes to this project will be documented in this file. See [standa
 * 更新 GitHub Actions Node 版本到 24 ([ca69705](https://gitee.com/siriussupreme/juice-cli/commit/ca697056e61afdf443b28ecd59c2482cf57528d7))
 * 更新自定义图标，优化信封+闪电设计 ([cc1f175](https://gitee.com/siriussupreme/juice-cli/commit/cc1f175510f420ef3de849f83e159a89452b5c8b))
 
-## [1.3.0](https://github.com/siriussupreme/juice-cli/compare/v1.2.0...v1.3.0) (2024-01-01)
+## [1.3.0](https://github.com/GuoSirius/juice-cli/compare/v1.2.0...v1.3.0) (2026-04-23)
+
 
 ### Features
 
-- Initial release of juice-email-cli
-- CSS inlining with juice
-- Mustache templating support
-- HTML minification
-- CLI interface for email template generation
+* 重构配置加载逻辑，添加 install/uninstall 命令 ([7fc5d71](https://github.com/GuoSirius/juice-cli/commit/7fc5d713f8f30cac50e4bc53bf0835fac74fb351))
+* 添加 juice 高级配置选项 ([a97ea32](https://github.com/GuoSirius/juice-cli/commit/a97ea320d89cb0f3049f53d2904d6ff2dcb58f5e))
+* 启用 inlinePseudoElements，添加 preservedSelectors 示例 ([9cac2f3](https://github.com/GuoSirius/juice-cli/commit/9cac2f3b5b61bfa70b3ff114710565814c2ad569))
+* 添加 Mustache 列表循环示例，支持嵌套循环语法 ([02960e4](https://github.com/GuoSirius/juice-cli/commit/02960e4cce7fb3a73bcb57251708839437b54b86))
+
+
+### Documentation
+
+* 更新 README.md 和 package.json ([4658109](https://github.com/GuoSirius/juice-cli/commit/465810945220ccc17006aa98d0eed69111bb04b0))
+
+
+### Chores
+
+* 优化邮件 HTML 兼容性配置 ([10b2c3e](https://github.com/GuoSirius/juice-cli/commit/10b2c3e94b94d1ff9bce296afcf8820a904d4334))
+* 更新版本号至 v1.1.0，优化帮助信息 ([75c7b16](https://github.com/GuoSirius/juice-cli/commit/75c7b16075143345482dcec31652ca0329ac6ef9))
+* remove .workbuddy from git tracking ([c7a6ed2](https://github.com/GuoSirius/juice-cli/commit/c7a6ed2e26171ca0c560bfbdb50f626126fc5a9d))
+* initial project setup ([26ec410](https://github.com/GuoSirius/juice-cli/commit/26ec41011f33e36e0732aced0bb91748b7d9ed77), [6ac96f4](https://github.com/GuoSirius/juice-cli/commit/6ac96f48cf3f37d23c885c3db90ee9f7c31eeeed))
