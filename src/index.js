@@ -33,6 +33,10 @@ const HOME_CANDIDATES = [
   path.join(os.homedir(), 'juice.yml'),
 ];
 
+function resolveHomeConfig() {
+  return HOME_CANDIDATES.find((c) => fs.existsSync(c)) || null;
+}
+
 // ─── 配置文件查找 ─────────────────────────────────────────────────────────────
 
 /**
@@ -73,7 +77,7 @@ function findConfigs(configPath, inputFile) {
     }
   }
 
-  return { highPriorityPath, homePath: HOME_CANDIDATES[0] };
+  return { highPriorityPath, homePath: resolveHomeConfig() };
 }
 
 // ─── 配置文件加载 ─────────────────────────────────────────────────────────────
@@ -121,14 +125,13 @@ function deepMerge(base, ...overrides) {
  *   CLI 内置默认值  <  用户目录 ~/juice.yaml  <  优先配置（-c/输入目录）
  */
 function buildConfig(highPriorityPath, homePath) {
-  const homeExists = fs.existsSync(homePath);
   const layers = [];
 
   // 1. CLI 内置默认值（最低优先级）
   layers.push({ label: 'CLI 内置默认值', data: CODE_DEFAULTS });
 
   // 2. 用户目录配置（如果有）
-  if (homeExists) {
+  if (homePath) {
     layers.push({ label: `用户目录配置 (${homePath})`, data: loadYaml(homePath) });
   }
 
@@ -148,11 +151,15 @@ function processTemplate(inputFile, config) {
 
   // 1. Mustache 变量替换（根据 rawHtml 配置决定是否转义 HTML）
   const originalEscape = Mustache.escape;
-  if (config.rawHtml) {
-    Mustache.escape = (text) => text;
+  let htmlWithVars;
+  try {
+    if (config.rawHtml) {
+      Mustache.escape = (text) => text;
+    }
+    htmlWithVars = Mustache.render(htmlRaw, config.variables || {});
+  } finally {
+    Mustache.escape = originalEscape;
   }
-  const htmlWithVars = Mustache.render(htmlRaw, config.variables || {});
-  Mustache.escape = originalEscape;
 
   // 2. 收集 extraCssFiles
   const basePath = path.dirname(path.resolve(inputFile));
@@ -228,10 +235,16 @@ async function run({ file, config: configPath }) {
 
     // 5. 写出标准版
     spinner.text = '写出 .output.html ...';
+    if (fs.existsSync(outPaths.normal)) {
+      spinner.warn(chalk.yellow(`目标文件已存在，将覆盖：${outPaths.normal}`));
+    }
     fs.writeFileSync(outPaths.normal, resultHtml, encoding);
 
     // 6. 压缩并写出
     spinner.text = '写出 .minified.html ...';
+    if (fs.existsSync(outPaths.minified)) {
+      spinner.warn(chalk.yellow(`目标文件已存在，将覆盖：${outPaths.minified}`));
+    }
     const minified = await minifyHtml(resultHtml, config.minify);
     fs.writeFileSync(outPaths.minified, minified, encoding);
 
@@ -266,4 +279,4 @@ function savings(original, minified) {
   return (((orig - mini) / orig) * 100).toFixed(1) + '%';
 }
 
-module.exports = { run, findConfigs, buildConfig, processTemplate, minifyHtml, deepMerge, collectExtraCss, loadYaml, fmtSize, savings };
+module.exports = { run, findConfigs, buildConfig, processTemplate, minifyHtml, deepMerge, collectExtraCss, loadYaml, fmtSize, savings, DEFAULT_CONFIG_PATH, resolveHomeConfig };

@@ -13,6 +13,7 @@ const {
   minifyHtml,
   fmtSize,
   savings,
+  DEFAULT_CONFIG_PATH,
 } = require('./index');
 
 // ─── EDM 目录解析 ──────────────────────────────────────────────────────────────
@@ -95,8 +96,6 @@ function getBrand(filePath, edmDir) {
 
 // ─── 配置合并 ─────────────────────────────────────────────────────────────────
 
-const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '..', 'defaults', 'juice.yaml');
-
 /**
  * 片段模式配置合并
  *
@@ -114,8 +113,12 @@ function buildSnippetConfig({ priorityConfigPath, cliConfigPath }) {
   layers.push({ label: 'CLI 内置默认值', data: defaults });
 
   // 2. 用户主目录
-  const homePath = path.join(os.homedir(), 'juice.yaml');
-  if (fs.existsSync(homePath)) {
+  const homeCandidates = [
+    path.join(os.homedir(), 'juice.yaml'),
+    path.join(os.homedir(), 'juice.yml'),
+  ];
+  const homePath = homeCandidates.find((c) => fs.existsSync(c));
+  if (homePath) {
     layers.push({ label: `用户目录配置 (${homePath})`, data: loadYaml(homePath) });
   }
 
@@ -246,7 +249,7 @@ function resolveSnippetOutputPaths(outputBaseName, cwd) {
  *   3. Juice CSS 内联 → .output.html
  *   4. 压缩 → .minified.html
  */
-async function assembleSnippet({ snippetPath, templatePath, config, layers, cwd, outputBaseName }) {
+async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputBaseName }) {
   const templateHtml = fs.readFileSync(templatePath, 'utf8');
   const snippetRaw = fs.readFileSync(snippetPath, 'utf8');
   const outPaths = resolveSnippetOutputPaths(outputBaseName, cwd);
@@ -258,11 +261,15 @@ async function assembleSnippet({ snippetPath, templatePath, config, layers, cwd,
 
   // 2. Mustache 渲染合并 HTML → .html（已渲染，无 juice 内联）
   const originalEscape = Mustache.escape;
-  if (config.rawHtml) {
-    Mustache.escape = (text) => text;
+  let renderedHtml;
+  try {
+    if (config.rawHtml) {
+      Mustache.escape = (text) => text;
+    }
+    renderedHtml = Mustache.render(rawMarkup, variables);
+  } finally {
+    Mustache.escape = originalEscape;
   }
-  const renderedHtml = Mustache.render(rawMarkup, variables);
-  Mustache.escape = originalEscape;
   fs.writeFileSync(outPaths.normal, renderedHtml, 'utf8');
 
   // 3. 收集模板目录的额外 CSS + Juice CSS 内联 → .output.html
@@ -278,6 +285,7 @@ async function assembleSnippet({ snippetPath, templatePath, config, layers, cwd,
   fs.writeFileSync(outPaths.minified, minified, 'utf8');
 
   // 5. 报告
+  const layers = config._layers || [];
   const layerLines = layers
     .map((l) => `    ${chalk.gray('·')} ${l.label}`)
     .join('\n');
@@ -585,6 +593,7 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
   }
 
   const { config, layers } = buildSnippetConfig({ priorityConfigPath, cliConfigPath });
+  config._layers = layers;
 
   // 确定输出文件名
   const defaultBaseName = outputName || path.parse(templatePath).name;
@@ -621,7 +630,6 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
     snippetPath,
     templatePath,
     config,
-    layers,
     cwd: process.cwd(),
     outputBaseName,
   });
@@ -697,12 +705,12 @@ async function runInteractiveMode({ config: cliConfigPath }) {
 
   // 8. 构建配置并执行
   const { config, layers } = buildSnippetConfig({ priorityConfigPath, cliConfigPath });
+  config._layers = layers;
 
   await assembleSnippet({
     snippetPath: snippetFile.path,
     templatePath: templateChoice.path,
     config,
-    layers,
     cwd: process.cwd(),
     outputBaseName,
   });

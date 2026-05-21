@@ -51,7 +51,7 @@ function checkUnstagedFiles() {
 function commitFiles(message) {
   try {
     execSync('git add .', { stdio: 'ignore' });
-    execSync(`git commit -m "${message}"`, { stdio: 'ignore' });
+    execSync(`git commit -F -`, { input: message, stdio: 'ignore' });
     console.log(chalk.green('Files committed successfully'));
   } catch (error) {
     console.error(chalk.red('Error committing files:', error.message));
@@ -76,13 +76,13 @@ function runStandardVersion(releaseType) {
 function pushToRemote() {
   try {
     console.log(chalk.blue('Pushing to origin...'));
-    execSync('git push origin main', { stdio: 'ignore' });
-    execSync('git push origin --tags', { stdio: 'ignore' });
+    execSync('git push origin main', { stdio: 'inherit' });
+    execSync('git push origin --tags', { stdio: 'inherit' });
     console.log(chalk.green('Pushed to origin successfully'));
 
     console.log(chalk.blue('Pushing to github...'));
-    execSync('git push github main', { stdio: 'ignore' });
-    execSync('git push github --tags', { stdio: 'ignore' });
+    execSync('git push github main', { stdio: 'inherit' });
+    execSync('git push github --tags', { stdio: 'inherit' });
     console.log(chalk.green('Pushed to github successfully'));
   } catch (error) {
     console.error(chalk.red('Error pushing to remote:', error.message));

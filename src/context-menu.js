@@ -8,10 +8,10 @@
  * 菜单结构（所有文件类型统一）：
  *   .html / .htm / .yaml / .yml：
  *     📧 用 juice 生成邮件 HTML
- *       ├── ⚡ 生成邮件 HTML（标准 + 压缩）       → juice -f
- *       ├── 🧩 邮件片段组装（交互选择模板）       → juice -s
- *       ├── 📋 交互式生成邮件（使用此配置）       → juice -c
- *       └── 📂 在此目录打开 PowerShell 7         （可选）
+ *       ├── 📄 作为模板，生成邮件 HTML   → juice -f（后台执行）
+ *       ├── 🧩 作为片段，拼接邮件 HTML   → juice -s（交互选择模板）
+ *       ├── ⚙️ 作为配置，生成邮件 HTML   → juice -c（交互选择品牌/模板/片段）
+ *       └── 📂 打开 PowerShell        （可选）
  */
 
 const { execSync } = require('child_process');
@@ -99,13 +99,6 @@ const SUBCMDS = {
   pwsh:     'JuiceEmail.OpenPwsh',
 };
 
-// 旧版本可能残留的子命令名（升级时清理）
-const LEGACY_SUBCMDS = [
-  'JuiceEmail.Generate',
-  'JuiceEmail.Snippet',
-  'JuiceEmail.OpenPwsh',
-];
-
 const PARENT_KEY_NAME = 'JuiceEmail';
 
 /**
@@ -130,19 +123,19 @@ async function registerContextMenu() {
 
   // ── 子命令 1：普通模式 - juice 生成（非交互，不需终端）─────────────────
   const generateCmd = `"${nodePath}" "${scriptPath}" -f %1`;
-  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}`, '', 'REG_SZ', '⚡ 生成邮件 HTML（标准 + 压缩）') && ok;
+  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}`, '', 'REG_SZ', '📄 作为模板，生成邮件 HTML') && ok;
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.generate}\\command`, '', 'REG_SZ', generateCmd);
 
   // ── 子命令 2：片段模式 - 片段组装（交互，需要终端）────────────────────────
   const snippetCmd = wrapInteractive(nodePath, scriptPath, '-s %1');
-  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}`, '', 'REG_SZ', '🧩 邮件片段组装（交互选择模板）') && ok;
+  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}`, '', 'REG_SZ', '🧩 作为片段，拼接邮件 HTML') && ok;
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.snippet}\\command`, '', 'REG_SZ', snippetCmd);
 
   // ── 子命令 3：配置文件模式 - 交互式生成（交互，需要终端）──────────────────
   const configCmd = wrapInteractive(nodePath, scriptPath, '-c %1');
-  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, '', 'REG_SZ', '📋 交互式生成邮件（使用此配置）') && ok;
+  ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, '', 'REG_SZ', '⚙️ 作为配置，生成邮件 HTML') && ok;
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}`, 'Icon', 'REG_SZ', iconPath);
   regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.config}\\command`, '', 'REG_SZ', configCmd);
 
@@ -150,7 +143,7 @@ async function registerContextMenu() {
   const pwshPath = resolvePwsh();
   if (pwshPath) {
     const pwshCmd = `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath (Split-Path '%1')"`;
-    ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.pwsh}`, '', 'REG_SZ', '📂 在此目录打开 PowerShell 7') && ok;
+    ok = regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.pwsh}`, '', 'REG_SZ', '📂 打开 PowerShell') && ok;
     regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.pwsh}`, 'Icon', 'REG_SZ', pwshPath);
     regAdd(`${SUBCMD_SPACE}\\${SUBCMDS.pwsh}\\command`, '', 'REG_SZ', pwshCmd);
   }
@@ -186,10 +179,10 @@ async function registerContextMenu() {
     chalk.green('  ✔ 右键菜单注册完成！') + '\n\n' +
     `  ${chalk.bold('.html / .htm / .yaml / .yml')} 文件右键：\n` +
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
-    `      ├── ⚡ 生成邮件 HTML（标准 + 压缩）  →  juice -f\n` +
-    `      ├── 🧩 邮件片段组装（交互选择模板） →  juice -s\n` +
-    `      ├── 📋 交互式生成邮件（使用此配置） →  juice -c\n` +
-    (pwshPath ? `      └── 📂 在此目录打开 PowerShell 7\n` : '') +
+    `      ├── 📄 作为模板，生成邮件 HTML  →  juice -f（后台执行）\n` +
+    `      ├── 🧩 作为片段，拼接邮件 HTML  →  juice -s（交互选择模板）\n` +
+    `      ├── ⚙️ 作为配置，生成邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
+    (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
   );
@@ -212,9 +205,8 @@ async function unregisterContextMenu() {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理子命令（当前版本 + 旧版本残留）
-  const allSubcmds = [...new Set([...Object.values(SUBCMDS), ...LEGACY_SUBCMDS])];
-  for (const name of allSubcmds) {
+  // 清理子命令
+  for (const name of Object.values(SUBCMDS)) {
     regDelete(`${SUBCMD_SPACE}\\${name}`);
   }
 

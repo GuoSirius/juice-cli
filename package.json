@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node bin/juice.js",
-    "test": "node bin/juice.js --help",
+    "test": "node test/smoke.js",
     "postinstall": "node bin/juice.js --install",
     "preuninstall": "node bin/juice.js --uninstall",
     "prepare": "husky install",
@@ -46,7 +46,7 @@
     "ora": "^5.4.1"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "files": [
     "bin/",
@@ -60,7 +60,6 @@
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
     "husky": "^9.1.7",
-    "inquirer": "^13.4.3",
     "standard-version": "^9.5.0"
   }
 }
