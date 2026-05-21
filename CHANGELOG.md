@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.4](https://github.com/GuoSirius/juice-cli/compare/v2.1.3...v2.1.4) (2026-05-21)
+
+
+### Chores
+
+* remove --access public from npm publish, update local settings ([5f9dd42](https://github.com/GuoSirius/juice-cli/commit/5f9dd42c843c66861f4e6ba2746ecc08709ecf17))
+
 ### [2.1.3](https://github.com/GuoSirius/juice-cli/compare/v2.1.2...v2.1.3) (2026-05-21)
 
 
