@@ -18,11 +18,20 @@ const {
 // ─── EDM 目录解析 ──────────────────────────────────────────────────────────────
 
 function resolveEdmDir() {
-  const edmDir = path.join(process.cwd(), 'edm');
-  if (!fs.existsSync(edmDir)) {
-    throw new Error(`EDM 目录不存在：${edmDir}\n请在项目根目录（含 edm/ 目录）下执行，或先创建 edm/ 目录结构。`);
-  }
-  return edmDir;
+  // 优先：当前工作目录下的 edm/（用户自己的 EDM 资源）
+  const cwdEdm = path.join(process.cwd(), 'edm');
+  if (fs.existsSync(cwdEdm)) return cwdEdm;
+
+  // 回退：npm 全局安装时，包内置的 edm/
+  const pkgEdm = path.resolve(__dirname, '..', 'edm');
+  if (fs.existsSync(pkgEdm)) return pkgEdm;
+
+  throw new Error(
+    `EDM 目录不存在。\n` +
+    `  已检查：${cwdEdm}\n` +
+    `  已检查：${pkgEdm}\n` +
+    `  请在项目根目录创建 edm/ 目录结构，或重新安装 juice-email-cli。`
+  );
 }
 
 function findBrands(edmDir) {
@@ -70,6 +79,18 @@ function findLocalConfig(dir) {
     if (fs.existsSync(c)) return c;
   }
   return null;
+}
+
+/**
+ * 从 edm 子路径中提取品牌名
+ * 例如：edm/elabscience/literature/snippet.html → elabscience
+ * 如果文件不在 edmDir 下，返回 null
+ */
+function getBrand(filePath, edmDir) {
+  const rel = path.relative(edmDir, filePath);
+  if (rel.startsWith('..')) return null;
+  const parts = rel.split(path.sep);
+  return parts[0] || null;
 }
 
 // ─── 配置合并 ─────────────────────────────────────────────────────────────────
@@ -399,6 +420,20 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath }) {
   // 自动检测片段目录下的配置文件（juice.yaml 优先，juice.yml 次之）
   const snippetDir = path.dirname(snippetPath);
   const priorityConfigPath = findLocalConfig(snippetDir);
+
+  // 跨品牌检查：片段和模板品牌不一致时给出警告
+  try {
+    const edmDir = resolveEdmDir();
+    const snippetBrand = getBrand(snippetPath, edmDir);
+    const templateBrand = getBrand(templatePath, edmDir);
+    if (snippetBrand && templateBrand && snippetBrand !== templateBrand) {
+      console.warn(chalk.yellow(
+        `\n⚠  片段品牌「${snippetBrand}」与模板品牌「${templateBrand}」不一致，可能导致样式错乱。`
+      ));
+    }
+  } catch (_) {
+    // edm/ 不存在时跳过品牌检查（用户可能使用自定义路径）
+  }
 
   const { config, layers } = buildSnippetConfig({ priorityConfigPath, cliConfigPath });
 
