@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.10](https://github.com/GuoSirius/juice-cli/compare/v2.1.9...v2.1.10) (2026-05-21)
+
+
+### Bug Fixes
+
+* code review improvements — config dedup, test suite, menu naming, and bug fixes ([cd7285a](https://github.com/GuoSirius/juice-cli/commit/cd7285a1b3457fe6157701910e5285b3413d9c04))
+* rename config menu to 作为配置，拼接邮件 HTML ([ef6c89e](https://github.com/GuoSirius/juice-cli/commit/ef6c89e895edcdee55bc5b22777410117c5a6b2e))
+* right-click terminal auto-close on success, show re-run command on failure ([9448d0a](https://github.com/GuoSirius/juice-cli/commit/9448d0aebc64d2a637a87219466006bbc8467312))
+* wrap interactive right-click commands in terminal, unify sub-commands for all file types ([fa05f16](https://github.com/GuoSirius/juice-cli/commit/fa05f16e1abbc31c0319609b68254d5b005ae421))
+
 ### [2.1.9](https://github.com/GuoSirius/juice-cli/compare/v2.1.8...v2.1.9) (2026-05-21)
 
 
