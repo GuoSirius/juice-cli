@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.7](https://github.com/GuoSirius/juice-cli/compare/v2.1.6...v2.1.7) (2026-05-21)
+
+
+### Features
+
+* add rawHtml config, -s shorthand, custom output name, and indent fix ([de14926](https://github.com/GuoSirius/juice-cli/commit/de14926e6e64eafc651dd1415505ed52eae430c6))
+
+
+### Documentation
+
+* update ([d91e409](https://github.com/GuoSirius/juice-cli/commit/d91e4098e9994f484020e653f76dc718689462a8))
+
 ### [2.1.6](https://github.com/GuoSirius/juice-cli/compare/v2.1.5...v2.1.6) (2026-05-21)
 
 
