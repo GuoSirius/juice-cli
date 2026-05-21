@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.3](https://github.com/GuoSirius/juice-cli/compare/v2.1.2...v2.1.3) (2026-05-21)
+
+
+### Bug Fixes
+
+* add icons/ to npm publish files for context menu icon ([ed59264](https://github.com/GuoSirius/juice-cli/commit/ed5926452cfabfc49f739d22b83ea1785587b669))
+
+
+### Documentation
+
+* update ([d64e933](https://github.com/GuoSirius/juice-cli/commit/d64e9336f5ac3db3145d7a39784076d05ae4745f))
+
 ### [2.1.2](https://github.com/GuoSirius/juice-cli/compare/v2.1.1...v2.1.2) (2026-05-21)
 
 
