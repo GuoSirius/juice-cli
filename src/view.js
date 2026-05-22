@@ -3,10 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { fmtSize } = require('./index');
 const {
   resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
-  findSeriesDirs, filterSeries, findSnippetVariants, findConfigs,
+  findSeriesDirs, findSnippetVariants, findConfigs,
 } = require('./snippet');
 
 function fmtBytes(b) {
@@ -378,7 +377,7 @@ async function interactiveBrowse(edmDir, startParsed) {
     let choices = [];
     let title = '';
 
-    const hasParent = stack.length > 0 || (current.level !== 'brands');
+    const hasParent = stack.length > 0;
     const navChoices = [];
     if (hasParent) {
       navChoices.push({ name: '.. 返回上级', value: 'back' });
@@ -724,8 +723,7 @@ async function runViewMode({ viewPath, interactive, scope }) {
       }));
       const picked = await showMenu('选择模板', tplChoices);
       if (!picked) return;
-      current = { level: 'template-detail', brand: picked.brand.name, brandMeta: picked.brand.meta, version: picked.version.name, versionData: picked.version };
-      // For simplicity, just show the detail and allow copy
+      // Show detail and allow copy
       const stat = fs.statSync(picked.version.templatePath);
       console.log(chalk.dim(`\n  ${path.basename(picked.version.templatePath)} (${fmtBytes(stat.size)})\n`));
       const { select } = await import('@inquirer/prompts');
@@ -767,11 +765,7 @@ async function runViewMode({ viewPath, interactive, scope }) {
       }));
       const picked = await showMenu('选择系列', sChoices);
       if (!picked) return;
-      // Navigate into this series
-      current = { level: 'series', brand: picked.brand.name, brandMeta: picked.brand.meta, series: picked.series.name, seriesData: picked.series };
-      stack = [{ level: 'brand', brand: picked.brand.name, brandMeta: picked.brand.meta }];
-      // Fall through to the main loop... actually this won't work easily.
-      // Just do inline handling for now:
+      // Show variants and copy actions inline
       const variants = findSnippetVariants(picked.series.path);
       if (variants.length === 0) {
         console.log(chalk.yellow('  该系列下无变体。\n'));

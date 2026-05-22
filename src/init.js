@@ -32,16 +32,11 @@ function copyFileToCwd(srcPath, cwd, destName) {
   if (fs.existsSync(dest)) {
     // Find a non-conflicting name
     const parsed = path.parse(dest);
-    const base = path.join(parsed.dir, parsed.name);
-    const ext = parsed.ext;
-    let alt = findNextVersion(parsed.name, cwd);
-    // findNextVersion works with base names, not full paths
-    // Reimplement inline
     let v = 1;
     while (true) {
-      const candidate = path.join(cwd, parsed.name + '-v' + v + ext);
+      const candidate = path.join(cwd, parsed.name + '-v' + v + parsed.ext);
       if (!fs.existsSync(candidate)) {
-        const altName = parsed.name + '-v' + v + ext;
+        const altName = parsed.name + '-v' + v + parsed.ext;
         const altPath = path.join(cwd, altName);
         console.log(chalk.yellow(`  ⚠  ${destName || path.basename(srcPath)} 已存在，使用：${altName}`));
         fs.copyFileSync(srcPath, altPath);
@@ -293,10 +288,7 @@ async function runInitMode({ initPath, template, snippet, config }) {
         copyItems.push({ name: '⚙️ 配置文件', value: 'config', description: configs.map(c => c.name).join(', '), checked: true });
       }
 
-      const { checkbox } = await (async () => {
-        const mod = await import('@inquirer/prompts');
-        return mod;
-      })();
+      const { checkbox } = await import('@inquirer/prompts');
       const selected = await checkbox({
         message: '选择要拷贝的内容：',
         choices: copyItems,
