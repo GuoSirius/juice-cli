@@ -272,6 +272,17 @@ function registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath) {
     `${HKCU_SHELL}\\Directory\\Background\\shell`,
   ];
 
+  // First, clean up old keys from all previous versions to prevent stale entries
+  for (const root of roots) {
+    // Old parent key (ExtendedSubCommandsKey approach, v2.x commit 3fc761e)
+    regDelete(`${root}\\${PARENT_KEY_NAME}`);
+    // Old individual entries from any prior version
+    regDelete(`${root}\\JuiceEmail.Init`);
+    regDelete(`${root}\\JuiceEmail.View`);
+    regDelete(`${root}\\JuiceEmail.Browse`);
+    regDelete(`${root}\\JuiceEmail.Pwsh`);
+  }
+
   for (const root of roots) {
     // 📥 从资源库拷贝到此处
     const initKey = `${root}\\JuiceEmail.Init`;
@@ -411,12 +422,13 @@ async function unregisterContextMenu() {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理 Directory / Background 独立菜单项
+  // 清理 Directory / Background 独立菜单项 + 旧版父键
   const dirBgRoots = [
     `${HKCU_SHELL}\\Directory\\shell`,
     `${HKCU_SHELL}\\Directory\\Background\\shell`,
   ];
-  const dirBgKeys = ['JuiceEmail.Init', 'JuiceEmail.View', 'JuiceEmail.Browse', 'JuiceEmail.Pwsh'];
+  const dirBgKeys = ['JuiceEmail.Init', 'JuiceEmail.View', 'JuiceEmail.Browse', 'JuiceEmail.Pwsh',
+                      PARENT_KEY_NAME];  // PARENT_KEY_NAME = 'JuiceEmail' (old ExtendedSubCommandsKey parent)
   for (const root of dirBgRoots) {
     for (const key of dirBgKeys) {
       if (regDelete(`${root}\\${key}`)) removed++;
