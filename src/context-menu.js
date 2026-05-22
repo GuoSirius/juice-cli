@@ -262,54 +262,60 @@ function wrapWithPause(nodePath, scriptPath, cliArgs) {
 // ─── Directory / Background 菜单注册 ──────────────────────────────────────────
 
 /**
- * Register individual shell commands for Directory and Directory\Background.
- * ExtendedSubCommandsKey doesn't work reliably for non-file-type associations,
- * so we register each item as a standalone shell verb.
+ * Register Directory and Background right-click menus using SubCommands
+ * + CommandStore (same format as file-type menus for consistent UX).
  */
 function registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath) {
+  const node = nodePath.replace(/'/g, "''");
+  const script = scriptPath.replace(/'/g, "''");
+
+  // CommandStore subcommand names
+  const DIR_VIEW    = 'JuiceEmailDir.View';
+  const DIR_COPYALL = 'JuiceEmailDir.CopyAll';
+  const DIR_COPYPICK= 'JuiceEmailDir.CopyPick';
+  const DIR_PWSH    = 'JuiceEmailDir.Pwsh';
+
+  // Helper: register a CommandStore entry
+  function regCmd(name, label, psCmd) {
+    const cmdKey = `${HKCU_SHELL}\\${name}`;
+    regAdd(cmdKey, 'MUIVerb', 'REG_SZ', label);
+    regAdd(cmdKey, 'Icon', 'REG_SZ', iconPath);
+    // Always pause so user can see output
+    const fullPs = `${psCmd}; Write-Host ''; Read-Host 'Press Enter to close'`;
+    regAdd(`${cmdKey}\\command`, '', 'REG_SZ', `powershell.exe -Command "${fullPs}"`);
+  }
+
+  // View: non-interactive, no directory dependency
+  regCmd(DIR_VIEW, '📋 查看可用资源', `& '${node}' '${script}' view`);
+
+  // CopyAll: copy entire EDM to clicked directory
+  regCmd(DIR_COPYALL, '📦 拷贝全部资源', `& '${node}' '${script}' init --all '%V'`);
+
+  // CopyPick: interactive, cd to directory first so output lands there
+  regCmd(DIR_COPYPICK, '📥 选择资源拷贝', `Set-Location '%V'; & '${node}' '${script}' init`);
+
+  // Pwsh
+  if (pwshPath) {
+    const pwshKey = `${HKCU_SHELL}\\${DIR_PWSH}`;
+    regAdd(pwshKey, 'MUIVerb', 'REG_SZ', '📂 在此打开终端');
+    regAdd(pwshKey, 'Icon', 'REG_SZ', pwshPath);
+    regAdd(`${pwshKey}\\command`, '', 'REG_SZ',
+      `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath '%V'"`);
+  }
+
+  // Build SubCommands string
+  const subCmds = [DIR_VIEW, DIR_COPYALL, DIR_COPYPICK];
+  if (pwshPath) subCmds.push(DIR_PWSH);
+
+  // Parent keys: Directory + Directory\Background
   const roots = [
     `${HKCU_SHELL}\\Directory\\shell`,
     `${HKCU_SHELL}\\Directory\\Background\\shell`,
   ];
-
-  // First, clean up old keys from all previous versions to prevent stale entries
   for (const root of roots) {
-    // Old parent key (ExtendedSubCommandsKey approach, v2.x commit 3fc761e)
-    regDelete(`${root}\\${PARENT_KEY_NAME}`);
-    // Old individual entries from any prior version
-    regDelete(`${root}\\JuiceEmail.Init`);
-    regDelete(`${root}\\JuiceEmail.View`);
-    regDelete(`${root}\\JuiceEmail.Browse`);
-    regDelete(`${root}\\JuiceEmail.Pwsh`);
-  }
-
-  for (const root of roots) {
-    // 📥 从资源库拷贝到此处
-    const initKey = `${root}\\JuiceEmail.Init`;
-    regAdd(initKey, 'MUIVerb', 'REG_SZ', '📥 从资源库拷贝到此处');
-    regAdd(initKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(`${initKey}\\command`, '', 'REG_SZ', wrapWithPause(nodePath, scriptPath, 'init'));
-
-    // 📦 查看资源列表
-    const viewKey = `${root}\\JuiceEmail.View`;
-    regAdd(viewKey, 'MUIVerb', 'REG_SZ', '📦 查看资源列表');
-    regAdd(viewKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(`${viewKey}\\command`, '', 'REG_SZ', wrapWithPause(nodePath, scriptPath, 'view'));
-
-    // 📋 浏览资源库
-    const browseKey = `${root}\\JuiceEmail.Browse`;
-    regAdd(browseKey, 'MUIVerb', 'REG_SZ', '📋 浏览资源库');
-    regAdd(browseKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(`${browseKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view -i'));
-
-    // 📂 在此打开终端
-    if (pwshPath) {
-      const pwshKey = `${root}\\JuiceEmail.Pwsh`;
-      regAdd(pwshKey, 'MUIVerb', 'REG_SZ', '📂 在此打开终端');
-      regAdd(pwshKey, 'Icon', 'REG_SZ', pwshPath);
-      regAdd(`${pwshKey}\\command`, '', 'REG_SZ',
-        `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath '%V'"`);
-    }
+    regAdd(`${root}\\${PARENT_KEY_NAME}`, 'MUIVerb', 'REG_SZ', '📧 juice 邮件工具');
+    regAdd(`${root}\\${PARENT_KEY_NAME}`, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${root}\\${PARENT_KEY_NAME}`, 'SubCommands', 'REG_SZ', subCmds.join(';'));
   }
 }
 
@@ -367,8 +373,20 @@ async function registerContextMenu() {
     regAdd(parentKey, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER_YAML);
   }
 
-  // Directory / Background → 独立容器
+  // Directory / Background → 子菜单（SubCommands + CommandStore）
   console.log(chalk.gray('  注册文件夹/空白处菜单...'));
+  // Clean up old individual entries from v2.3.x before registering new format
+  for (const root of [`${HKCU_SHELL}\\Directory\\shell`, `${HKCU_SHELL}\\Directory\\Background\\shell`]) {
+    regDelete(`${root}\\${PARENT_KEY_NAME}`);
+    regDelete(`${root}\\JuiceEmail.Init`);
+    regDelete(`${root}\\JuiceEmail.View`);
+    regDelete(`${root}\\JuiceEmail.Browse`);
+    regDelete(`${root}\\JuiceEmail.Pwsh`);
+  }
+  // Clean up old CommandStore entries for Dir menu (from any prior version)
+  for (const name of ['JuiceEmailDir.View', 'JuiceEmailDir.CopyAll', 'JuiceEmailDir.CopyPick', 'JuiceEmailDir.Pwsh']) {
+    regDelete(`${HKCU_SHELL}\\${name}`);
+  }
   registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath);
 
   if (!ok) {
@@ -392,10 +410,11 @@ async function registerContextMenu() {
     `      ├── 📋 浏览资源库                →  juice view -i\n` +
     (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
     `\n  ${chalk.bold('文件夹 / 空白处')} 右键：\n` +
-    `      📥 从资源库拷贝到此处         →  juice init\n` +
-    `      📦 查看资源列表              →  juice view\n` +
-    `      📋 浏览资源库                →  juice view -i\n` +
-    (pwshPath ? `      📂 在此打开终端\n` : '') +
+    `    ${chalk.bold('📧 juice 邮件工具')}\n` +
+    `      ├── 📋 查看可用资源             →  juice view\n` +
+    `      ├── 📦 拷贝全部资源             →  juice init --all\n` +
+    `      ├── 📥 选择资源拷贝             →  juice init\n` +
+    (pwshPath ? `      └── 📂 在此打开终端\n` : '') +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
   );
@@ -422,17 +441,21 @@ async function unregisterContextMenu() {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理 Directory / Background 独立菜单项 + 旧版父键
+  // 清理 Directory / Background 父菜单 + 旧版独立条目
   const dirBgRoots = [
     `${HKCU_SHELL}\\Directory\\shell`,
     `${HKCU_SHELL}\\Directory\\Background\\shell`,
   ];
-  const dirBgKeys = ['JuiceEmail.Init', 'JuiceEmail.View', 'JuiceEmail.Browse', 'JuiceEmail.Pwsh',
-                      PARENT_KEY_NAME];  // PARENT_KEY_NAME = 'JuiceEmail' (old ExtendedSubCommandsKey parent)
+  // New parent key + old individual entries from v2.3.x
+  const dirBgKeys = [PARENT_KEY_NAME, 'JuiceEmail.Init', 'JuiceEmail.View', 'JuiceEmail.Browse', 'JuiceEmail.Pwsh'];
   for (const root of dirBgRoots) {
     for (const key of dirBgKeys) {
       if (regDelete(`${root}\\${key}`)) removed++;
     }
+  }
+  // CommandStore entries for Dir menus
+  for (const name of ['JuiceEmailDir.View', 'JuiceEmailDir.CopyAll', 'JuiceEmailDir.CopyPick', 'JuiceEmailDir.Pwsh']) {
+    if (regDelete(`${HKCU_SHELL}\\${name}`)) removed++;
   }
 
   // 清理所有子命令容器（含旧版 Dir/Bg 容器）

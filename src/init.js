@@ -230,8 +230,87 @@ async function interactiveInit(edmDir, cwd) {
 
 // ─── Main Entry ──────────────────────────────────────────────────────────────
 
-async function runInitMode({ initPath, template, snippet, config }) {
+function copyDir(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+function dirSize(dir) {
+  let size = 0;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      size += dirSize(p);
+    } else {
+      size += fs.statSync(p).size;
+    }
+  }
+  return size;
+}
+
+function countFiles(dir) {
+  let count = 0;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      count += countFiles(path.join(dir, entry.name));
+    } else {
+      count++;
+    }
+  }
+  return count;
+}
+
+async function runInitMode({ initPath, template, snippet, config, all }) {
   const cwd = process.cwd();
+
+  // --all: copy entire EDM directory
+  if (all) {
+    let edmDir;
+    try {
+      edmDir = resolveEdmDir();
+    } catch (err) {
+      console.error(chalk.red(`\n  ✘ ${err.message}\n`));
+      process.exit(1);
+    }
+    const target = all === true ? cwd : path.resolve(all);
+    const destDir = path.join(target, 'edm');
+
+    // Prevent deleting the source when target overlaps
+    if (path.resolve(edmDir) === path.resolve(destDir)) {
+      console.log(chalk.yellow('目标目录与 EDM 资源库相同，无需拷贝。\n'));
+      return;
+    }
+    console.log(chalk.cyan(`\n  拷贝 EDM 资源库...`));
+    console.log(chalk.gray(`  源：${edmDir}`));
+    console.log(chalk.gray(`  目标：${destDir}`));
+
+    if (fs.existsSync(destDir)) {
+      const { confirm } = await import('@inquirer/prompts');
+      const overwrite = await confirm({
+        message: `目标已存在 ${destDir}，是否覆盖？`,
+        default: false,
+      });
+      if (!overwrite) {
+        console.log(chalk.gray('已取消。\n'));
+        return;
+      }
+      fs.rmSync(destDir, { recursive: true, force: true });
+    }
+
+    copyDir(edmDir, destDir);
+    const edmSize = dirSize(destDir);
+    const fileCount = countFiles(destDir);
+    console.log(chalk.green(`\n✔ 已拷贝 EDM 资源库（${fileCount} 个文件，${fmtBytes(edmSize)}）\n`));
+    return;
+  }
 
   // Direct copy modes
   if (template) {

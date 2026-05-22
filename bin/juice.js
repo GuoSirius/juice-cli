@@ -103,6 +103,7 @@ program
   .option('-t, --template <file-path>', '仅拷贝模板 HTML 文件')
   .option('-s, --snippet <file-path>', '仅拷贝片段 HTML 文件')
   .option('-c, --config <file-path>', '仅拷贝配置 YAML 文件')
+  .option('--all [target]', '拷贝整个 EDM 资源目录到当前或指定目录')
   .action(async (initPath, options) => {
     const { runInitMode } = require('../src/init');
     await runInitMode({
@@ -110,6 +111,7 @@ program
       template: options.template || null,
       snippet: options.snippet || null,
       config: options.config || null,
+      all: options.all !== undefined ? (options.all || true) : null,
     });
   });
 
