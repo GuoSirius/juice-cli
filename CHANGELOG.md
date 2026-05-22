@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/GuoSirius/juice-cli/compare/v2.1.18...v2.2.0) (2026-05-22)
+
+
+### Features
+
+* 重构 EDM 目录结构为方案B，支持元数据驱动的交互式选择 ([32de4a6](https://github.com/GuoSirius/juice-cli/commit/32de4a6422f7e462fb019e402244b4b25be6460f))
+
 ### [2.1.18](https://github.com/GuoSirius/juice-cli/compare/v2.1.17...v2.1.18) (2026-05-21)
 
 
