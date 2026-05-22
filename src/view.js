@@ -12,6 +12,27 @@ function fmtBytes(b) {
   return b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`;
 }
 
+/**
+ * Copy src to dest, auto-versioning (-v1, -v2, ...) if dest exists.
+ * Returns the actual destination path used.
+ */
+function copyFileSafe(srcPath, destPath) {
+  if (!fs.existsSync(destPath)) {
+    fs.copyFileSync(srcPath, destPath);
+    return destPath;
+  }
+  const parsed = path.parse(destPath);
+  let v = 1;
+  while (true) {
+    const alt = path.join(parsed.dir, parsed.name + '-v' + v + parsed.ext);
+    if (!fs.existsSync(alt)) {
+      fs.copyFileSync(srcPath, alt);
+      return alt;
+    }
+    v++;
+  }
+}
+
 // ─── Path Parser ──────────────────────────────────────────────────────────────
 
 /**
@@ -327,13 +348,17 @@ async function showCheckbox(title, choices) {
  * Trigger copy via the init module.
  */
 async function copyResource(type, resourcePath, cwd) {
-  const { runInitMode } = require('./init');
-  if (type === 'template') {
-    await runInitMode({ template: resourcePath });
-  } else if (type === 'snippet') {
-    await runInitMode({ snippet: resourcePath });
-  } else if (type === 'config') {
-    await runInitMode({ config: resourcePath });
+  try {
+    const { runInitMode } = require('./init');
+    if (type === 'template') {
+      await runInitMode({ template: resourcePath });
+    } else if (type === 'snippet') {
+      await runInitMode({ snippet: resourcePath });
+    } else if (type === 'config') {
+      await runInitMode({ config: resourcePath });
+    }
+  } catch (err) {
+    console.error(chalk.red(`  ✘ 拷贝失败：${err.message}`));
   }
 }
 
@@ -551,7 +576,7 @@ async function interactiveBrowse(edmDir, startParsed) {
       if (versions.length > 0) {
         const tplPath = versions[0].templatePath;
         copyItems.push({
-          name: '📋 模板 HTML',
+          name: `📋 模板 HTML（${versions[0].meta.name || versions[0].name}）`,
           value: 'template',
           description: path.basename(tplPath),
           checked: true,
@@ -588,7 +613,9 @@ async function interactiveBrowse(edmDir, startParsed) {
         });
 
         if (selected.length > 0) {
-          const defaultBaseName = `${current.brand}-${current.series}-${current.variant}`;
+          // Include template version in default name for clarity
+          const versionName = versions.length > 0 ? versions[0].name : 'template';
+          const defaultBaseName = `${current.brand}-${versionName}-${current.series}-${current.variant}`;
           const { promptOutputName: pn } = require('./snippet');
           const outputBaseName = await pn(defaultBaseName, process.cwd());
           const cwd = process.cwd();
@@ -596,28 +623,22 @@ async function interactiveBrowse(edmDir, startParsed) {
 
           console.log(chalk.green('\n✔ 已拷贝：'));
           if (selected.includes('template') && versions.length > 0) {
-            const tplPath = versions[0].templatePath;
-            const dest = path.join(cwd, outputBaseName + path.extname(tplPath));
-            fs.copyFileSync(tplPath, dest);
-            console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+            const src = versions[0].templatePath;
+            const dest = path.join(cwd, outputBaseName + path.extname(src));
+            const actual = copyFileSafe(src, dest);
+            console.log(`   ${chalk.cyan('·')} ${cwdRel(actual)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(actual).size) + ')')}`);
           }
           if (selected.includes('snippet') && fs.existsSync(snipPath)) {
             const dest = path.join(cwd, outputBaseName + '-snippet' + path.extname(snipPath));
-            fs.copyFileSync(snipPath, dest);
-            console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+            const actual = copyFileSafe(snipPath, dest);
+            console.log(`   ${chalk.cyan('·')} ${cwdRel(actual)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(actual).size) + ')')}`);
           }
           if (selected.includes('config') && configs.length > 0) {
             const optimal = configs.find(c => c.isOptimal);
             const cfgPath = optimal ? optimal.path : configs[0].path;
             const dest = path.join(cwd, 'juice.yaml');
-            if (fs.existsSync(dest)) {
-              const alt = path.join(cwd, 'juice-v1.yaml');
-              fs.copyFileSync(cfgPath, alt);
-              console.log(`   ${chalk.cyan('·')} ${cwdRel(alt)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(alt).size) + ')')}`);
-            } else {
-              fs.copyFileSync(cfgPath, dest);
-              console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-            }
+            const actual = copyFileSafe(cfgPath, dest);
+            console.log(`   ${chalk.cyan('·')} ${cwdRel(actual)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(actual).size) + ')')}`);
           }
           console.log();
         }

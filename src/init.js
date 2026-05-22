@@ -71,8 +71,7 @@ function deriveDefaultName(filePath) {
 async function directCopy(srcPath, cwd) {
   const resolved = path.resolve(srcPath);
   if (!fs.existsSync(resolved)) {
-    console.error(chalk.red(`\n  ✘ 文件不存在：${resolved}\n`));
-    process.exit(1);
+    throw new Error(`文件不存在：${resolved}`);
   }
 
   const destName = await promptOutputName(

@@ -288,7 +288,7 @@ function registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath) {
     const initKey = `${root}\\JuiceEmail.Init`;
     regAdd(initKey, 'MUIVerb', 'REG_SZ', '📥 从资源库拷贝到此处');
     regAdd(initKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(`${initKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'init'));
+    regAdd(`${initKey}\\command`, '', 'REG_SZ', wrapWithPause(nodePath, scriptPath, 'init'));
 
     // 📦 查看资源列表
     const viewKey = `${root}\\JuiceEmail.View`;
