@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.2](https://github.com/GuoSirius/juice-cli/compare/v2.2.1...v2.2.2) (2026-05-22)
+
+
+### Bug Fixes
+
+* use random delimiter in GITHUB_OUTPUT to prevent content collision ([b92e9bf](https://github.com/GuoSirius/juice-cli/commit/b92e9bfed003be38ac642388a5a12d6c53ebd23c))
+
 ### [2.2.1](https://github.com/GuoSirius/juice-cli/compare/v2.2.0...v2.2.1) (2026-05-22)
 
 
