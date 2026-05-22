@@ -420,20 +420,6 @@ async function interactiveBrowse(edmDir, startParsed) {
             description: allSeries.length + ' 个系列',
           });
         }
-
-        // Copy options
-        if (versions.length > 0) {
-          choices.push({
-            name: '📥 拷贝模板到当前目录',
-            value: { action: 'copy-template' },
-          });
-        }
-        if (allSeries.length > 0) {
-          choices.push({
-            name: '📥 拷贝配置到当前目录',
-            value: { action: 'copy-config-brand' },
-          });
-        }
         break;
       }
 
@@ -511,27 +497,15 @@ async function interactiveBrowse(edmDir, startParsed) {
         if (infoLines.length > 0) {
           console.log(chalk.dim('\n  ' + infoLines.join('\n  ') + '\n'));
         }
-        // Copy actions
-        if (fs.existsSync(snipPath)) {
-          choices.push({
-            name: '📥 拷贝片段到当前目录',
-            value: { action: 'copy-snippet' },
-          });
-        }
-        if (configs.length > 0) {
-          choices.push({
-            name: '📥 拷贝配置到当前目录',
-            value: { action: 'copy-config' },
-          });
-        }
-        // Also allow copying the template
+        // Multi-select copy
+        const hasResources = fs.existsSync(snipPath) || configs.length > 0;
         let versions;
         const brandDir = path.join(edmDir, current.brand);
         try { versions = findTemplateVersions(brandDir); } catch (_) { versions = []; }
-        if (versions.length > 0) {
+        if (hasResources || versions.length > 0) {
           choices.push({
-            name: '📥 拷贝模板到当前目录',
-            value: { action: 'copy-template' },
+            name: '📥 拷贝到当前目录',
+            value: { action: 'copy-multi' },
           });
         }
         break;
@@ -558,125 +532,95 @@ async function interactiveBrowse(edmDir, startParsed) {
 
     // Copy actions
     if (result.action === 'copy-template') {
-      let tplPath;
-      if (current.level === 'brand') {
-        const brandDir = path.join(edmDir, current.brand);
-        const versions = findTemplateVersions(brandDir);
-        if (versions.length === 1) {
-          tplPath = versions[0].templatePath;
-        } else {
-          // Let user pick which template version
-          const tplChoices = versions.map(v => ({
-            name: formatName(v.meta, v.name) + formatDesc(v.meta),
-            value: v.templatePath,
-          }));
-          tplPath = await showMenu('选择要拷贝的模板版本', tplChoices);
-        }
-      } else if (current.templatePath) {
-        tplPath = current.templatePath;
-      } else if (current.versionData) {
-        tplPath = current.versionData.templatePath;
-      } else {
-        const brandDir = path.join(edmDir, current.brand);
-        const versions = findTemplateVersions(brandDir);
-        if (versions.length === 0) continue;
-        if (versions.length === 1) {
-          tplPath = versions[0].templatePath;
-        } else {
-          const tplChoices = versions.map(v => ({
-            name: formatName(v.meta, v.name) + formatDesc(v.meta),
-            value: v.templatePath,
-          }));
-          tplPath = await showMenu('选择要拷贝的模板版本', tplChoices);
-        }
-      }
-      if (tplPath) {
+      const v = current.versionData;
+      if (v && v.templatePath) {
         console.log();
-        await copyResource('template', tplPath, process.cwd());
+        await copyResource('template', v.templatePath, process.cwd());
         console.log();
       }
       continue;
     }
 
-    if (result.action === 'copy-snippet') {
+    if (result.action === 'copy-multi') {
+      const brandDir = path.join(edmDir, current.brand);
+      const copyItems = [];
+
+      // Template
+      let versions;
+      try { versions = findTemplateVersions(brandDir); } catch (_) { versions = []; }
+      if (versions.length > 0) {
+        const tplPath = versions[0].templatePath;
+        copyItems.push({
+          name: '📋 模板 HTML',
+          value: 'template',
+          description: path.basename(tplPath),
+          checked: true,
+        });
+      }
+
+      // Snippet
       const snipPath = path.join(current.variantData.path, 'snippet.html');
       if (fs.existsSync(snipPath)) {
-        console.log();
-        await copyResource('snippet', snipPath, process.cwd());
-        console.log();
+        copyItems.push({
+          name: '🧩 片段 HTML',
+          value: 'snippet',
+          description: path.basename(snipPath),
+          checked: true,
+        });
       }
-      continue;
-    }
 
-    if (result.action === 'copy-config') {
+      // Config
       const configs = findConfigs(current.variantData.path);
-      if (configs.length === 1) {
-        console.log();
-        await copyResource('config', configs[0].path, process.cwd());
-        console.log();
-      } else if (configs.length > 1) {
-        const cfgChoices = configs.map(c => ({
-          name: c.isOptimal ? c.name + chalk.green(' (最优配对)') : c.name,
-          value: c.path,
-        }));
-        const cfgPath = await showMenu('选择要拷贝的配置文件', cfgChoices);
-        if (cfgPath) {
-          console.log();
-          await copyResource('config', cfgPath, process.cwd());
+      if (configs.length > 0) {
+        copyItems.push({
+          name: '⚙️ 配置文件',
+          value: 'config',
+          description: configs.map(c => c.name).join(', '),
+          checked: true,
+        });
+      }
+
+      if (copyItems.length > 0) {
+        const { checkbox } = await import('@inquirer/prompts');
+        const selected = await checkbox({
+          message: '选择要拷贝的内容：',
+          choices: copyItems,
+        });
+
+        if (selected.length > 0) {
+          const defaultBaseName = `${current.brand}-${current.series}-${current.variant}`;
+          const { promptOutputName: pn } = require('./snippet');
+          const outputBaseName = await pn(defaultBaseName, process.cwd());
+          const cwd = process.cwd();
+          const cwdRel = (p) => './' + path.relative(cwd, p);
+
+          console.log(chalk.green('\n✔ 已拷贝：'));
+          if (selected.includes('template') && versions.length > 0) {
+            const tplPath = versions[0].templatePath;
+            const dest = path.join(cwd, outputBaseName + path.extname(tplPath));
+            fs.copyFileSync(tplPath, dest);
+            console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+          }
+          if (selected.includes('snippet') && fs.existsSync(snipPath)) {
+            const dest = path.join(cwd, outputBaseName + '-snippet' + path.extname(snipPath));
+            fs.copyFileSync(snipPath, dest);
+            console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+          }
+          if (selected.includes('config') && configs.length > 0) {
+            const optimal = configs.find(c => c.isOptimal);
+            const cfgPath = optimal ? optimal.path : configs[0].path;
+            const dest = path.join(cwd, 'juice.yaml');
+            if (fs.existsSync(dest)) {
+              const alt = path.join(cwd, 'juice-v1.yaml');
+              fs.copyFileSync(cfgPath, alt);
+              console.log(`   ${chalk.cyan('·')} ${cwdRel(alt)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(alt).size) + ')')}`);
+            } else {
+              fs.copyFileSync(cfgPath, dest);
+              console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+            }
+          }
           console.log();
         }
-      }
-      continue;
-    }
-
-    if (result.action === 'copy-config-brand') {
-      // From brand level: pick series → variant → config
-      const brandDir = path.join(edmDir, current.brand);
-      const allSeries = findSeriesDirs(brandDir);
-      if (allSeries.length === 0) continue;
-
-      let series;
-      if (allSeries.length === 1) {
-        series = allSeries[0];
-      } else {
-        const sChoices = allSeries.map(s => ({
-          name: formatName(s.meta, s.name) + formatDesc(s.meta),
-          value: s,
-        }));
-        series = await showMenu('选择系列', sChoices);
-      }
-      if (!series) continue;
-
-      const variants = findSnippetVariants(series.path);
-      if (variants.length === 0) continue;
-      let variant;
-      if (variants.length === 1) {
-        variant = variants[0];
-      } else {
-        const vChoices = variants.map(v => ({
-          name: formatName(v.meta, v.name) + formatDesc(v.meta),
-          value: v,
-        }));
-        variant = await showMenu('选择变体', vChoices);
-      }
-      if (!variant) continue;
-
-      const configs = findConfigs(variant.path);
-      if (configs.length === 0) continue;
-      let cfgPath;
-      if (configs.length === 1) {
-        cfgPath = configs[0].path;
-      } else {
-        const cfgChoices = configs.map(c => ({
-          name: c.isOptimal ? c.name + chalk.green(' (最优配对)') : c.name,
-          value: c.path,
-        }));
-        cfgPath = await showMenu('选择配置文件', cfgChoices);
-      }
-      if (cfgPath) {
-        console.log();
-        await copyResource('config', cfgPath, process.cwd());
-        console.log();
       }
       continue;
     }

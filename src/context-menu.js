@@ -228,7 +228,7 @@ function registerSubCommands(containerPath, kind, nodePath, scriptPath, iconPath
     const viewKey = `${containerPath}\\shell\\${SUBCMDS.viewEdm}`;
     regAdd(viewKey, 'MUIVerb', 'REG_SZ', '📦 查看资源列表');
     regAdd(viewKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(`${viewKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view'));
+    regAdd(`${viewKey}\\command`, '', 'REG_SZ', wrapWithPause(nodePath, scriptPath, 'view'));
 
     const viewIntKey = `${containerPath}\\shell\\${SUBCMDS.viewEdmInt}`;
     regAdd(viewIntKey, 'MUIVerb', 'REG_SZ', '📋 浏览资源库');
@@ -246,52 +246,60 @@ function registerSubCommands(containerPath, kind, nodePath, scriptPath, iconPath
   }
 }
 
+// ─── 非交互命令包装（始终暂停以便用户查看输出）─────────────────────────────────
+
+function wrapWithPause(nodePath, scriptPath, cliArgs) {
+  const node = nodePath.replace(/'/g, "''");
+  const script = scriptPath.replace(/'/g, "''");
+  const ps = [
+    `& '${node}' '${script}' ${cliArgs}`,
+    `Write-Host ''`,
+    `Read-Host 'Press Enter to close'`,
+  ].join('; ');
+  return `powershell.exe -Command "${ps}"`;
+}
+
 // ─── Directory / Background 菜单注册 ──────────────────────────────────────────
 
+/**
+ * Register individual shell commands for Directory and Directory\Background.
+ * ExtendedSubCommandsKey doesn't work reliably for non-file-type associations,
+ * so we register each item as a standalone shell verb.
+ */
 function registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath) {
-  // Register directory container subcommands
-  const dirContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_DIR}`;
-  const bgContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_BG}`;
+  const roots = [
+    `${HKCU_SHELL}\\Directory\\shell`,
+    `${HKCU_SHELL}\\Directory\\Background\\shell`,
+  ];
 
-  for (const containerPath of [dirContainer, bgContainer]) {
+  for (const root of roots) {
     // 📥 从资源库拷贝到此处
-    const initKey = `${containerPath}\\shell\\${SUBCMDS.initEdm}`;
+    const initKey = `${root}\\JuiceEmail.Init`;
     regAdd(initKey, 'MUIVerb', 'REG_SZ', '📥 从资源库拷贝到此处');
     regAdd(initKey, 'Icon', 'REG_SZ', iconPath);
     regAdd(`${initKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'init'));
 
     // 📦 查看资源列表
-    const viewKey = `${containerPath}\\shell\\${SUBCMDS.viewEdm}`;
+    const viewKey = `${root}\\JuiceEmail.View`;
     regAdd(viewKey, 'MUIVerb', 'REG_SZ', '📦 查看资源列表');
     regAdd(viewKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(`${viewKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view'));
+    regAdd(`${viewKey}\\command`, '', 'REG_SZ', wrapWithPause(nodePath, scriptPath, 'view'));
 
     // 📋 浏览资源库
-    const viewIntKey = `${containerPath}\\shell\\${SUBCMDS.viewEdmInt}`;
-    regAdd(viewIntKey, 'MUIVerb', 'REG_SZ', '📋 浏览资源库');
-    regAdd(viewIntKey, 'Icon', 'REG_SZ', iconPath);
-    regAdd(`${viewIntKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view -i'));
+    const browseKey = `${root}\\JuiceEmail.Browse`;
+    regAdd(browseKey, 'MUIVerb', 'REG_SZ', '📋 浏览资源库');
+    regAdd(browseKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${browseKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view -i'));
 
     // 📂 在此打开终端
     if (pwshPath) {
-      const pwshKey = `${containerPath}\\shell\\${SUBCMDS.pwsh}`;
+      const pwshKey = `${root}\\JuiceEmail.Pwsh`;
       regAdd(pwshKey, 'MUIVerb', 'REG_SZ', '📂 在此打开终端');
       regAdd(pwshKey, 'Icon', 'REG_SZ', pwshPath);
       regAdd(`${pwshKey}\\command`, '', 'REG_SZ',
-        `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath '%1'"`);
+        `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath '%V'"`);
     }
   }
-
-  // Parent keys: Directory and Directory\Background
-  const dirParent = `${HKCU_SHELL}\\Directory\\shell\\${PARENT_KEY_NAME}`;
-  regAdd(dirParent, 'MUIVerb', 'REG_SZ', '📧 juice 邮件工具');
-  regAdd(dirParent, 'Icon', 'REG_SZ', iconPath);
-  regAdd(dirParent, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER_DIR);
-
-  const bgParent = `${HKCU_SHELL}\\Directory\\Background\\shell\\${PARENT_KEY_NAME}`;
-  regAdd(bgParent, 'MUIVerb', 'REG_SZ', '📧 juice 邮件工具');
-  regAdd(bgParent, 'Icon', 'REG_SZ', iconPath);
-  regAdd(bgParent, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER_BG);
 }
 
 // ─── 注册 ─────────────────────────────────────────────────────────────────────
@@ -373,11 +381,10 @@ async function registerContextMenu() {
     `      ├── 📋 浏览资源库                →  juice view -i\n` +
     (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
     `\n  ${chalk.bold('文件夹 / 空白处')} 右键：\n` +
-    `    ${chalk.bold('📧 juice 邮件工具')}\n` +
-    `      ├── 📥 从资源库拷贝到此处         →  juice init\n` +
-    `      ├── 📦 查看资源列表              →  juice view\n` +
-    `      ├── 📋 浏览资源库                →  juice view -i\n` +
-    (pwshPath ? `      └── 📂 在此打开终端\n` : '') +
+    `      📥 从资源库拷贝到此处         →  juice init\n` +
+    `      📦 查看资源列表              →  juice view\n` +
+    `      📋 浏览资源库                →  juice view -i\n` +
+    (pwshPath ? `      📂 在此打开终端\n` : '') +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
   );
@@ -395,20 +402,32 @@ async function unregisterContextMenu() {
 
   let removed = 0;
 
-  // 清理 HKCU 父菜单（4 个文件类型 + Directory + Background）
+  // 清理 HKCU 父菜单（文件类型）
   const allRoots = [
     ...HTML_ROOTS,
     ...YAML_ROOTS,
-    `${HKCU_SHELL}\\Directory\\shell`,
-    `${HKCU_SHELL}\\Directory\\Background\\shell`,
   ];
   for (const root of allRoots) {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理所有子命令容器
+  // 清理 Directory / Background 独立菜单项
+  const dirBgRoots = [
+    `${HKCU_SHELL}\\Directory\\shell`,
+    `${HKCU_SHELL}\\Directory\\Background\\shell`,
+  ];
+  const dirBgKeys = ['JuiceEmail.Init', 'JuiceEmail.View', 'JuiceEmail.Browse', 'JuiceEmail.Pwsh'];
+  for (const root of dirBgRoots) {
+    for (const key of dirBgKeys) {
+      if (regDelete(`${root}\\${key}`)) removed++;
+    }
+  }
+
+  // 清理所有子命令容器（含旧版 Dir/Bg 容器）
   if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`)) removed++;
   if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`)) removed++;
+  if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_DIR}`)) removed++;
+  if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_BG}`)) removed++;
   if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_DIR}`)) removed++;
   if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_BG}`)) removed++;
 
