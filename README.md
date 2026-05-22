@@ -15,7 +15,9 @@
 - **双文件输出** —— 普通模式生成 `.output.html` + `.minified.html`
 - **四文件输出** —— 片段模式生成 `.raw.html` + `.html` + `.output.html` + `.minified.html`
 - **交互模式** —— 无参数运行，逐步选择品牌、模板、片段、配置
-- **Windows 右键菜单** —— 子菜单层级，一键注册/卸载
+- **资源浏览** —— `juice view` 查看 EDM 资源树，`-i` 交互式逐层翻页
+- **资源拷贝** —— `juice init` 将模板/片段/配置拷贝到当前目录
+- **Windows 右键菜单** —— 文件/文件夹/空白处多场景支持，一键注册/卸载
 
 ---
 
@@ -97,6 +99,41 @@ juice
 
 流程：选择品牌 → 模板 → 片段文件夹 → 片段 HTML → 配置文件 → 输出文件名 → 确认执行。
 
+### 浏览资源（查看 EDM 模板库）
+
+```bash
+# 查看完整资源树
+juice view
+
+# 查看指定品牌/系列/变体
+juice view elabscience
+juice view elabscience/literature
+
+# 列出所有模板 / 系列 / 片段
+juice view --templates
+juice view --series
+juice view --snippets
+
+# 交互式浏览（可上下翻层级，叶节点可直接拷贝）
+juice view -i
+juice view -i elabscience
+```
+
+### 拷贝资源到当前目录
+
+```bash
+# 交互式选择并多选拷贝
+juice init
+
+# 从指定 EDM 路径拷贝
+juice init elabscience/templates/standard
+
+# 仅拷贝指定文件
+juice init --template edm/elabscience/templates/standard/template.html
+juice init --snippet edm/elabscience/series/literature/default/snippet.html
+juice init --config edm/elabscience/series/literature/default/juice.yaml
+```
+
 ### 参数说明
 
 | 参数 | 简写 | 说明 |
@@ -116,7 +153,9 @@ juice
 |------|------|------|----------|
 | ✓ | * | * | 片段模式（-s 指定片段，-f 可选指定模板） |
 | ✗ | ✓ | * | 普通模式（生成 .output.html + .minified.html） |
-| ✗ | ✗ | * | 交互式片段模式（逐步选择） |
+| ✗ | ✗ | ✗ | 交互式片段模式（逐步选择） |
+| — | — | — | `juice view [path]` 浏览资源 / `-i` 交互浏览 |
+| — | — | — | `juice init [path]` 拷贝资源到当前目录 |
 
 ---
 
@@ -312,21 +351,36 @@ edm/
 
 ## Windows 右键菜单
 
-注册后，在 `.html` / `.htm` / `.yaml` / `.yml` 文件上右键可看到统一子菜单（所有文件类型共享）：
+### 文件右键（.html / .htm）
 
 ```
 📧 用 juice 生成邮件 HTML
   ├── 📄 作为模板，生成邮件 HTML   → juice -f %1（后台执行）
   ├── 🧩 作为片段，拼接邮件 HTML   → juice -s %1（交互选择模板）
-  ├── ⚙️ 作为配置，拼接邮件 HTML   → juice -c %1（交互选择品牌/模板/片段）
+  ├── 📦 查看资源列表              → juice view
+  ├── 📋 浏览资源库                → juice view -i
   └── 📂 打开 PowerShell           ← 仅已安装 pwsh 时出现
 ```
 
-| 子命令 | 说明 |
-|--------|------|
-| 📄 作为模板，生成邮件 HTML | 将文件当模板处理，CSS 内联 + 变量替换 + 压缩 |
-| 🧩 作为片段，拼接邮件 HTML | 将文件当片段，打开终端选择模板后拼接输出 |
-| ⚙️ 作为配置，拼接邮件 HTML | 将文件当配置，打开终端选择品牌/模板/片段 |
+### 文件右键（.yaml / .yml）
+
+```
+📧 用 juice 生成邮件 HTML
+  ├── ⚙️ 作为配置，拼接邮件 HTML   → juice -c %1（交互选择品牌/模板/片段）
+  ├── 📦 查看资源列表              → juice view
+  ├── 📋 浏览资源库                → juice view -i
+  └── 📂 打开 PowerShell
+```
+
+### 文件夹 / 空白处右键
+
+```
+📧 juice 邮件工具
+  ├── 📥 从资源库拷贝到此处         → juice init
+  ├── 📦 查看资源列表              → juice view
+  ├── 📋 浏览资源库                → juice view -i
+  └── 📂 在此打开终端
+```
 
 ```bash
 juice --install    # 注册（当前用户，无需管理员）
@@ -342,21 +396,31 @@ juice --uninstall   # 卸载
 ```
 juice-cli/
 ├── bin/
-│   └── juice.js               # CLI 入口
+│   └── juice.js               # CLI 入口（Commander.js）
 ├── src/
 │   ├── index.js               # 核心逻辑（配置合并、模板处理、双输出）
 │   ├── snippet.js             # 片段组装模式 + 交互式提示
+│   ├── view.js                # EDM 资源查看/浏览（juice view）
+│   ├── init.js                # EDM 资源拷贝初始化（juice init）
 │   └── context-menu.js        # Windows 右键菜单注册
 ├── defaults/
 │   └── juice.yaml             # CLI 内置默认配置
 ├── edm/                       # EDM 模板库（npm 发布时包含）
 │   ├── elabscience/
-│   │   ├── elabscience-template.html
-│   │   └── literature/
-│   │       ├── snippet.html
-│   │       └── juice.yaml
+│   │   ├── _meta.yaml
+│   │   ├── templates/
+│   │   │   └── standard/
+│   │   │       └── template.html
+│   │   └── series/
+│   │       └── literature/
+│   │           └── default/
+│   │               ├── snippet.html
+│   │               └── juice.yaml
 │   └── procell/
-│       └── procell-template.html
+│       ├── _meta.yaml
+│       └── templates/
+│           └── standard/
+│               └── template.html
 ├── icons/
 │   └── juice-icon.ico          # 右键菜单图标
 ├── scripts/

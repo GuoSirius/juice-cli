@@ -8,13 +8,18 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 
 - `juice -f template.html` — 对 HTML 做 Mustache 变量替换 → juice CSS 内联 → 输出 `.output.html` + `.minified.html`
 - `juice -c config.yaml -f template.html` — 同上，指定配置文件
-- `juice --snippet snippet.html -f template.html` — 片段组装模式：片段 + 模板拼接，输出 4 个文件。跨品牌时给出警告但仍可执行
-- `juice --snippet snippet.html` — 片段模式，交互式选择品牌和模板，跨品牌时给出警告
+- `juice -s snippet.html -f template.html` — 片段组装模式：片段 + 模板拼接，输出 4 个文件。跨品牌时给出警告但仍可执行
+- `juice -s snippet.html` — 片段模式，交互式选择品牌和模板，跨品牌时给出警告
 - `juice` — 全交互模式：逐步选择品牌、模板、片段系列、片段 HTML、配置（同品牌内组合，不会跨品牌）
+- `juice view` — 查看 EDM 资源树（品牌、模板、系列、片段变体、配置文件）
+- `juice view -i` — 交互式浏览 EDM 资源库，可上下翻层级，叶节点可直接拷贝资源
+- `juice init` — 交互式选择并拷贝模板/片段/配置到当前目录
+- `juice init --template <file>` / `--snippet <file>` / `--config <file>` — 仅拷贝指定文件
 - `juice --install` / `juice --uninstall` — Windows 右键菜单注册/卸载（npm install 时自动执行 postinstall）
 - 右键菜单：
-  - `.html`/`.htm` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为模板生成 / 作为片段拼接 / 打开 PowerShell）
-  - `.yaml`/`.yml` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为配置拼接 / 打开 PowerShell）
+  - `.html`/`.htm` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为模板生成 / 作为片段拼接 / 查看资源列表 / 浏览资源库 / 打开 PowerShell）
+  - `.yaml`/`.yml` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为配置拼接 / 查看资源列表 / 浏览资源库 / 打开 PowerShell）
+  - 文件夹 / 空白处 → "📧 juice 邮件工具" → 子菜单（从资源库拷贝 / 查看资源列表 / 浏览资源库 / 打开终端）
 
 ## npm 生命周期（自动菜单注册）
 
@@ -29,6 +34,8 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 bin/juice.js              # CLI 入口（Commander.js, CJS）
 src/index.js              # 核心逻辑：配置加载、模板处理、输出
 src/snippet.js            # 片段组装模式逻辑 + 交互式提示
+src/view.js               # EDM 资源查看/浏览（juice view）
+src/init.js               # EDM 资源拷贝初始化（juice init）
 src/context-menu.js       # Windows 右键菜单注册
 defaults/juice.yaml       # CLI 内置默认配置
 edm/                      # EDM 模板库（npm 发布时包含，全局安装后可用）
@@ -136,6 +143,114 @@ description: "含产品引用表格的标准布局"
 ### 交互模式（无参数）
 
 低 → 高：`defaults/juice.yaml` → `~/juice.yaml` → 项目配置（CWD 优先 → 片段目录回退 → 手动输入，三选一）→ `-c` 指定
+
+---
+
+## 资源浏览（`juice view`）
+
+### 非交互模式（默认）
+
+查看 EDM 资源树结构，无需进入交互流程：
+
+```
+juice view                          # 完整资源树（品牌→模板→系列→片段→配置）
+juice view elabscience              # 子树：指定品牌
+juice view elabscience/literature   # 子树：指定系列
+juice view elabscience/literature/default                # 子树：指定变体
+juice view elabscience/templates/standard                # 子树：指定模板版本
+juice view --templates              # 扁平列表：所有品牌的所有模板
+juice view --series                 # 扁平列表：所有品牌的所有系列
+juice view --snippets               # 扁平列表：所有品牌的所有片段
+```
+
+### 交互模式（`-i`）
+
+进入可上下翻层的交互浏览器（使用 @inquirer/prompts select 列表）：
+
+```
+juice view -i                       # 从品牌开始浏览
+juice view -i elabscience           # 从指定品牌开始
+juice view -i --templates           # 从模板列表开始
+juice view -i --series              # 从系列列表开始
+juice view -i --snippets            # 从片段列表开始
+```
+
+交互菜单每层固定结构：
+- 当前层级的可选项目（品牌、模板、系列、变体）
+- `.. 返回上级`（有上级时显示）
+- `✕ 退出`
+
+叶节点（变体/模板详情）提供操作：
+- `📥 拷贝模板到当前目录` → 触发 `juice init --template`
+- `📥 拷贝片段到当前目录` → 触发 `juice init --snippet`
+- `📥 拷贝配置到当前目录` → 触发 `juice init --config`
+
+**不显示配置内容**（太长，破坏浏览体验）。
+
+### 核心模块：`src/view.js`
+
+| 函数 | 用途 |
+|---|---|
+| `parseViewPath(rawPath, edmDir)` | 解析路径字符串 → `{ type, brand, series?, variant?, version? }` |
+| `printFullTree(edmDir)` | 打印全部品牌资源树 |
+| `printSubTree(edmDir, parsed)` | 打印指定路径子树 |
+| `printFlatTemplates(edmDir)` | `--templates` 扁平列表 |
+| `printFlatSeries(edmDir)` | `--series` 扁平列表 |
+| `printFlatSnippets(edmDir)` | `--snippets` 扁平列表 |
+| `interactiveBrowse(edmDir, startNode)` | 交互浏览器（导航栈 + while 循环 + select） |
+| `runViewMode({ viewPath, interactive, scope })` | 主入口 |
+
+---
+
+## 资源拷贝（`juice init`）
+
+### 用法
+
+```
+juice init                                    # 交互式：选择品牌 → 模板 → 系列(可选) → 变体 → 多选拷贝内容
+juice init <brand>/templates/<version>        # 从指定模板版本交互式多选拷贝
+juice init <brand>/<series>/<variant>         # 从指定变体交互式多选拷贝
+juice init --template <文件路径>               # 仅拷贝模板 HTML 到当前目录
+juice init --snippet <文件路径>                # 仅拷贝片段 HTML 到当前目录
+juice init --config <文件路径>                 # 仅拷贝配置 YAML 到当前目录
+```
+
+### 交互流程
+
+```
+juice init
+
+? 选择品牌：        伊莱瑞特 (elabscience)
+? 选择模板版本：     标准版 (standard)
+? 选择系列：         文献推广 (literature) / [跳过，仅用模板]
+  → 选了系列 → 选变体
+? 拷贝内容：（多选）
+  ☑ 模板 HTML
+  ☑ 片段 HTML
+  ☑ 配置文件
+? 输出文件名：       [elabscience-standard]
+```
+
+输出示例（片段模式）：
+```
+✔ 已拷贝：
+   · ./elabscience-standard.html          (模板, 72.2 KB)
+   · ./elabscience-standard-snippet.html  (片段, 3.3 KB)
+   · ./juice.yaml                          (配置, 1.2 KB)
+
+💡 下一步：
+   juice -s elabscience-standard-snippet.html -f elabscience-standard.html
+```
+
+### 核心模块：`src/init.js`
+
+| 函数 | 用途 |
+|---|---|
+| `deriveDefaultName(filePath)` | 从 EDM 路径推导友好的默认输出名 |
+| `directCopy(srcPath, cwd)` | `--template`/`--snippet`/`--config` 直接拷贝 |
+| `copyFileToCwd(srcPath, cwd, destName)` | 拷贝单个文件，自动处理重名 |
+| `interactiveInit(edmDir, cwd)` | 交互式初始化流程 |
+| `runInitMode({ initPath, template, snippet, config })` | 主入口 |
 
 ---
 
@@ -273,12 +388,18 @@ description: "含产品引用表格的标准布局"
 
 ### 验证清单
 
-- [x] `juice -f edm/procell/procell-template.html` — 普通模式正常
-- [x] `juice --snippet edm/elabscience/literature/snippet.html -f edm/procell/procell-template.html` — 命令行片段模式，跨品牌警告 + 输出 4 文件
-- [x] `juice --snippet edm/elabscience/literature/snippet.html -f edm/elabscience/elabscience-template.html` — 同品牌无警告
-- [ ] `juice --snippet edm/elabscience/literature/snippet.html` — 片段 + 交互选模板（需 TTY）
-- [ ] `juice`（项目根目录）— 全交互模式（需 TTY）
+- [x] `juice -f edm/elabscience/templates/standard/template.html` — 普通模式正常
+- [x] `juice -s edm/elabscience/series/literature/default/snippet.html -f edm/elabscience/templates/standard/template.html` — 命令行片段模式，同品牌输出 4 文件
+- [x] `juice -s edm/elabscience/series/literature/default/snippet.html -f edm/procell/templates/standard/template.html` — 跨品牌警告
+- [x] `juice view` — 完整资源树
+- [x] `juice view elabscience` / `juice view --templates` / `--series` / `--snippets` — 子级查看
+- [x] `juice view --help` / `juice init --help` — 子命令帮助
+- [ ] `juice view -i` — 交互式浏览（需 TTY）
+- [ ] `juice view -i elabscience` — 从指定品牌开始浏览（需 TTY）
+- [ ] `juice init` — 交互式拷贝（需 TTY）
+- [ ] `juice init --template <file>` / `--snippet <file>` / `--config <file>` — 直接拷贝
+- [ ] `juice` — 全交互模式（需 TTY）
 - [ ] `juice`（npm 全局安装后，任意目录）— 全交互模式使用包内置 edm/（需 TTY）
-- [ ] `juice --install` / `juice --uninstall` — 右键菜单含新增选项（需管理员权限）
+- [ ] `juice --install` / `juice --uninstall` — 右键菜单含文件/文件夹/空白处所有选项
 - [x] `juice -c defaults/juice.yaml --snippet ...` — 配置文件覆盖生效
 - [x] `edm/procell/` 品牌（暂无片段文件夹）— 交互模式优雅提示
