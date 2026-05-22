@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.1](https://github.com/GuoSirius/juice-cli/compare/v2.2.0...v2.2.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* release notes extraction incorrectly crosses version boundaries ([a72cfc7](https://github.com/GuoSirius/juice-cli/commit/a72cfc740cd3f70c27d452ae822adf8c2d3a42ca))
+
+
+### Chores
+
+* update ([fcc837b](https://github.com/GuoSirius/juice-cli/commit/fcc837ba7f77842330e0d1b2d2cb62c43ba8b6d4))
+
 ## [2.2.0](https://github.com/GuoSirius/juice-cli/compare/v2.1.18...v2.2.0) (2026-05-22)
 
 
