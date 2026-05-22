@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.1](https://github.com/GuoSirius/juice-cli/compare/v2.3.0...v2.3.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* add spawnSync timeout and progress logging to prevent install hangs ([d9a487c](https://github.com/GuoSirius/juice-cli/commit/d9a487cf64262bc76bd8501de78bf84ca7b833ed))
+
 ## [2.3.0](https://github.com/GuoSirius/juice-cli/compare/v2.2.2...v2.3.0) (2026-05-22)
 
 
