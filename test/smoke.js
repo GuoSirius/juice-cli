@@ -43,7 +43,7 @@ test('juice --version shows version', () => {
 
 // ─── Normal mode ──────────────────────────────────────────────────────
 test('juice -f template.html produces output', () => {
-  const template = path.join(EDM, 'elabscience', 'elabscience-template.html');
+  const template = path.join(EDM, 'elabscience', 'templates', 'standard', 'template.html');
   // Copy to tmp to avoid polluting edm/
   const src = path.join(TMP, 'test.html');
   fs.copyFileSync(template, src);
@@ -76,7 +76,7 @@ test('rawHtml: true renders HTML tags in variables', () => {
 // ─── Config loading ───────────────────────────────────────────────────
 test('juice -c with nonexistent config throws', () => {
   try {
-    execSync(`${JUICE} -c ./nonexistent.yaml -f "${path.join(EDM, 'elabscience', 'elabscience-template.html')}"`, { stdio: 'pipe' });
+    execSync(`${JUICE} -c ./nonexistent.yaml -f "${path.join(EDM, 'elabscience', 'templates', 'standard', 'template.html')}"`, { stdio: 'pipe' });
     throw new Error('should have failed');
   } catch (e) {
     // expected to fail — nonexistent config file
