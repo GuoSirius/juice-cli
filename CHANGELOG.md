@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/GuoSirius/juice-cli/compare/v2.2.2...v2.3.0) (2026-05-22)
+
+
+### Features
+
+* add juice view and juice init commands with enhanced context menus ([3fc761e](https://github.com/GuoSirius/juice-cli/commit/3fc761e65d21b49a6a3eb23d2448d7388317b956))
+
+
+### Bug Fixes
+
+* safe strict-mode ReferenceErrors and stack underflow in view/init ([72d12ab](https://github.com/GuoSirius/juice-cli/commit/72d12abb860c84acad804f2dc797939e50b24ed0))
+* update smoke test template paths to match current EDM structure ([db8742d](https://github.com/GuoSirius/juice-cli/commit/db8742d9b7387f025891aca4e42d8706df6ac9e8))
+
 ### [2.2.2](https://github.com/GuoSirius/juice-cli/compare/v2.2.1...v2.2.2) (2026-05-22)
 
 
