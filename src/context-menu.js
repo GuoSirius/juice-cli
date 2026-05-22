@@ -56,19 +56,28 @@ function regAdd(key, valueName, type, data) {
   if (type) args.push('/t', type);
   if (data !== undefined) args.push('/d', data);
 
-  const result = spawnSync('reg', args, { stdio: 'pipe' });
-  if (result.status !== 0) {
-    const msg = (result.stderr || '').toString().trim();
-    console.warn(chalk.yellow(`  ⚠  reg add 失败\n     键：${key}\n     原因：${msg}`));
+  try {
+    const result = spawnSync('reg', args, { stdio: 'pipe', timeout: 10000 });
+    if (result.status !== 0) {
+      const msg = (result.stderr || '').toString().trim();
+      console.warn(chalk.yellow(`  ⚠  reg add 失败\n     键：${key}\n     原因：${msg}`));
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn(chalk.yellow(`  ⚠  reg add 超时：${key}`));
     return false;
   }
-  return true;
 }
 
 function regDelete(key) {
   if (!isWindows) return false;
-  const result = spawnSync('reg', ['delete', key, '/f'], { stdio: 'pipe' });
-  return result.status === 0;
+  try {
+    const result = spawnSync('reg', ['delete', key, '/f'], { stdio: 'pipe', timeout: 10000 });
+    return result.status === 0;
+  } catch (_) {
+    return false;
+  }
 }
 
 // ─── 菜单结构常量 ─────────────────────────────────────────────────────────────
@@ -307,16 +316,19 @@ async function registerContextMenu() {
   let ok = true;
 
   // 先删除旧容器再重建，避免注册残留旧子命令（如旧版 HTML 容器的 WithConfig）
+  console.log(chalk.gray('  清理旧版菜单...'));
   regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`);
   regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`);
   regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_DIR}`);
   regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_BG}`);
 
   // HTML 容器：generate + snippet + pwsh
+  console.log(chalk.gray('  注册 .html 文件菜单...'));
   const htmlContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`;
   registerSubCommands(htmlContainer, 'html', nodePath, scriptPath, iconPath, pwshPath);
 
   // YAML 容器：config + pwsh
+  console.log(chalk.gray('  注册 .yaml 文件菜单...'));
   const yamlContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`;
   registerSubCommands(yamlContainer, 'yaml', nodePath, scriptPath, iconPath, pwshPath);
 
@@ -337,6 +349,7 @@ async function registerContextMenu() {
   }
 
   // Directory / Background → 独立容器
+  console.log(chalk.gray('  注册文件夹/空白处菜单...'));
   registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath);
 
   if (!ok) {
