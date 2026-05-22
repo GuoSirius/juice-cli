@@ -35,36 +35,183 @@ function resolveEdmDir() {
   );
 }
 
+// ─── 元数据读取 ─────────────────────────────────────────────────────────────────
+
+/**
+ * 读取目录下的 _meta.yaml，返回 { name, description, series }。
+ * 文件不存在时回退为 { name: 目录名, description: "" }。
+ */
+function loadMeta(dir) {
+  const metaPath = path.join(dir, '_meta.yaml');
+  if (fs.existsSync(metaPath)) {
+    try {
+      const raw = loadYaml(metaPath);
+      return {
+        name: raw.name || path.basename(dir),
+        description: raw.description || "",
+        series: raw.series || null,
+      };
+    } catch (_) {
+      // 解析失败时回退
+    }
+  }
+  return { name: path.basename(dir), description: "", series: null };
+}
+
+/**
+ * 根据版本 _meta.yaml 中的 series.allow / series.block 过滤系列列表。
+ * allow 和 block 互斥，同时存在时 allow 优先。
+ * 均不配置时返回全部系列。
+ */
+function filterSeries(allSeries, versionMeta) {
+  if (!versionMeta || !versionMeta.series) return allSeries;
+
+  const { allow, block } = versionMeta.series;
+
+  if (allow && Array.isArray(allow)) {
+    return allSeries.filter((s) => allow.includes(s.name));
+  }
+
+  if (block && Array.isArray(block)) {
+    return allSeries.filter((s) => !block.includes(s.name));
+  }
+
+  return allSeries;
+}
+
+// ─── EDM 目录扫描 ───────────────────────────────────────────────────────────────
+
 function findBrands(edmDir) {
   const entries = fs.readdirSync(edmDir, { withFileTypes: true });
   const brands = entries
     .filter((e) => e.isDirectory())
-    .map((e) => ({ name: e.name, path: path.join(edmDir, e.name) }));
+    .map((e) => {
+      const dir = path.join(edmDir, e.name);
+      const meta = loadMeta(dir);
+      return { name: e.name, path: dir, meta };
+    });
   if (brands.length === 0) {
     throw new Error(`EDM 目录下未找到任何品牌子目录：${edmDir}`);
   }
   return brands;
 }
 
-function findSnippetFolders(brandDir) {
-  const entries = fs.readdirSync(brandDir, { withFileTypes: true });
-  return entries
+/**
+ * 扫描品牌下的模板版本：templates/<version>/
+ * 每个版本返回 { name, path, meta, templatePath }。
+ */
+function findTemplateVersions(brandDir) {
+  const templatesDir = path.join(brandDir, 'templates');
+  if (!fs.existsSync(templatesDir)) {
+    throw new Error(`品牌目录下未找到 templates/：${brandDir}`);
+  }
+
+  const entries = fs.readdirSync(templatesDir, { withFileTypes: true });
+  const versions = [];
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const dir = path.join(templatesDir, e.name);
+    const meta = loadMeta(dir);
+    const htmlFiles = findFiles(dir, /\.html?$/i);
+    if (htmlFiles.length === 0) continue;
+    versions.push({
+      name: e.name,
+      path: dir,
+      meta,
+      templatePath: htmlFiles[0].path,
+    });
+  }
+  if (versions.length === 0) {
+    throw new Error(`templates/ 下未找到任何含 .html 模板的版本子目录：${templatesDir}`);
+  }
+  return versions;
+}
+
+/**
+ * 扫描品牌下的片段系列：series/<series>/
+ * 每个系列返回 { name, path, meta }。
+ */
+function findSeriesDirs(brandDir) {
+  const seriesDir = path.join(brandDir, 'series');
+  if (!fs.existsSync(seriesDir)) return [];
+
+  const entries = fs.readdirSync(seriesDir, { withFileTypes: true });
+  const list = entries
     .filter((e) => e.isDirectory())
-    .map((e) => ({ name: e.name, path: path.join(brandDir, e.name) }));
+    .map((e) => {
+      const dir = path.join(seriesDir, e.name);
+      const meta = loadMeta(dir);
+      return { name: e.name, path: dir, meta };
+    });
+
+  if (list.length === 0) {
+    console.log(chalk.yellow(`  ⚠  series/ 下暂无片段系列。`));
+  }
+  return list;
+}
+
+/**
+ * 检测系列目录下的片段变体：
+ *   - 有子目录且含 snippet.html → 多变体模式，返回变体列表
+ *   - 无子目录、自身有 snippet.html → 单变体模式，自身作为唯一变体
+ * 每个变体返回 { name, path, meta, hasSnippet }。
+ */
+function findSnippetVariants(seriesDir) {
+  const entries = fs.readdirSync(seriesDir, { withFileTypes: true });
+  const subDirs = entries.filter((e) => e.isDirectory());
+
+  if (subDirs.length > 0) {
+    // 潜在的多变体模式：检查是否有子目录包含 snippet.html
+    const variants = [];
+    for (const d of subDirs) {
+      const dir = path.join(seriesDir, d.name);
+      const snipPath = path.join(dir, 'snippet.html');
+      if (fs.existsSync(snipPath)) {
+        const meta = loadMeta(dir);
+        variants.push({ name: d.name, path: dir, meta, hasSnippet: true });
+      }
+    }
+    if (variants.length > 0) return variants;
+  }
+
+  // 单变体模式：系列目录自身就是变体
+  const snipPath = path.join(seriesDir, 'snippet.html');
+  if (fs.existsSync(snipPath)) {
+    const meta = loadMeta(seriesDir);
+    return [{ name: 'default', path: seriesDir, meta, hasSnippet: true }];
+  }
+
+  return [];
+}
+
+/**
+ * 列出变体目录下所有 YAML 配置，标记 juice.yaml 为最优配对。
+ * 返回 { name, path, isOptimal }。
+ */
+function findConfigs(variantDir) {
+  const yamlFiles = findYamlFiles(variantDir);
+  return yamlFiles
+    .filter((f) => f.name !== '_meta.yaml' && f.name !== '_meta.yml')
+    .map((f) => ({
+      name: f.name,
+      path: f.path,
+      isOptimal: f.name === 'juice.yaml',
+    }));
+}
+
+function findFiles(dir, regex) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  return entries
+    .filter((e) => e.isFile() && regex.test(e.name))
+    .map((e) => ({ name: e.name, path: path.join(dir, e.name) }));
 }
 
 function findHtmlFiles(dir) {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  return entries
-    .filter((e) => e.isFile() && /\.html?$/i.test(e.name))
-    .map((e) => ({ name: e.name, path: path.join(dir, e.name) }));
+  return findFiles(dir, /\.html?$/i);
 }
 
 function findYamlFiles(dir) {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  return entries
-    .filter((e) => e.isFile() && /\.ya?ml$/i.test(e.name))
-    .map((e) => ({ name: e.name, path: path.join(dir, e.name) }));
+  return findFiles(dir, /\.ya?ml$/i);
 }
 
 /**
@@ -307,79 +454,96 @@ async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputB
 
 // ─── 交互式提示 ───────────────────────────────────────────────────────────────
 
+function fmtChoice(meta, dirName) {
+  const display = meta.name || dirName;
+  const suffix = meta.name ? ` ${chalk.gray(`(${dirName})`)}` : "";
+  return { display: display + suffix, description: meta.description || "" };
+}
+
 async function promptBrand(brands) {
   const { select } = await import('@inquirer/prompts');
+  const choices = brands.map((b) => ({
+    name: fmtChoice(b.meta, b.name).display,
+    value: b,
+    description: b.meta.description || undefined,
+  }));
   return select({
-    message: '请选择品牌/系列：',
-    choices: brands.map((b) => ({ name: b.name, value: b })),
+    message: '请选择品牌：',
+    choices,
   });
 }
 
-async function promptSnippetFolder(folders) {
+async function promptTemplateVersion(versions) {
   const { select } = await import('@inquirer/prompts');
-  if (folders.length === 0) return null;
+  const choices = versions.map((v) => ({
+    name: fmtChoice(v.meta, v.name).display,
+    value: v,
+    description: v.meta.description || undefined,
+  }));
   return select({
-    message: '请选择片段文件夹：',
-    choices: folders.map((f) => ({ name: f.name, value: f })),
+    message: '请选择模板版本：',
+    choices,
   });
 }
 
-async function promptSnippetFile(htmlFiles) {
+async function promptSeries(seriesList) {
   const { select } = await import('@inquirer/prompts');
-  if (htmlFiles.length === 0) return null;
-  const defaultName = 'snippet.html';
-  const defaultIdx = htmlFiles.findIndex((f) => f.name === defaultName);
+  if (seriesList.length === 0) return null;
+
+  const choices = seriesList.map((s) => {
+    const variants = findSnippetVariants(s.path);
+    const extra = variants.length > 0 ? ` — 含 ${variants.length} 个片段变体` : "";
+    return {
+      name: fmtChoice(s.meta, s.name).display,
+      value: s,
+      description: (s.meta.description || "") + chalk.dim(extra),
+    };
+  });
 
   return select({
-    message: '请选择片段 HTML 文件：',
-    choices: htmlFiles.map((f, i) => ({
-      name: f.name + (i === defaultIdx ? ' (默认)' : ''),
-      value: f,
-    })),
+    message: '请选择片段系列：',
+    choices,
+  });
+}
+
+async function promptSnippetVariant(variants) {
+  const { select } = await import('@inquirer/prompts');
+  if (variants.length === 0) return null;
+
+  const choices = variants.map((v) => ({
+    name: fmtChoice(v.meta, v.name).display,
+    value: v,
+    description: v.meta.description || undefined,
+  }));
+
+  const defaultIdx = variants.findIndex((v) => v.name === 'default');
+
+  return select({
+    message: '请选择片段变体：',
+    choices,
     default: defaultIdx >= 0 ? defaultIdx : 0,
   });
 }
 
-/**
- * 交互模式的配置选择提示
- * 优先 CWD 下的配置文件，不存在则回退到片段目录下的，也可手动输入或跳过
- */
-async function promptConfigForInteractive(snippetDirYamlFiles) {
+async function promptConfig(configs) {
   const { select, input } = await import('@inquirer/prompts');
-
-  // 检查当前工作目录是否有配置文件
-  const cwdCandidates = [
-    { path: path.join(process.cwd(), 'juice.yaml'), name: 'juice.yaml' },
-    { path: path.join(process.cwd(), 'juice.yml'), name: 'juice.yml' },
-  ];
-  const cwdConfig = cwdCandidates.find((c) => fs.existsSync(c.path));
 
   const choices = [];
   let defaultIdx = 0;
 
-  if (cwdConfig) {
+  for (const c of configs) {
     choices.push({
-      name: `[当前目录] ${cwdConfig.name} (优先)`,
-      value: { type: 'file', path: cwdConfig.path, name: cwdConfig.name },
+      name: c.isOptimal
+        ? `${chalk.green('●')} ${c.name} ${chalk.green('(最优配对)')}`
+        : `  ${c.name}`,
+      value: { type: 'file', path: c.path, name: c.name },
     });
-  }
-
-  // 片段目录下的配置文件
-  const defaultName = 'juice.yaml';
-  for (const f of snippetDirYamlFiles) {
-    const isDefault = f.name === defaultName;
-    choices.push({
-      name: `[片段目录] ${f.name}${isDefault ? ' (默认)' : ''}`,
-      value: { type: 'file', path: f.path, name: f.name },
-    });
-    if (isDefault && !cwdConfig) {
-      defaultIdx = choices.length - 1;
-    }
+    if (c.isOptimal) defaultIdx = choices.length - 1;
   }
 
   choices.push(
-    { name: '[自定义] 输入路径...', value: { type: 'custom' } },
-    { name: '[跳过] 不使用项目配置', value: { type: 'skip' } },
+    { name: '  [自定义] 输入其他路径...', value: { type: 'custom' } },
+    { name: '  [跳过] 不使用项目配置', value: { type: 'skip' } },
   );
 
   const result = await select({
@@ -394,24 +558,6 @@ async function promptConfigForInteractive(snippetDirYamlFiles) {
   }
 
   return result;
-}
-
-async function promptTemplate(templateFiles) {
-  const { select } = await import('@inquirer/prompts');
-  if (templateFiles.length === 0) {
-    throw new Error('品牌目录下未找到模板 HTML 文件。');
-  }
-  const templateRe = /-template\.html?$/i;
-  const defaultIdx = templateFiles.findIndex((f) => templateRe.test(f.name));
-
-  return select({
-    message: '请选择模板 HTML 文件：',
-    choices: templateFiles.map((f, i) => ({
-      name: f.name + (i === defaultIdx ? ' (默认)' : ''),
-      value: f,
-    })),
-    default: defaultIdx >= 0 ? defaultIdx : 0,
-  });
 }
 
 // ─── 输出文件名处理 ───────────────────────────────────────────────────────────
@@ -519,10 +665,10 @@ async function promptConfirm(summary) {
   console.log('\n' + chalk.cyan('═══════════════════════════════════════════'));
   console.log(chalk.bold('  片段组装汇总'));
   console.log(chalk.cyan('═══════════════════════════════════════════'));
-  console.log(`  品牌：          ${chalk.green(summary.brand)}`);
-  console.log(`  模板 HTML：     ${chalk.green(summary.templateFile)}`);
-  console.log(`  片段文件夹：    ${chalk.green(summary.snippetFolder)}`);
-  console.log(`  片段 HTML：     ${chalk.green(summary.snippetFile)}`);
+  console.log(`  品牌：          ${chalk.green(summary.brandName)} ${chalk.gray(`(${summary.brand})`)}`);
+  console.log(`  模板版本：      ${chalk.green(summary.versionName)} ${chalk.gray(`(${summary.version})`)}`);
+  console.log(`  片段系列：      ${chalk.green(summary.seriesName)} ${chalk.gray(`(${summary.series})`)}`);
+  console.log(`  片段变体：      ${chalk.green(summary.variantName)} ${chalk.gray(`(${summary.variant})`)}`);
   console.log(`  配置 YAML：     ${chalk.green(summary.configFile)}`);
   console.log(chalk.gray('───────────────────────────────────────────'));
   console.log(`  输出目录：      ${chalk.cyan(summary.outputDir)}`);
@@ -545,7 +691,7 @@ async function promptConfirm(summary) {
 /**
  * --snippet 模式：指定了片段 HTML
  *   - 如果同时指定了 -f（模板），直接使用
- *   - 如果未指定 -f，交互式选择：品牌 → 模板
+ *   - 如果未指定 -f，交互式选择：品牌 → 模板版本
  *   - 配置文件：自动检测片段目录下的 juice.yaml / juice.yml，-c 可覆盖
  *   - 合并顺序：项目默认 → 用户目录 → 片段目录配置 → CLI -c
  */
@@ -565,13 +711,13 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
       process.exit(1);
     }
   } else {
-    // 交互式选择：品牌 → 模板
+    // 交互式选择：品牌 → 模板版本
     const edmDir = resolveEdmDir();
     const brands = findBrands(edmDir);
     const brand = await promptBrand(brands);
-    const templateFiles = findHtmlFiles(brand.path);
-    const chosen = await promptTemplate(templateFiles);
-    templatePath = chosen.path;
+    const versions = findTemplateVersions(brand.path);
+    const version = await promptTemplateVersion(versions);
+    templatePath = version.templatePath;
   }
 
   // 配置文件：非交互模式自动检测片段目录，交互模式提示用户选择
@@ -583,8 +729,8 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
     priorityConfigPath = findLocalConfig(snippetDir);
   } else {
     // 交互模式（只有 -s），提示选择配置
-    const yamlFiles = findYamlFiles(snippetDir);
-    const configChoice = await promptConfigForInteractive(yamlFiles);
+    const configs = findConfigs(snippetDir);
+    const configChoice = await promptConfig(configs);
     priorityConfigPath = (configChoice.type === 'file') ? configChoice.path : null;
   }
 
@@ -610,7 +756,6 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
   let outputBaseName;
 
   if (outputName) {
-    // 命令行指定了 --name，检查冲突，有冲突则自动版本号
     const conflicts = checkOutputConflicts(defaultBaseName, process.cwd());
     if (conflicts.length > 0) {
       outputBaseName = findNextVersion(defaultBaseName, process.cwd());
@@ -621,7 +766,6 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
       outputBaseName = defaultBaseName;
     }
   } else if (template) {
-    // 非交互模式（--snippet + -f 均指定），自动版本号
     const conflicts = checkOutputConflicts(defaultBaseName, process.cwd());
     if (conflicts.length > 0) {
       outputBaseName = findNextVersion(defaultBaseName, process.cwd());
@@ -632,7 +776,6 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
       outputBaseName = defaultBaseName;
     }
   } else {
-    // 交互模式（--snippet 单独指定），提示用户输入
     outputBaseName = await promptOutputName(defaultBaseName, process.cwd());
   }
 
@@ -646,10 +789,8 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
 }
 
 /**
- * 交互模式：未指定 --snippet，未指定 -f
- *   流程：品牌 → 模板 → 片段文件夹 → 片段 HTML → 配置文件 → 汇总确认 → 执行
- *   配置文件：优先 CWD，不存在则用片段目录下 YAML，也可手动输入
- *   合并顺序：项目默认 → 用户目录 → 项目配置（CWD/片段/手动三选一）→ CLI -c
+ * 交互模式（无 --snippet，无 -f）— 方案 B 新结构
+ *   流程：品牌 → 模板版本 → 片段系列 → 片段变体 → 配置文件 → 输出名 → 确认 → 执行
  */
 async function runInteractiveMode({ config: cliConfigPath }) {
   const edmDir = resolveEdmDir();
@@ -658,32 +799,43 @@ async function runInteractiveMode({ config: cliConfigPath }) {
   const brands = findBrands(edmDir);
   const brand = await promptBrand(brands);
 
-  // 2. 选择模板
-  const templateFiles = findHtmlFiles(brand.path);
-  const templateChoice = await promptTemplate(templateFiles);
+  // 2. 选择模板版本
+  const versions = findTemplateVersions(brand.path);
+  const version = await promptTemplateVersion(versions);
 
-  // 3. 选择片段文件夹
-  const snippetFolders = findSnippetFolders(brand.path);
-  if (snippetFolders.length === 0) {
-    console.log(chalk.yellow(`\n  ⚠  品牌「${brand.name}」下暂无片段系列。`));
-    await copyTemplateToCwd(templateChoice.path);
+  // 3. 选择片段系列（按版本 series.allow/block 过滤）
+  const allSeries = findSeriesDirs(brand.path);
+  if (allSeries.length === 0) {
+    console.log(chalk.yellow(`\n  ⚠  品牌「${brand.meta.name || brand.name}」下暂无片段系列。`));
+    await copyTemplateToCwd(version.templatePath);
     return;
   }
-  const folder = await promptSnippetFolder(snippetFolders);
-  if (!folder) return;
-
-  // 4. 选择片段 HTML
-  const htmlFiles = findHtmlFiles(folder.path);
-  if (htmlFiles.length === 0) {
-    console.log(chalk.yellow(`\n  ⚠  片段系列「${folder.name}」下暂无 HTML 文件。`));
+  const filteredSeries = filterSeries(allSeries, version.meta);
+  if (filteredSeries.length === 0) {
+    console.log(chalk.yellow(`\n  ⚠  版本「${version.meta.name || version.name}」配置的系列过滤后无可用系列。`));
     return;
   }
-  const snippetFile = await promptSnippetFile(htmlFiles);
-  if (!snippetFile) return;
+  const series = await promptSeries(filteredSeries);
+  if (!series) return;
 
-  // 5. 选择配置文件（优先 CWD，不存在则用片段目录）
-  const yamlFiles = findYamlFiles(folder.path);
-  const configChoice = await promptConfigForInteractive(yamlFiles);
+  // 4. 选择片段变体
+  const variants = findSnippetVariants(series.path);
+  if (variants.length === 0) {
+    console.log(chalk.yellow(`\n  ⚠  系列「${series.meta.name || series.name}」下暂无 snippet.html。`));
+    return;
+  }
+  const variant = await promptSnippetVariant(variants);
+  if (!variant) return;
+
+  const snippetPath = path.join(variant.path, 'snippet.html');
+  if (!fs.existsSync(snippetPath)) {
+    console.log(chalk.red(`\n  ✘ 片段文件不存在：${snippetPath}`));
+    return;
+  }
+
+  // 5. 选择配置文件
+  const configs = findConfigs(variant.path);
+  const configChoice = await promptConfig(configs, variant.path);
 
   let priorityConfigPath = null;
   let configFileName = '(跳过)';
@@ -693,17 +845,20 @@ async function runInteractiveMode({ config: cliConfigPath }) {
   }
 
   // 6. 确定输出文件名
-  const defaultBaseName = path.parse(templateChoice.path).name;
+  const defaultBaseName = `${brand.name}-${version.name}-${series.name}-${variant.name}-template`;
   const outputBaseName = await promptOutputName(defaultBaseName, process.cwd());
 
   // 7. 汇总确认
   const confirmed = await promptConfirm({
+    brandName: brand.meta.name || brand.name,
     brand: brand.name,
-    templateFile: templateChoice.name,
-    snippetFolder: folder.name,
-    snippetFile: snippetFile.name,
+    versionName: version.meta.name || version.name,
+    version: version.name,
+    seriesName: series.meta.name || series.name,
+    series: series.name,
+    variantName: variant.meta.name || variant.name,
+    variant: variant.name,
     configFile: configFileName,
-    snippetPath: snippetFile.path,
     outputDir: process.cwd(),
     outputBaseName,
   });
@@ -718,8 +873,8 @@ async function runInteractiveMode({ config: cliConfigPath }) {
   config._layers = layers;
 
   await assembleSnippet({
-    snippetPath: snippetFile.path,
-    templatePath: templateChoice.path,
+    snippetPath: snippetPath,
+    templatePath: version.templatePath,
     config,
     cwd: process.cwd(),
     outputBaseName,
