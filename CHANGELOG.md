@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.3](https://github.com/GuoSirius/juice-cli/compare/v2.3.2...v2.3.3) (2026-05-22)
+
+
+### Bug Fixes
+
+* context menu visibility, view pause, and browse UX improvements ([b37f20a](https://github.com/GuoSirius/juice-cli/commit/b37f20ae51920a9bb98bf07b28ff482704b553e9))
+* ensure complete registry cleanup across install/update/uninstall ([1c33db6](https://github.com/GuoSirius/juice-cli/commit/1c33db61013bc1bbb6a9efe468d79168914a6249))
+
 ### [2.3.2](https://github.com/GuoSirius/juice-cli/compare/v2.3.1...v2.3.2) (2026-05-22)
 
 
