@@ -881,4 +881,39 @@ async function runInteractiveMode({ config: cliConfigPath }) {
   });
 }
 
-module.exports = { runSnippetMode, runInteractiveMode };
+module.exports = {
+  runSnippetMode,
+  runInteractiveMode,
+  // EDM resolution & scanning
+  resolveEdmDir,
+  loadMeta,
+  findBrands,
+  findTemplateVersions,
+  findSeriesDirs,
+  findSnippetVariants,
+  findConfigs,
+  findHtmlFiles,
+  findYamlFiles,
+  findLocalConfig,
+  getBrand,
+  filterSeries,
+  // config
+  buildSnippetConfig,
+  // content
+  insertIntoContent,
+  reindentHtml,
+  resolveSnippetOutputPaths,
+  assembleSnippet,
+  // prompts
+  promptBrand,
+  promptTemplateVersion,
+  promptSeries,
+  promptSnippetVariant,
+  promptConfig,
+  promptConfirm,
+  promptOutputName,
+  // output helpers
+  checkOutputConflicts,
+  findNextVersion,
+  copyTemplateToCwd,
+};

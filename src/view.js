@@ -1,0 +1,969 @@
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const chalk = require('chalk');
+const { fmtSize } = require('./index');
+const {
+  resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
+  findSeriesDirs, filterSeries, findSnippetVariants, findConfigs,
+} = require('./snippet');
+
+function fmtBytes(b) {
+  return b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`;
+}
+
+// ─── Path Parser ──────────────────────────────────────────────────────────────
+
+/**
+ * Parse a view path like "elabscience/literature/default" or
+ * "elabscience/templates/standard" into structured parts.
+ */
+function parseViewPath(rawPath, edmDir) {
+  const segments = rawPath.replace(/\\/g, '/').split('/').filter(Boolean);
+  if (segments.length === 0) {
+    throw new Error('路径不能为空。');
+  }
+
+  const brandName = segments[0];
+  const brandDir = path.join(edmDir, brandName);
+  if (!fs.existsSync(brandDir) || !fs.statSync(brandDir).isDirectory()) {
+    const brands = fs.readdirSync(edmDir, { withFileTypes: true })
+      .filter(e => e.isDirectory()).map(e => e.name);
+    throw new Error(
+      `品牌「${brandName}」不存在。可用品牌：${brands.join(', ') || '(无)'}`
+    );
+  }
+
+  if (segments.length === 1) {
+    return { type: 'brand', brand: brandName };
+  }
+
+  if (segments[1] === 'templates') {
+    if (segments.length < 3) {
+      const versions = findTemplateVersions(brandDir);
+      throw new Error(
+        `请指定模板版本。可用：${versions.map(v => v.name).join(', ')}`
+      );
+    }
+    const versionDir = path.join(brandDir, 'templates', segments[2]);
+    if (!fs.existsSync(versionDir)) {
+      const versions = findTemplateVersions(brandDir);
+      throw new Error(
+        `模板版本「${segments[2]}」不存在。可用：${versions.map(v => v.name).join(', ')}`
+      );
+    }
+    const versions = findTemplateVersions(brandDir);
+    const version = versions.find(v => v.name === segments[2]);
+    if (!version) throw new Error(`模板版本「${segments[2]}」下无模板文件。`);
+    return { type: 'template', brand: brandName, version: segments[2], versionData: version };
+  }
+
+  // series path: brand/series[/variant]
+  const seriesName = segments[1];
+  const allSeries = findSeriesDirs(brandDir);
+  const series = allSeries.find(s => s.name === seriesName);
+  if (!series) {
+    throw new Error(
+      `系列「${seriesName}」不存在。可用：${allSeries.map(s => s.name).join(', ') || '(无)'}`
+    );
+  }
+
+  if (segments.length === 2) {
+    return { type: 'series', brand: brandName, series: seriesName, seriesData: series };
+  }
+
+  // variant
+  const variants = findSnippetVariants(series.path);
+  const variant = variants.find(v => v.name === segments[2]);
+  if (!variant) {
+    throw new Error(
+      `变体「${segments[2]}」不存在。可用：${variants.map(v => v.name).join(', ') || '(无)'}`
+    );
+  }
+  return {
+    type: 'variant',
+    brand: brandName,
+    series: seriesName,
+    variant: segments[2],
+    seriesData: series,
+    variantData: variant,
+  };
+}
+
+// ─── Non-Interactive Tree Display ─────────────────────────────────────────────
+
+function ind(n) { return '  '.repeat(n); }
+
+function formatName(meta, dirName) {
+  const display = meta.name || dirName;
+  return display !== dirName
+    ? chalk.bold.cyan(display) + ' ' + chalk.gray(`(${dirName})`)
+    : chalk.bold.cyan(dirName);
+}
+
+function formatDesc(meta) {
+  return meta.description ? ' ' + chalk.dim('— ' + meta.description) : '';
+}
+
+function printBrandTree(edmDir, brand, depth) {
+  const d = depth || 0;
+  const meta = brand.meta;
+  const line = ind(d) + '📦 ' + formatName(meta, brand.name) + formatDesc(meta);
+  console.log(line);
+
+  // Templates
+  let versions;
+  try {
+    versions = findTemplateVersions(brand.path);
+  } catch (_) { versions = []; }
+  if (versions.length > 0) {
+    console.log(ind(d + 1) + '📋 模板');
+    for (const v of versions) {
+      console.log(ind(d + 2) + '└─ ' + formatName(v.meta, v.name) + formatDesc(v.meta));
+    }
+  }
+
+  // Series
+  const allSeries = findSeriesDirs(brand.path);
+  if (allSeries.length > 0) {
+    console.log(ind(d + 1) + '📑 系列');
+    for (const s of allSeries) {
+      const variants = findSnippetVariants(s.path);
+      console.log(ind(d + 2) + '└─ ' + formatName(s.meta, s.name) + formatDesc(s.meta));
+      for (const v of variants) {
+        const files = [];
+        if (fs.existsSync(path.join(v.path, 'snippet.html'))) {
+          const stat = fs.statSync(path.join(v.path, 'snippet.html'));
+          files.push('📄 snippet.html (' + fmtBytes(stat.size) + ')');
+        }
+        const configs = findConfigs(v.path);
+        if (configs.length > 0) {
+          const optimal = configs.find(c => c.isOptimal) || configs[0];
+          files.push('⚙️ ' + optimal.name + (optimal.isOptimal ? ' (最优配对)' : ''));
+        }
+        console.log(ind(d + 3) + '└─ ' + formatName(v.meta, v.name) + formatDesc(v.meta));
+        for (const f of files) {
+          console.log(ind(d + 4) + '├─ ' + f);
+        }
+      }
+    }
+  } else {
+    console.log(ind(d + 1) + chalk.gray('📑 系列 (无)'));
+  }
+}
+
+function printFullTree(edmDir) {
+  const brands = findBrands(edmDir);
+  console.log(chalk.bold('\n📧 EDM 资源总览\n'));
+  for (const b of brands) {
+    printBrandTree(edmDir, b, 0);
+    console.log();
+  }
+}
+
+function printSubTree(edmDir, parsed) {
+  const brandDir = path.join(edmDir, parsed.brand);
+  const brandMeta = loadMeta(brandDir);
+
+  switch (parsed.type) {
+    case 'brand': {
+      console.log(chalk.bold(`\n📧 ${brandMeta.name || parsed.brand}${formatDesc(brandMeta)}\n`));
+      const brand = { name: parsed.brand, path: brandDir, meta: brandMeta };
+      printBrandTree(edmDir, brand, 0);
+      break;
+    }
+    case 'series': {
+      console.log(chalk.bold(`\n📧 ${brandMeta.name || parsed.brand} / ${parsed.seriesData.meta.name || parsed.series}\n`));
+      const variants = findSnippetVariants(parsed.seriesData.path);
+      console.log(ind(0) + '📑 ' + formatName(parsed.seriesData.meta, parsed.series) + formatDesc(parsed.seriesData.meta));
+      for (const v of variants) {
+        const files = [];
+        if (fs.existsSync(path.join(v.path, 'snippet.html'))) {
+          const stat = fs.statSync(path.join(v.path, 'snippet.html'));
+          files.push('📄 snippet.html (' + fmtBytes(stat.size) + ')');
+        }
+        const configs = findConfigs(v.path);
+        if (configs.length > 0) {
+          const optimal = configs.find(c => c.isOptimal) || configs[0];
+          files.push('⚙️ ' + optimal.name + (optimal.isOptimal ? ' (最优配对)' : ''));
+        }
+        console.log(ind(1) + '└─ ' + formatName(v.meta, v.name) + formatDesc(v.meta));
+        for (const f of files) {
+          console.log(ind(2) + '├─ ' + f);
+        }
+      }
+      break;
+    }
+    case 'variant': {
+      console.log(chalk.bold(`\n📧 ${brandMeta.name || parsed.brand} / ${parsed.seriesData.meta.name || parsed.series} / ${parsed.variantData.meta.name || parsed.variant}\n`));
+      const v = parsed.variantData;
+      console.log(ind(0) + '📌 ' + formatName(v.meta, parsed.variant) + formatDesc(v.meta));
+      if (fs.existsSync(path.join(v.path, 'snippet.html'))) {
+        const stat = fs.statSync(path.join(v.path, 'snippet.html'));
+        console.log(ind(1) + '├─ 📄 snippet.html (' + fmtBytes(stat.size) + ')');
+      }
+      const configs = findConfigs(v.path);
+      for (const c of configs) {
+        const marker = c.isOptimal ? chalk.green(' (最优配对)') : '';
+        console.log(ind(1) + '├─ ⚙️ ' + c.name + marker);
+      }
+      break;
+    }
+    case 'template': {
+      console.log(chalk.bold(`\n📧 ${brandMeta.name || parsed.brand} / 模板\n`));
+      const v = parsed.versionData;
+      console.log(ind(0) + '📋 ' + formatName(v.meta, parsed.version) + formatDesc(v.meta));
+      const stat = fs.statSync(v.templatePath);
+      console.log(ind(1) + '└─ 📄 ' + path.basename(v.templatePath) + ' (' + fmtBytes(stat.size) + ')');
+      break;
+    }
+  }
+  console.log();
+}
+
+function printFlatTemplates(edmDir) {
+  console.log(chalk.bold('\n📧 所有模板\n'));
+  const brands = findBrands(edmDir);
+  for (const b of brands) {
+    console.log('📦 ' + formatName(b.meta, b.name));
+    let versions;
+    try {
+      versions = findTemplateVersions(b.path);
+    } catch (_) { versions = []; }
+    if (versions.length === 0) {
+      console.log(ind(1) + chalk.gray('(无)'));
+    }
+    for (const v of versions) {
+      const stat = fs.statSync(v.templatePath);
+      console.log(ind(1) + '└─ 📋 ' + formatName(v.meta, v.name) + formatDesc(v.meta));
+      console.log(ind(2) + chalk.gray(path.basename(v.templatePath) + ' (' + fmtBytes(stat.size) + ')'));
+    }
+  }
+  console.log();
+}
+
+function printFlatSeries(edmDir) {
+  console.log(chalk.bold('\n📧 所有系列\n'));
+  const brands = findBrands(edmDir);
+  for (const b of brands) {
+    console.log('📦 ' + formatName(b.meta, b.name));
+    const allSeries = findSeriesDirs(b.path);
+    if (allSeries.length === 0) {
+      console.log(ind(1) + chalk.gray('(无)'));
+    }
+    for (const s of allSeries) {
+      console.log(ind(1) + '└─ 📑 ' + formatName(s.meta, s.name) + formatDesc(s.meta));
+    }
+  }
+  console.log();
+}
+
+function printFlatSnippets(edmDir) {
+  console.log(chalk.bold('\n📧 所有片段\n'));
+  const brands = findBrands(edmDir);
+  for (const b of brands) {
+    console.log('📦 ' + formatName(b.meta, b.name));
+    const allSeries = findSeriesDirs(b.path);
+    let count = 0;
+    for (const s of allSeries) {
+      const variants = findSnippetVariants(s.path);
+      for (const v of variants) {
+        count++;
+        const relPath = b.name + '/' + s.name + '/' + v.name;
+        const filePath = path.join(v.path, 'snippet.html');
+        let size = '';
+        if (fs.existsSync(filePath)) {
+          size = ' ' + chalk.gray('(' + fmtBytes(fs.statSync(filePath).size) + ')');
+        }
+        console.log(ind(1) + '└─ 🧩 ' + formatName(v.meta, v.name) + (' ' + chalk.dim('(' + relPath + ')') + size + formatDesc(v.meta)));
+      }
+    }
+    if (count === 0) {
+      console.log(ind(1) + chalk.gray('(无)'));
+    }
+  }
+  console.log();
+}
+
+// ─── Interactive Browser ─────────────────────────────────────────────────────
+
+/**
+ * Build initial state from a parsed path for interactive browsing.
+ */
+function parsedToStartNode(edmDir, parsed) {
+  const brandDir = path.join(edmDir, parsed.brand);
+  const brandMeta = loadMeta(brandDir);
+
+  switch (parsed.type) {
+    case 'brand':
+      return { level: 'brand', brand: parsed.brand, brandMeta };
+    case 'template':
+      return { level: 'template-detail', brand: parsed.brand, brandMeta, version: parsed.version, versionData: parsed.versionData };
+    case 'series':
+      return { level: 'series', brand: parsed.brand, brandMeta, series: parsed.series, seriesData: parsed.seriesData };
+    case 'variant':
+      return { level: 'variant', brand: parsed.brand, brandMeta, series: parsed.series, seriesData: parsed.seriesData, variant: parsed.variant, variantData: parsed.variantData };
+  }
+}
+
+async function showMenu(title, choices) {
+  const { select } = await import('@inquirer/prompts');
+  return select({
+    message: title,
+    choices,
+    loop: false,
+  });
+}
+
+async function showCheckbox(title, choices) {
+  const { checkbox } = await import('@inquirer/prompts');
+  return checkbox({
+    message: title,
+    choices,
+  });
+}
+
+/**
+ * Trigger copy via the init module.
+ */
+async function copyResource(type, resourcePath, cwd) {
+  const { runInitMode } = require('./init');
+  if (type === 'template') {
+    await runInitMode({ template: resourcePath });
+  } else if (type === 'snippet') {
+    await runInitMode({ snippet: resourcePath });
+  } else if (type === 'config') {
+    await runInitMode({ config: resourcePath });
+  }
+}
+
+function brandToChoice(b) {
+  return {
+    name: formatName(b.meta, b.name) + formatDesc(b.meta),
+    value: { action: 'navigate', node: { level: 'brand', brand: b.name, brandMeta: b.meta } },
+    description: b.meta.description || undefined,
+  };
+}
+
+async function interactiveBrowse(edmDir, startParsed) {
+  let stack = [];
+  let current;
+
+  if (startParsed) {
+    // Build stack to the starting node
+    if (startParsed.type === 'brand') {
+      current = parsedToStartNode(edmDir, startParsed);
+    } else if (startParsed.type === 'template') {
+      // Stack: brand → template-detail
+      const brandNode = { level: 'brand', brand: startParsed.brand, brandMeta: loadMeta(path.join(edmDir, startParsed.brand)) };
+      stack = [brandNode];
+      current = parsedToStartNode(edmDir, startParsed);
+    } else if (startParsed.type === 'series') {
+      const brandNode = { level: 'brand', brand: startParsed.brand, brandMeta: loadMeta(path.join(edmDir, startParsed.brand)) };
+      stack = [brandNode];
+      current = parsedToStartNode(edmDir, startParsed);
+    } else if (startParsed.type === 'variant') {
+      const brandNode = { level: 'brand', brand: startParsed.brand, brandMeta: loadMeta(path.join(edmDir, startParsed.brand)) };
+      const seriesNode = { level: 'series', brand: startParsed.brand, brandMeta: brandNode.brandMeta, series: startParsed.series, seriesData: startParsed.seriesData };
+      stack = [brandNode, seriesNode];
+      current = parsedToStartNode(edmDir, startParsed);
+    }
+  } else {
+    current = { level: 'brands' };
+  }
+
+  while (true) {
+    // Build choices for current level
+    let choices = [];
+    let title = '';
+
+    const hasParent = stack.length > 0 || (current.level !== 'brands');
+    const navChoices = [];
+    if (hasParent) {
+      navChoices.push({ name: '.. 返回上级', value: 'back' });
+    }
+    navChoices.push({ name: '✕ 退出', value: 'exit' });
+
+    switch (current.level) {
+      case 'brands': {
+        title = '选择品牌';
+        const brands = findBrands(edmDir);
+        for (const b of brands) {
+          choices.push(brandToChoice(b));
+        }
+        break;
+      }
+
+      case 'brand': {
+        const brandDir = path.join(edmDir, current.brand);
+        title = current.brandMeta.name
+          ? `${current.brandMeta.name} (${current.brand})`
+          : current.brand;
+
+        // Templates
+        let versions;
+        try { versions = findTemplateVersions(brandDir); } catch (_) { versions = []; }
+        if (versions.length > 0) {
+          choices.push({
+            name: '📋 查看模板',
+            value: { action: 'navigate', node: { level: 'templates', brand: current.brand, brandMeta: current.brandMeta } },
+            description: versions.length + ' 个版本',
+          });
+        }
+
+        // Series
+        const allSeries = findSeriesDirs(brandDir);
+        if (allSeries.length > 0) {
+          choices.push({
+            name: '📑 查看系列',
+            value: { action: 'navigate', node: { level: 'series-list', brand: current.brand, brandMeta: current.brandMeta } },
+            description: allSeries.length + ' 个系列',
+          });
+        }
+
+        // Copy options
+        if (versions.length > 0) {
+          choices.push({
+            name: '📥 拷贝模板到当前目录',
+            value: { action: 'copy-template' },
+          });
+        }
+        if (allSeries.length > 0) {
+          choices.push({
+            name: '📥 拷贝配置到当前目录',
+            value: { action: 'copy-config-brand' },
+          });
+        }
+        break;
+      }
+
+      case 'templates': {
+        const brandDir = path.join(edmDir, current.brand);
+        title = `${current.brandMeta.name || current.brand} / 模板`;
+        const versions = findTemplateVersions(brandDir);
+        for (const v of versions) {
+          choices.push({
+            name: formatName(v.meta, v.name) + formatDesc(v.meta),
+            value: { action: 'navigate', node: { level: 'template-detail', brand: current.brand, brandMeta: current.brandMeta, version: v.name, versionData: v } },
+            description: v.meta.description || undefined,
+          });
+        }
+        break;
+      }
+
+      case 'template-detail': {
+        const v = current.versionData;
+        title = `${v.meta.name || current.version} 模板`;
+        const stat = fs.statSync(v.templatePath);
+        // Show info as description, not in choices
+        console.log(chalk.dim(`\n  ${path.basename(v.templatePath)} (${fmtBytes(stat.size)})\n`));
+        choices.push({
+          name: '📥 拷贝模板到当前目录',
+          value: { action: 'copy-template' },
+        });
+        break;
+      }
+
+      case 'series-list': {
+        const brandDir = path.join(edmDir, current.brand);
+        title = `${current.brandMeta.name || current.brand} / 系列`;
+        const allSeries = findSeriesDirs(brandDir);
+        for (const s of allSeries) {
+          const variants = findSnippetVariants(s.path);
+          choices.push({
+            name: formatName(s.meta, s.name) + formatDesc(s.meta),
+            value: { action: 'navigate', node: { level: 'series', brand: current.brand, brandMeta: current.brandMeta, series: s.name, seriesData: s } },
+            description: (s.meta.description || '') + ` — ${variants.length} 个变体`,
+          });
+        }
+        break;
+      }
+
+      case 'series': {
+        const s = current.seriesData;
+        title = `${current.brandMeta.name || current.brand} / ${s.meta.name || current.series}`;
+        const variants = findSnippetVariants(s.path);
+        for (const v of variants) {
+          choices.push({
+            name: formatName(v.meta, v.name) + formatDesc(v.meta),
+            value: { action: 'navigate', node: { level: 'variant', brand: current.brand, brandMeta: current.brandMeta, series: current.series, seriesData: s, variant: v.name, variantData: v } },
+            description: v.meta.description || undefined,
+          });
+        }
+        break;
+      }
+
+      case 'variant': {
+        const v = current.variantData;
+        title = `${v.meta.name || current.variant} 变体`;
+        // Show file info via console.log before the prompt
+        const snipPath = path.join(v.path, 'snippet.html');
+        let infoLines = [];
+        if (fs.existsSync(snipPath)) {
+          const stat = fs.statSync(snipPath);
+          infoLines.push('📄 snippet.html (' + fmtBytes(stat.size) + ')');
+        }
+        const configs = findConfigs(v.path);
+        for (const c of configs) {
+          const marker = c.isOptimal ? ' (最优配对)' : '';
+          infoLines.push('⚙️ ' + c.name + marker);
+        }
+        if (infoLines.length > 0) {
+          console.log(chalk.dim('\n  ' + infoLines.join('\n  ') + '\n'));
+        }
+        // Copy actions
+        if (fs.existsSync(snipPath)) {
+          choices.push({
+            name: '📥 拷贝片段到当前目录',
+            value: { action: 'copy-snippet' },
+          });
+        }
+        if (configs.length > 0) {
+          choices.push({
+            name: '📥 拷贝配置到当前目录',
+            value: { action: 'copy-config' },
+          });
+        }
+        // Also allow copying the template
+        let versions;
+        const brandDir = path.join(edmDir, current.brand);
+        try { versions = findTemplateVersions(brandDir); } catch (_) { versions = []; }
+        if (versions.length > 0) {
+          choices.push({
+            name: '📥 拷贝模板到当前目录',
+            value: { action: 'copy-template' },
+          });
+        }
+        break;
+      }
+    }
+
+    if (choices.length === 0) {
+      console.log(chalk.yellow('  该层级无可用内容。'));
+    }
+
+    const allChoices = [...choices, ...(navChoices.length > 0 ? [new (await import('@inquirer/prompts')).Separator()] : []), ...navChoices];
+    const result = await showMenu(title, allChoices);
+
+    if (result === 'exit' || !result) break;
+    if (result === 'back') {
+      current = stack.pop();
+      continue;
+    }
+    if (result.action === 'navigate') {
+      stack.push(current);
+      current = result.node;
+      continue;
+    }
+
+    // Copy actions
+    if (result.action === 'copy-template') {
+      let tplPath;
+      if (current.level === 'brand') {
+        const brandDir = path.join(edmDir, current.brand);
+        const versions = findTemplateVersions(brandDir);
+        if (versions.length === 1) {
+          tplPath = versions[0].templatePath;
+        } else {
+          // Let user pick which template version
+          const tplChoices = versions.map(v => ({
+            name: formatName(v.meta, v.name) + formatDesc(v.meta),
+            value: v.templatePath,
+          }));
+          tplPath = await showMenu('选择要拷贝的模板版本', tplChoices);
+        }
+      } else if (current.templatePath) {
+        tplPath = current.templatePath;
+      } else if (current.versionData) {
+        tplPath = current.versionData.templatePath;
+      } else {
+        const brandDir = path.join(edmDir, current.brand);
+        const versions = findTemplateVersions(brandDir);
+        if (versions.length === 0) continue;
+        if (versions.length === 1) {
+          tplPath = versions[0].templatePath;
+        } else {
+          const tplChoices = versions.map(v => ({
+            name: formatName(v.meta, v.name) + formatDesc(v.meta),
+            value: v.templatePath,
+          }));
+          tplPath = await showMenu('选择要拷贝的模板版本', tplChoices);
+        }
+      }
+      if (tplPath) {
+        console.log();
+        await copyResource('template', tplPath, process.cwd());
+        console.log();
+      }
+      continue;
+    }
+
+    if (result.action === 'copy-snippet') {
+      const snipPath = path.join(current.variantData.path, 'snippet.html');
+      if (fs.existsSync(snipPath)) {
+        console.log();
+        await copyResource('snippet', snipPath, process.cwd());
+        console.log();
+      }
+      continue;
+    }
+
+    if (result.action === 'copy-config') {
+      const configs = findConfigs(current.variantData.path);
+      if (configs.length === 1) {
+        console.log();
+        await copyResource('config', configs[0].path, process.cwd());
+        console.log();
+      } else if (configs.length > 1) {
+        const cfgChoices = configs.map(c => ({
+          name: c.isOptimal ? c.name + chalk.green(' (最优配对)') : c.name,
+          value: c.path,
+        }));
+        const cfgPath = await showMenu('选择要拷贝的配置文件', cfgChoices);
+        if (cfgPath) {
+          console.log();
+          await copyResource('config', cfgPath, process.cwd());
+          console.log();
+        }
+      }
+      continue;
+    }
+
+    if (result.action === 'copy-config-brand') {
+      // From brand level: pick series → variant → config
+      const brandDir = path.join(edmDir, current.brand);
+      const allSeries = findSeriesDirs(brandDir);
+      if (allSeries.length === 0) continue;
+
+      let series;
+      if (allSeries.length === 1) {
+        series = allSeries[0];
+      } else {
+        const sChoices = allSeries.map(s => ({
+          name: formatName(s.meta, s.name) + formatDesc(s.meta),
+          value: s,
+        }));
+        series = await showMenu('选择系列', sChoices);
+      }
+      if (!series) continue;
+
+      const variants = findSnippetVariants(series.path);
+      if (variants.length === 0) continue;
+      let variant;
+      if (variants.length === 1) {
+        variant = variants[0];
+      } else {
+        const vChoices = variants.map(v => ({
+          name: formatName(v.meta, v.name) + formatDesc(v.meta),
+          value: v,
+        }));
+        variant = await showMenu('选择变体', vChoices);
+      }
+      if (!variant) continue;
+
+      const configs = findConfigs(variant.path);
+      if (configs.length === 0) continue;
+      let cfgPath;
+      if (configs.length === 1) {
+        cfgPath = configs[0].path;
+      } else {
+        const cfgChoices = configs.map(c => ({
+          name: c.isOptimal ? c.name + chalk.green(' (最优配对)') : c.name,
+          value: c.path,
+        }));
+        cfgPath = await showMenu('选择配置文件', cfgChoices);
+      }
+      if (cfgPath) {
+        console.log();
+        await copyResource('config', cfgPath, process.cwd());
+        console.log();
+      }
+      continue;
+    }
+  }
+}
+
+// ─── Internal helpers that init.js needs ──────────────────────────────────────
+// parseViewPath is used by init.js to resolve <brand>/templates/<version> etc.
+
+// ─── Main Entry ──────────────────────────────────────────────────────────────
+
+async function runViewMode({ viewPath, interactive, scope }) {
+  let edmDir;
+  try {
+    edmDir = resolveEdmDir();
+  } catch (err) {
+    console.error(chalk.red(`\n  ✘ ${err.message}\n`));
+    process.exit(1);
+  }
+
+  if (interactive) {
+    let startParsed = null;
+    if (scope === 'templates') {
+      // Start from a flat list: let user pick any template across all brands
+      const brands = findBrands(edmDir);
+      const allTemplates = [];
+      for (const b of brands) {
+        let versions;
+        try { versions = findTemplateVersions(b.path); } catch (_) { versions = []; }
+        for (const v of versions) {
+          allTemplates.push({ brand: b, version: v });
+        }
+      }
+      if (allTemplates.length === 0) {
+        console.log(chalk.yellow('没有可用的模板。\n'));
+        return;
+      }
+      const tplChoices = allTemplates.map(t => ({
+        name: t.brand.meta.name
+          ? `${chalk.bold.cyan(t.brand.meta.name)} ${chalk.gray('(' + t.brand.name + ')')} / ${formatName(t.version.meta, t.version.name)}`
+          : formatName(t.brand.meta, t.brand.name) + ' / ' + formatName(t.version.meta, t.version.name),
+        value: t,
+        description: (t.version.meta.description || t.brand.meta.description || undefined),
+      }));
+      const picked = await showMenu('选择模板', tplChoices);
+      if (!picked) return;
+      current = { level: 'template-detail', brand: picked.brand.name, brandMeta: picked.brand.meta, version: picked.version.name, versionData: picked.version };
+      // For simplicity, just show the detail and allow copy
+      const stat = fs.statSync(picked.version.templatePath);
+      console.log(chalk.dim(`\n  ${path.basename(picked.version.templatePath)} (${fmtBytes(stat.size)})\n`));
+      const { select } = await import('@inquirer/prompts');
+      const action = await select({
+        message: `${picked.version.meta.name || picked.version.name} 模板`,
+        choices: [
+          { name: '📥 拷贝模板到当前目录', value: 'copy' },
+          { name: '✕ 退出', value: 'exit' },
+        ],
+      });
+      if (action === 'copy') {
+        console.log();
+        const { runInitMode } = require('./init');
+        await runInitMode({ template: picked.version.templatePath });
+        console.log();
+      }
+      return;
+    }
+
+    if (scope === 'series') {
+      const brands = findBrands(edmDir);
+      const allSeries = [];
+      for (const b of brands) {
+        const sList = findSeriesDirs(b.path);
+        for (const s of sList) {
+          allSeries.push({ brand: b, series: s });
+        }
+      }
+      if (allSeries.length === 0) {
+        console.log(chalk.yellow('没有可用的系列。\n'));
+        return;
+      }
+      const sChoices = allSeries.map(item => ({
+        name: item.brand.meta.name
+          ? `${chalk.bold.cyan(item.brand.meta.name)} ${chalk.gray('(' + item.brand.name + ')')} / ${formatName(item.series.meta, item.series.name)}`
+          : formatName(item.brand.meta, item.brand.name) + ' / ' + formatName(item.series.meta, item.series.name),
+        value: item,
+        description: item.series.meta.description || undefined,
+      }));
+      const picked = await showMenu('选择系列', sChoices);
+      if (!picked) return;
+      // Navigate into this series
+      current = { level: 'series', brand: picked.brand.name, brandMeta: picked.brand.meta, series: picked.series.name, seriesData: picked.series };
+      stack = [{ level: 'brand', brand: picked.brand.name, brandMeta: picked.brand.meta }];
+      // Fall through to the main loop... actually this won't work easily.
+      // Just do inline handling for now:
+      const variants = findSnippetVariants(picked.series.path);
+      if (variants.length === 0) {
+        console.log(chalk.yellow('  该系列下无变体。\n'));
+        return;
+      }
+      let variant;
+      if (variants.length === 1) {
+        variant = variants[0];
+      } else {
+        const vChoices = variants.map(v => ({
+          name: formatName(v.meta, v.name) + formatDesc(v.meta),
+          value: v,
+          description: v.meta.description || undefined,
+        }));
+        variant = await showMenu(
+          `${picked.series.meta.name || picked.series.name} / 选择变体`,
+          vChoices
+        );
+      }
+      if (!variant) return;
+
+      // Show variant detail
+      const snipPath = path.join(variant.path, 'snippet.html');
+      if (fs.existsSync(snipPath)) {
+        const stat = fs.statSync(snipPath);
+        console.log(chalk.dim(`\n  📄 snippet.html (${fmtBytes(stat.size)})`));
+      }
+      const configs = findConfigs(variant.path);
+      for (const c of configs) {
+        console.log(chalk.dim(`  ⚙️ ${c.name}${c.isOptimal ? ' (最优配对)' : ''}`));
+      }
+      console.log();
+
+      // Offer copy actions
+      const actions = [];
+      if (fs.existsSync(snipPath)) {
+        actions.push({ name: '📥 拷贝片段到当前目录', value: 'snippet' });
+      }
+      if (configs.length > 0) {
+        actions.push({ name: '📥 拷贝配置到当前目录', value: 'config' });
+      }
+      actions.push({ name: '✕ 退出', value: 'exit' });
+
+      const action = await showMenu(
+        `${variant.meta.name || variant.name} 变体`,
+        actions
+      );
+      if (action === 'exit') return;
+      const { runInitMode } = require('./init');
+      console.log();
+      if (action === 'snippet') {
+        await runInitMode({ snippet: snipPath });
+      } else if (action === 'config') {
+        let cfgPath;
+        if (configs.length === 1) {
+          cfgPath = configs[0].path;
+        } else {
+          const cfgChoices = configs.map(c => ({
+            name: c.isOptimal ? c.name + chalk.green(' (最优配对)') : c.name,
+            value: c.path,
+          }));
+          cfgPath = await showMenu('选择配置文件', cfgChoices);
+        }
+        if (cfgPath) await runInitMode({ config: cfgPath });
+      }
+      console.log();
+      return;
+    }
+
+    if (scope === 'snippets') {
+      const brands = findBrands(edmDir);
+      const allSnippets = [];
+      for (const b of brands) {
+        const sList = findSeriesDirs(b.path);
+        for (const s of sList) {
+          const variants = findSnippetVariants(s.path);
+          for (const v of variants) {
+            const snipPath = path.join(v.path, 'snippet.html');
+            if (fs.existsSync(snipPath)) {
+              allSnippets.push({ brand: b, series: s, variant: v, snippetPath: snipPath });
+            }
+          }
+        }
+      }
+      if (allSnippets.length === 0) {
+        console.log(chalk.yellow('没有可用的片段。\n'));
+        return;
+      }
+      const snipChoices = allSnippets.map(item => {
+        const relPath = `${item.brand.name}/${item.series.name}/${item.variant.name}`;
+        return {
+          name: item.brand.meta.name
+            ? `${chalk.bold.cyan(item.brand.meta.name)} / ${formatName(item.variant.meta, item.variant.name)}`
+            : formatName(item.brand.meta, item.brand.name) + ' / ' + formatName(item.variant.meta, item.variant.name),
+          value: item,
+          description: chalk.dim(relPath) + (item.variant.meta.description ? ' — ' + item.variant.meta.description : ''),
+        };
+      });
+      const picked = await showMenu('选择片段', snipChoices);
+      if (!picked) return;
+      // Offer copy and browse actions
+      const snipActions = [
+        { name: '📥 拷贝片段到当前目录', value: 'copy-snippet' },
+      ];
+      const configs = findConfigs(picked.variant.path);
+      if (configs.length > 0) {
+        snipActions.push({ name: '📥 拷贝配置到当前目录', value: 'copy-config' });
+      }
+      snipActions.push({ name: '📋 查看所属系列', value: 'browse' });
+      snipActions.push({ name: '✕ 退出', value: 'exit' });
+
+      const action = await showMenu(
+        `${picked.variant.meta.name || picked.variant.name} 片段`,
+        snipActions
+      );
+      if (action === 'exit' || !action) return;
+
+      if (action === 'browse') {
+        // Enter interactive browse from this variant
+        startParsed = {
+          type: 'variant',
+          brand: picked.brand.name,
+          series: picked.series.name,
+          variant: picked.variant.name,
+          seriesData: picked.series,
+          variantData: picked.variant,
+        };
+      } else {
+        const { runInitMode } = require('./init');
+        console.log();
+        if (action === 'copy-snippet') {
+          await runInitMode({ snippet: picked.snippetPath });
+        } else if (action === 'copy-config') {
+          let cfgPath;
+          if (configs.length === 1) {
+            cfgPath = configs[0].path;
+          } else {
+            const cfgChoices = configs.map(c => ({
+              name: c.isOptimal ? c.name + chalk.green(' (最优配对)') : c.name,
+              value: c.path,
+            }));
+            cfgPath = await showMenu('选择配置文件', cfgChoices);
+          }
+          if (cfgPath) await runInitMode({ config: cfgPath });
+        }
+        console.log();
+        return;
+      }
+    }
+
+    if (viewPath) {
+      try {
+        startParsed = parseViewPath(viewPath, edmDir);
+      } catch (err) {
+        console.error(chalk.red(`\n  ✘ ${err.message}\n`));
+        process.exit(1);
+      }
+    }
+
+    await interactiveBrowse(edmDir, startParsed || null);
+    return;
+  }
+
+  // ── Non-interactive mode ────────────────────────────────────────────────────
+
+  if (scope === 'templates') {
+    printFlatTemplates(edmDir);
+    return;
+  }
+  if (scope === 'series') {
+    printFlatSeries(edmDir);
+    return;
+  }
+  if (scope === 'snippets') {
+    printFlatSnippets(edmDir);
+    return;
+  }
+
+  if (viewPath) {
+    let parsed;
+    try {
+      parsed = parseViewPath(viewPath, edmDir);
+    } catch (err) {
+      console.error(chalk.red(`\n  ✘ ${err.message}\n`));
+      process.exit(1);
+    }
+    printSubTree(edmDir, parsed);
+    return;
+  }
+
+  // No args: full tree
+  printFullTree(edmDir);
+}
+
+module.exports = { runViewMode, parseViewPath };

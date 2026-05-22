@@ -75,7 +75,46 @@ program
       └── 📂 打开 PowerShell          （仅已安装 pwsh 时出现）
 
 更多信息：https://gitee.com/siriussupreme/juice-cli
-`)
+`);
+
+// ─── Subcommand: juice view ─────────────────────────────────────────────
+program
+  .command('view [path]')
+  .description('查看 EDM 资源：品牌、模板、系列、片段变体')
+  .option('-i, --interactive', '交互式浏览，可上下翻层级')
+  .option('--templates', '列出所有模板')
+  .option('--series', '列出所有系列')
+  .option('--snippets', '列出所有片段')
+  .action(async (viewPath, options) => {
+    const { runViewMode } = require('../src/view');
+    await runViewMode({
+      viewPath: viewPath || null,
+      interactive: !!options.interactive,
+      scope: options.templates ? 'templates'
+        : (options.series ? 'series'
+        : (options.snippets ? 'snippets' : null)),
+    });
+  });
+
+// ─── Subcommand: juice init ─────────────────────────────────────────────
+program
+  .command('init [path]')
+  .description('从 EDM 资源拷贝模板/片段/配置到当前目录')
+  .option('-t, --template <file-path>', '仅拷贝模板 HTML 文件')
+  .option('-s, --snippet <file-path>', '仅拷贝片段 HTML 文件')
+  .option('-c, --config <file-path>', '仅拷贝配置 YAML 文件')
+  .action(async (initPath, options) => {
+    const { runInitMode } = require('../src/init');
+    await runInitMode({
+      initPath: initPath || null,
+      template: options.template || null,
+      snippet: options.snippet || null,
+      config: options.config || null,
+    });
+  });
+
+// ─── Default action (backward compatible) ───────────────────────────────
+program
   .action(async (options) => {
     // 注册/卸载右键菜单
     if (options.install) {

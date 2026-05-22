@@ -90,10 +90,13 @@ const YAML_ROOTS = [
 
 // 子命令名称常量
 const SUBCMDS = {
-  generate: 'JuiceEmail.Generate',
-  snippet:  'JuiceEmail.Snippet',
-  config:   'JuiceEmail.WithConfig',
-  pwsh:     'JuiceEmail.OpenPwsh',
+  generate:  'JuiceEmail.Generate',
+  snippet:   'JuiceEmail.Snippet',
+  config:    'JuiceEmail.WithConfig',
+  viewEdm:   'JuiceEmail.ViewEdm',
+  viewEdmInt:'JuiceEmail.ViewEdmInteractive',
+  initEdm:   'JuiceEmail.InitEdm',
+  pwsh:      'JuiceEmail.OpenPwsh',
 };
 
 const PARENT_KEY_NAME = 'JuiceEmail';
@@ -101,6 +104,8 @@ const PARENT_KEY_NAME = 'JuiceEmail';
 // ExtendedSubCommandsKey 指向的容器路径（相对于 HKCU\Software\Classes）
 const SUB_CMDS_CONTAINER_HTML = 'JuiceEmail.SubCommands';
 const SUB_CMDS_CONTAINER_YAML = 'JuiceEmail.SubCommands.Yaml';
+const SUB_CMDS_CONTAINER_DIR  = 'JuiceEmail.SubCommands.Dir';
+const SUB_CMDS_CONTAINER_BG   = 'JuiceEmail.SubCommands.Bg';
 
 // ─── 旧版残留清理 ─────────────────────────────────────────────────────────────
 
@@ -209,6 +214,19 @@ function registerSubCommands(containerPath, kind, nodePath, scriptPath, iconPath
     regAdd(`${cfgKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, '-c %1'));
   }
 
+  // Common items for file-type containers (html + yaml)
+  if (kind === 'html' || kind === 'yaml') {
+    const viewKey = `${containerPath}\\shell\\${SUBCMDS.viewEdm}`;
+    regAdd(viewKey, 'MUIVerb', 'REG_SZ', '📦 查看资源列表');
+    regAdd(viewKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${viewKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view'));
+
+    const viewIntKey = `${containerPath}\\shell\\${SUBCMDS.viewEdmInt}`;
+    regAdd(viewIntKey, 'MUIVerb', 'REG_SZ', '📋 浏览资源库');
+    regAdd(viewIntKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${viewIntKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view -i'));
+  }
+
   // pwsh — 始终显示（可选）
   if (pwshPath) {
     const pwshKey = `${containerPath}\\shell\\${SUBCMDS.pwsh}`;
@@ -217,6 +235,54 @@ function registerSubCommands(containerPath, kind, nodePath, scriptPath, iconPath
     regAdd(`${pwshKey}\\command`, '', 'REG_SZ',
       `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath (Split-Path '%1')"`);
   }
+}
+
+// ─── Directory / Background 菜单注册 ──────────────────────────────────────────
+
+function registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath) {
+  // Register directory container subcommands
+  const dirContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_DIR}`;
+  const bgContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_BG}`;
+
+  for (const containerPath of [dirContainer, bgContainer]) {
+    // 📥 从资源库拷贝到此处
+    const initKey = `${containerPath}\\shell\\${SUBCMDS.initEdm}`;
+    regAdd(initKey, 'MUIVerb', 'REG_SZ', '📥 从资源库拷贝到此处');
+    regAdd(initKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${initKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'init'));
+
+    // 📦 查看资源列表
+    const viewKey = `${containerPath}\\shell\\${SUBCMDS.viewEdm}`;
+    regAdd(viewKey, 'MUIVerb', 'REG_SZ', '📦 查看资源列表');
+    regAdd(viewKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${viewKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view'));
+
+    // 📋 浏览资源库
+    const viewIntKey = `${containerPath}\\shell\\${SUBCMDS.viewEdmInt}`;
+    regAdd(viewIntKey, 'MUIVerb', 'REG_SZ', '📋 浏览资源库');
+    regAdd(viewIntKey, 'Icon', 'REG_SZ', iconPath);
+    regAdd(`${viewIntKey}\\command`, '', 'REG_SZ', wrapInteractive(nodePath, scriptPath, 'view -i'));
+
+    // 📂 在此打开终端
+    if (pwshPath) {
+      const pwshKey = `${containerPath}\\shell\\${SUBCMDS.pwsh}`;
+      regAdd(pwshKey, 'MUIVerb', 'REG_SZ', '📂 在此打开终端');
+      regAdd(pwshKey, 'Icon', 'REG_SZ', pwshPath);
+      regAdd(`${pwshKey}\\command`, '', 'REG_SZ',
+        `"${pwshPath}" -NoExit -Command "Set-Location -LiteralPath '%1'"`);
+    }
+  }
+
+  // Parent keys: Directory and Directory\Background
+  const dirParent = `${HKCU_SHELL}\\Directory\\shell\\${PARENT_KEY_NAME}`;
+  regAdd(dirParent, 'MUIVerb', 'REG_SZ', '📧 juice 邮件工具');
+  regAdd(dirParent, 'Icon', 'REG_SZ', iconPath);
+  regAdd(dirParent, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER_DIR);
+
+  const bgParent = `${HKCU_SHELL}\\Directory\\Background\\shell\\${PARENT_KEY_NAME}`;
+  regAdd(bgParent, 'MUIVerb', 'REG_SZ', '📧 juice 邮件工具');
+  regAdd(bgParent, 'Icon', 'REG_SZ', iconPath);
+  regAdd(bgParent, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER_BG);
 }
 
 // ─── 注册 ─────────────────────────────────────────────────────────────────────
@@ -243,6 +309,8 @@ async function registerContextMenu() {
   // 先删除旧容器再重建，避免注册残留旧子命令（如旧版 HTML 容器的 WithConfig）
   regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`);
   regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`);
+  regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_DIR}`);
+  regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_BG}`);
 
   // HTML 容器：generate + snippet + pwsh
   const htmlContainer = `${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`;
@@ -268,6 +336,9 @@ async function registerContextMenu() {
     regAdd(parentKey, 'ExtendedSubCommandsKey', 'REG_SZ', SUB_CMDS_CONTAINER_YAML);
   }
 
+  // Directory / Background → 独立容器
+  registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath);
+
   if (!ok) {
     console.log(chalk.yellow('  ⚠  部分注册表项写入失败，右键菜单可能不完整。\n'));
   }
@@ -279,13 +350,21 @@ async function registerContextMenu() {
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
     `      ├── 📄 作为模板，生成邮件 HTML  →  juice -f（后台执行）\n` +
     `      ├── 🧩 作为片段，拼接邮件 HTML  →  juice -s（交互选择模板）\n` +
+    `      ├── 📦 查看资源列表              →  juice view\n` +
+    `      ├── 📋 浏览资源库                →  juice view -i\n` +
     (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
     `\n  ${chalk.bold('.yaml / .yml')} 文件右键：\n` +
     `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
-    (pwshPath
-      ? `      ├── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
-        `      └── 📂 打开 PowerShell\n`
-      : `      └── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n`) +
+    `      ├── ⚙️ 作为配置，拼接邮件 HTML  →  juice -c（交互选择品牌/模板/片段）\n` +
+    `      ├── 📦 查看资源列表              →  juice view\n` +
+    `      ├── 📋 浏览资源库                →  juice view -i\n` +
+    (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
+    `\n  ${chalk.bold('文件夹 / 空白处')} 右键：\n` +
+    `    ${chalk.bold('📧 juice 邮件工具')}\n` +
+    `      ├── 📥 从资源库拷贝到此处         →  juice init\n` +
+    `      ├── 📦 查看资源列表              →  juice view\n` +
+    `      ├── 📋 浏览资源库                →  juice view -i\n` +
+    (pwshPath ? `      └── 📂 在此打开终端\n` : '') +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
   );
@@ -303,15 +382,22 @@ async function unregisterContextMenu() {
 
   let removed = 0;
 
-  // 清理 HKCU 父菜单（4 个文件类型）
-  const allRoots = [...HTML_ROOTS, ...YAML_ROOTS];
+  // 清理 HKCU 父菜单（4 个文件类型 + Directory + Background）
+  const allRoots = [
+    ...HTML_ROOTS,
+    ...YAML_ROOTS,
+    `${HKCU_SHELL}\\Directory\\shell`,
+    `${HKCU_SHELL}\\Directory\\Background\\shell`,
+  ];
   for (const root of allRoots) {
     if (regDelete(`${root}\\${PARENT_KEY_NAME}`)) removed++;
   }
 
-  // 清理两个子命令容器
+  // 清理所有子命令容器
   if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_HTML}`)) removed++;
   if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_YAML}`)) removed++;
+  if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_DIR}`)) removed++;
+  if (regDelete(`${HKCU_SHELL}\\${SUB_CMDS_CONTAINER_BG}`)) removed++;
 
   // 清理旧版共享容器（v2.1.14 之前只有一个容器）
   regDelete(`${HKCU_SHELL}\\JuiceEmail.SubCommands`);
