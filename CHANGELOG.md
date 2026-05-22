@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.2](https://github.com/GuoSirius/juice-cli/compare/v2.3.1...v2.3.2) (2026-05-22)
+
+
+### Documentation
+
+* update CLAUDE.md and README.md for juice view and juice init ([814dcaa](https://github.com/GuoSirius/juice-cli/commit/814dcaa00f72b483983459f0118972429ef44b0e))
+
 ### [2.3.1](https://github.com/GuoSirius/juice-cli/compare/v2.3.0...v2.3.1) (2026-05-22)
 
 
