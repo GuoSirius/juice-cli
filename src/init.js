@@ -93,13 +93,13 @@ async function directCopy(srcPath, cwd) {
  * Wrap @inquirer/prompts select with back/exit navigation.
  * Returns the chosen value, 'back', or 'exit'.
  */
-async function selectWithNav(choices, showBack) {
+async function selectWithNav(message, choices, showBack) {
   const { select } = await import('@inquirer/prompts');
   const all = [];
   if (showBack) all.push({ name: '.. 返回上级', value: 'back' });
   all.push(...choices);
   all.push({ name: '✕ 退出', value: 'exit' });
-  return select({ message: choices[0] ? undefined : '', choices: all, loop: false });
+  return select({ message, choices: all, loop: false });
 }
 
 async function interactiveInit(edmDir, cwd) {
@@ -113,7 +113,7 @@ async function interactiveInit(edmDir, cwd) {
         name: formatName(b.meta, b.name) + (b.meta.description ? ' — ' + chalk.dim(b.meta.description) : ''),
         value: b,
       }));
-      const result = await selectWithNav(choices, false);
+      const result = await selectWithNav('选择品牌：', choices, false);
       if (result === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
       brand = result;
       step = 'version';
@@ -126,7 +126,7 @@ async function interactiveInit(edmDir, cwd) {
         name: formatName(v.meta, v.name) + (v.meta.description ? ' — ' + chalk.dim(v.meta.description) : ''),
         value: v,
       }));
-      const result = await selectWithNav(choices, true);
+      const result = await selectWithNav('选择模板版本：', choices, true);
       if (result === 'back') { step = 'brand'; continue; }
       if (result === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
       version = result;
@@ -148,7 +148,7 @@ async function interactiveInit(edmDir, cwd) {
           value: s,
         })),
       ];
-      const result = await selectWithNav(choices, true);
+      const result = await selectWithNav('选择片段系列：', choices, true);
       if (result === 'back') { step = 'version'; continue; }
       if (result === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
       series = result;
@@ -167,7 +167,7 @@ async function interactiveInit(edmDir, cwd) {
         name: formatName(v.meta, v.name) + (v.meta.description ? ' — ' + chalk.dim(v.meta.description) : ''),
         value: v,
       }));
-      const result = await selectWithNav(choices, true);
+      const result = await selectWithNav('选择片段变体：', choices, true);
       if (result === 'back') { step = 'series'; continue; }
       if (result === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
       variant = result;
@@ -367,11 +367,13 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
 
   // --all: copy entire EDM directory
   if (all) {
-    let edmDir;
-    try {
-      edmDir = resolveEdmDir();
-    } catch (err) {
-      console.error(chalk.red(`\n  ✘ ${err.message}\n`));
+    // Always use package built-in EDM for --all (not CWD's local copy)
+    const pkgEdm = path.resolve(__dirname, '..', 'edm');
+    const edmDir = fs.existsSync(pkgEdm) ? pkgEdm : (() => {
+      try { return resolveEdmDir(); } catch (_) { return null; }
+    })();
+    if (!edmDir) {
+      console.error(chalk.red('\n  ✘ EDM 资源库不存在，无法拷贝。\n'));
       process.exit(1);
     }
     const target = all === true ? cwd : path.resolve(all);
