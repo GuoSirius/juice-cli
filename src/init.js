@@ -231,10 +231,8 @@ async function interactiveInit(edmDir, cwd) {
         }
         if (action === 'snippet-config') {
           selected = ['snippet', 'config'];
-          continue;
-        }
-
-        if (selected.length === 0) {
+          // fall through to confirmation below
+        } else if (selected.length === 0) {
           console.log(chalk.gray('未选择任何内容。\n'));
           step = series ? 'variant' : 'series';
           break;
