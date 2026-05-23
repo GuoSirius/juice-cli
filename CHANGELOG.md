@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.10](https://github.com/GuoSirius/juice-cli/compare/v2.3.9...v2.3.10) (2026-05-23)
+
+
+### Bug Fixes
+
+* icon overwrite instead of versioning, add snippet+config shortcut ([d35db8d](https://github.com/GuoSirius/juice-cli/commit/d35db8d6e07cb0368f186e4e7c10c8071b08c4f7))
+
 ### [2.3.9](https://github.com/GuoSirius/juice-cli/compare/v2.3.8...v2.3.9) (2026-05-23)
 
 
