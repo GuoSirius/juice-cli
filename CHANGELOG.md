@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/GuoSirius/juice-cli/compare/v2.3.15...v2.4.0) (2026-05-23)
+
+
+### Features
+
+* convert project to ESM and upgrade chalk/ora/commander to latest ([8aa2411](https://github.com/GuoSirius/juice-cli/commit/8aa24116f63ae3d21490ff19b19a6e0d7d2f8daf))
+
+
+### Chores
+
+* update local permissions ([f7855df](https://github.com/GuoSirius/juice-cli/commit/f7855df7ce1375ab4f92db8491584a5966992b71))
+* upgrade dependencies and bump minimum Node.js to v24 ([518ec31](https://github.com/GuoSirius/juice-cli/commit/518ec31265631cba812b2dc8f2f55b893baf4bb9))
+
 ### [2.3.15](https://github.com/GuoSirius/juice-cli/compare/v2.3.14...v2.3.15) (2026-05-23)
 
 
