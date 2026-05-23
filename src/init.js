@@ -195,7 +195,7 @@ async function interactiveInit(edmDir, cwd) {
       console.log(chalk.dim(`\n  品牌：${brand.meta.name || brand.name}  →  模板：${version.meta.name || version.name}`));
       if (series) console.log(chalk.dim(`  系列：${series.meta.name || series.name}${variant ? '  →  变体：' + (variant.meta.name || variant.name) : ''}`));
 
-      // Loop: select → checkbox → confirm, allow back/modify at any point
+      // Loop: confirm / shortcuts / customize, allow back at any point
       let selected = copyItems.filter(c => c.checked).map(c => c.value);
       while (true) {
         const picked = selected
@@ -207,7 +207,11 @@ async function interactiveInit(edmDir, cwd) {
         if (picked.length > 0) {
           mainChoices.push({ name: `✅ 确认拷贝（${summary}）`, value: 'confirm' });
         }
-        mainChoices.push({ name: `🔄 修改选择（${summary}）`, value: 'edit' });
+        // Quick shortcut: snippet + config only (skip template)
+        if (variant && copyItems.some(c => c.value === 'snippet') && copyItems.some(c => c.value === 'config')) {
+          mainChoices.push({ name: '🧩 仅片段 + 配置', value: 'snippet-config' });
+        }
+        mainChoices.push({ name: `🔄 自定义选择（${summary}）`, value: 'edit' });
 
         const action = await selectWithNav(
           '拷贝操作：',
@@ -223,6 +227,10 @@ async function interactiveInit(edmDir, cwd) {
             choices: copyItems,
           });
           if (selected.length === 0) { console.log(chalk.dim('  (已清空选择)\n')); }
+          continue;
+        }
+        if (action === 'snippet-config') {
+          selected = ['snippet', 'config'];
           continue;
         }
 
@@ -339,7 +347,8 @@ function copyIcon(variantDir, versionDir, brandDir, cwd) {
   } catch (_) {}
   for (const src of candidates) {
     if (fs.existsSync(src)) {
-      const dest = copyFileToCwd(src, cwd, 'favicon.ico');
+      const dest = path.join(cwd, 'favicon.ico');
+      fs.copyFileSync(src, dest);
       return dest;
     }
   }

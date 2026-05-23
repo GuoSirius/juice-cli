@@ -634,7 +634,8 @@ async function interactiveBrowse(edmDir, startParsed) {
             ];
             for (const isrc of iconSrcs) {
               if (fs.existsSync(isrc)) {
-                const idest = copyFileSafe(isrc, path.join(cwd, 'favicon.ico'));
+                const idest = path.join(cwd, 'favicon.ico');
+                fs.copyFileSync(isrc, idest);
                 console.log(`   ${chalk.cyan('·')} ${cwdRel(idest)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(idest).size) + ')')}`);
                 break;
               }
