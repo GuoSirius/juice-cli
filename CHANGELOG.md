@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.6](https://github.com/GuoSirius/juice-cli/compare/v2.3.5...v2.3.6) (2026-05-23)
+
+
+### Features
+
+* auto-copy favicon.ico when copying template ([0302bdf](https://github.com/GuoSirius/juice-cli/commit/0302bdf60cee61ec1587cd9237b19ce7a4edc3f9))
+
+
+### Bug Fixes
+
+* add back/exit navigation to juice init, simplify --all conflict ([78aa19f](https://github.com/GuoSirius/juice-cli/commit/78aa19f5f5ef8b6b5489505d585254afe8a38ae8))
+
 ### [2.3.5](https://github.com/GuoSirius/juice-cli/compare/v2.3.4...v2.3.5) (2026-05-23)
 
 
