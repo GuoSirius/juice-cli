@@ -206,11 +206,22 @@ async function interactiveInit(edmDir, cwd) {
         }
       }
 
-      // Show summary before multi-select
+      // Show summary
       console.log(chalk.dim(`\n  品牌：${brand.meta.name || brand.name}  →  模板：${version.meta.name || version.name}`));
       if (series) console.log(chalk.dim(`  系列：${series.meta.name || series.name}${variant ? '  →  变体：' + (variant.meta.name || variant.name) : ''}`));
 
-      // Step 1: multi-select resources (checkbox only, no nav items)
+      // Step 1: confirm intent (arrow-key nav, easy to back out)
+      const n = copyItems.length;
+      const desc = copyItems.map(c => c.name.replace(/^[^\s]+\s/, '')).join(' + ');
+      const action = await selectWithNav(
+        `将拷贝 ${n} 项（${desc}）：`,
+        [{ name: '📥 拷贝到当前目录', value: 'go' }],
+        true
+      );
+      if (action === 'back') { step = series ? 'variant' : 'series'; continue; }
+      if (action === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
+
+      // Step 2: customize selection via checkbox
       const { checkbox } = await import('@inquirer/prompts');
       const selected = await checkbox({
         message: '选择要拷贝的内容：',
@@ -222,18 +233,6 @@ async function interactiveInit(edmDir, cwd) {
         step = series ? 'variant' : 'series';
         continue;
       }
-
-      // Step 2: confirm / back / exit (select, arrow-key navigation)
-      const action = await selectWithNav(
-        `已选 ${selected.length} 项，确认操作：`,
-        [{ name: '✅ 确认拷贝', value: 'confirm' }],
-        true
-      );
-      if (action === 'back') {
-        step = 'copy'; // redo the checkbox selection
-        continue;
-      }
-      if (action === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
 
       // Output name
       const defaultBaseName = variant
@@ -386,14 +385,12 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
       return;
     }
     console.log(chalk.cyan(`\n  拷贝 EDM 资源库...`));
-    console.log(chalk.gray(`  源：${edmDir}`));
-    console.log(chalk.gray(`  目标：${destDir}`));
 
     if (fs.existsSync(destDir)) {
       const { select } = await import('@inquirer/prompts');
       const vName = findNextEdmVersion(target);
       const action = await select({
-        message: `目录 ${destDir} 已存在：`,
+        message: `目录 edm/ 已存在：`,
         choices: [
           { name: '覆盖', value: 'overwrite' },
           { name: `版本（${path.basename(vName)}）`, value: 'version' },
