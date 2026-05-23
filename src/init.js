@@ -5,7 +5,7 @@ const path = require('path');
 const chalk = require('chalk');
 const {
   resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
-  findSeriesDirs, findSnippetVariants, findConfigs,
+  findSeriesDirs, filterSeries, findSnippetVariants, findConfigs,
   promptOutputName,
 } = require('./snippet');
 
@@ -92,6 +92,7 @@ async function selectWithNav(message, choices, showBack) {
 async function interactiveInit(edmDir, cwd) {
   let step = 'brand';
   let brand = null, version = null, series = null, variant = null;
+  let hadVariantStep = false; // track if variant step was actually shown
 
   while (true) {
     if (step === 'brand') {
@@ -122,7 +123,9 @@ async function interactiveInit(edmDir, cwd) {
     }
 
     if (step === 'series') {
-      const allSeries = findSeriesDirs(brand.path);
+      let allSeries = findSeriesDirs(brand.path);
+      // Apply template version series filtering (allow/block in _meta.yaml)
+      allSeries = filterSeries(allSeries, version.meta);
       if (allSeries.length === 0) {
         series = null;
         step = 'copy';
@@ -150,6 +153,7 @@ async function interactiveInit(edmDir, cwd) {
         step = 'copy';
         continue;
       }
+      hadVariantStep = true;
       const choices = variants.map(v => ({
         name: formatName(v.meta, v.name) + (v.meta.description ? ' — ' + chalk.dim(v.meta.description) : ''),
         value: v,
@@ -218,7 +222,7 @@ async function interactiveInit(edmDir, cwd) {
           mainChoices,
           true
         );
-        if (action === 'back') { step = series ? 'variant' : 'series'; break; }
+        if (action === 'back') { step = hadVariantStep ? 'variant' : (series ? 'series' : 'version'); break; }
         if (action === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
         if (action === 'edit') {
           const { checkbox } = await import('@inquirer/prompts');
@@ -234,7 +238,7 @@ async function interactiveInit(edmDir, cwd) {
           // fall through to confirmation below
         } else if (selected.length === 0) {
           console.log(chalk.gray('未选择任何内容。\n'));
-          step = series ? 'variant' : 'series';
+          step = hadVariantStep ? 'variant' : (series ? 'series' : 'version');
           break;
         }
 

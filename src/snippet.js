@@ -204,24 +204,6 @@ function findConfigs(variantDir, sourceLabel) {
  * Collect configs from multiple directories, deduplicating by path.
  * Returns { name, path, isOptimal, source }[].
  */
-function collectConfigs(dirs) {
-  const seen = new Set();
-  const result = [];
-  for (const { dir, label, markOptimal } of dirs) {
-    if (!fs.existsSync(dir)) continue;
-    const configs = findConfigs(dir, label);
-    for (const c of configs) {
-      if (seen.has(c.path)) continue;
-      seen.add(c.path);
-      if (markOptimal && c.name === 'juice.yaml') {
-        c.isOptimal = true;
-      }
-      result.push(c);
-    }
-  }
-  return result;
-}
-
 function findFiles(dir, regex) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   return entries
@@ -980,7 +962,6 @@ module.exports = {
   findHtmlFiles,
   findYamlFiles,
   findLocalConfig,
-  collectConfigs,
   getBrand,
   filterSeries,
   // config
