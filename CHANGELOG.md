@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/GuoSirius/juice-cli/compare/v2.4.0...v2.4.1) (2026-05-23)
+
+
+### Bug Fixes
+
+* add missing __dirname ESM definitions, convert generate-icon.js ([fe878bd](https://github.com/GuoSirius/juice-cli/commit/fe878bda0d0d86e4dcde774132c7c2f26285208d))
+
 ## [2.4.0](https://github.com/GuoSirius/juice-cli/compare/v2.3.15...v2.4.0) (2026-05-23)
 
 
