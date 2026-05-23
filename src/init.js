@@ -6,8 +6,7 @@ const chalk = require('chalk');
 const {
   resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
   findSeriesDirs, findSnippetVariants, findConfigs,
-  promptBrand, promptTemplateVersion, promptSeries, promptSnippetVariant,
-  promptOutputName, checkOutputConflicts, findNextVersion,
+  promptOutputName,
 } = require('./snippet');
 
 function fmtBytes(b) {
@@ -90,141 +89,200 @@ async function directCopy(srcPath, cwd) {
 
 // ─── Interactive Init ────────────────────────────────────────────────────────
 
+/**
+ * Wrap @inquirer/prompts select with back/exit navigation.
+ * Returns the chosen value, 'back', or 'exit'.
+ */
+async function selectWithNav(choices, showBack) {
+  const { select } = await import('@inquirer/prompts');
+  const all = [];
+  if (showBack) all.push({ name: '.. 返回上级', value: 'back' });
+  all.push(...choices);
+  all.push({ name: '✕ 退出', value: 'exit' });
+  return select({ message: choices[0] ? undefined : '', choices: all, loop: false });
+}
+
 async function interactiveInit(edmDir, cwd) {
-  const brands = findBrands(edmDir);
-  const brand = await promptBrand(brands);
-  const versions = findTemplateVersions(brand.path);
-  const version = await promptTemplateVersion(versions);
+  let step = 'brand';
+  let brand = null, version = null, series = null, variant = null;
 
-  // Series selection
-  const allSeries = findSeriesDirs(brand.path);
-  let series = null;
-  let variant = null;
+  while (true) {
+    if (step === 'brand') {
+      const brands = findBrands(edmDir);
+      const choices = brands.map(b => ({
+        name: formatName(b.meta, b.name) + (b.meta.description ? ' — ' + chalk.dim(b.meta.description) : ''),
+        value: b,
+      }));
+      const result = await selectWithNav(choices, false);
+      if (result === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
+      brand = result;
+      step = 'version';
+      continue;
+    }
 
-  if (allSeries.length > 0) {
-    const { select } = await import('@inquirer/prompts');
-    const seriesChoices = [
-      { name: '[跳过] 仅使用模板', value: null },
-      ...allSeries.map(s => {
-        const meta = s.meta;
-        const display = meta.name
-          ? formatName(meta, s.name)
-          : chalk.bold.cyan(s.name);
-        return {
-          name: display,
-          value: s,
-          description: meta.description || undefined,
-        };
-      }),
-    ];
-    series = await select({
-      message: '选择片段系列（可选）：',
-      choices: seriesChoices,
-    });
+    if (step === 'version') {
+      const versions = findTemplateVersions(brand.path);
+      const choices = versions.map(v => ({
+        name: formatName(v.meta, v.name) + (v.meta.description ? ' — ' + chalk.dim(v.meta.description) : ''),
+        value: v,
+      }));
+      const result = await selectWithNav(choices, true);
+      if (result === 'back') { step = 'brand'; continue; }
+      if (result === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
+      version = result;
+      step = 'series';
+      continue;
+    }
 
-    if (series) {
-      const variants = findSnippetVariants(series.path);
-      if (variants.length > 0) {
-        variant = await promptSnippetVariant(variants);
+    if (step === 'series') {
+      const allSeries = findSeriesDirs(brand.path);
+      if (allSeries.length === 0) {
+        series = null;
+        step = 'copy';
+        continue;
       }
+      const choices = [
+        { name: '[跳过] 仅使用模板', value: null },
+        ...allSeries.map(s => ({
+          name: formatName(s.meta, s.name) + (s.meta.description ? ' — ' + chalk.dim(s.meta.description) : ''),
+          value: s,
+        })),
+      ];
+      const result = await selectWithNav(choices, true);
+      if (result === 'back') { step = 'version'; continue; }
+      if (result === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
+      series = result;
+      step = series ? 'variant' : 'copy';
+      continue;
     }
-  }
 
-  // Multi-select what to copy
-  const copyItems = [];
-  copyItems.push({
-    name: '📋 模板 HTML',
-    value: 'template',
-    description: path.basename(version.templatePath),
-    checked: true,
-  });
+    if (step === 'variant') {
+      const variants = findSnippetVariants(series.path);
+      if (variants.length === 0) {
+        variant = null;
+        step = 'copy';
+        continue;
+      }
+      const choices = variants.map(v => ({
+        name: formatName(v.meta, v.name) + (v.meta.description ? ' — ' + chalk.dim(v.meta.description) : ''),
+        value: v,
+      }));
+      const result = await selectWithNav(choices, true);
+      if (result === 'back') { step = 'series'; continue; }
+      if (result === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
+      variant = result;
+      step = 'copy';
+      continue;
+    }
 
-  if (variant) {
-    const snipPath = path.join(variant.path, 'snippet.html');
-    if (fs.existsSync(snipPath)) {
+    if (step === 'copy') {
+      // Multi-select what to copy
+      const copyItems = [];
       copyItems.push({
-        name: '🧩 片段 HTML',
-        value: 'snippet',
-        description: path.basename(snipPath),
+        name: `📋 模板 HTML（${version.meta.name || version.name}）`,
+        value: 'template',
+        description: path.basename(version.templatePath),
         checked: true,
       });
-    }
 
-    const configs = findConfigs(variant.path);
-    if (configs.length > 0) {
-      copyItems.push({
-        name: '⚙️ 配置文件',
-        value: 'config',
-        description: configs.map(c => c.name).join(', '),
-        checked: true,
+      if (variant) {
+        const snipPath = path.join(variant.path, 'snippet.html');
+        if (fs.existsSync(snipPath)) {
+          copyItems.push({
+            name: '🧩 片段 HTML',
+            value: 'snippet',
+            description: path.basename(snipPath),
+            checked: true,
+          });
+        }
+        const configs = findConfigs(variant.path);
+        if (configs.length > 0) {
+          copyItems.push({
+            name: '⚙️ 配置文件',
+            value: 'config',
+            description: configs.map(c => c.name).join(', '),
+            checked: true,
+          });
+        }
+      }
+
+      // Show summary before multi-select
+      console.log(chalk.dim(`\n  品牌：${brand.meta.name || brand.name}  →  模板：${version.meta.name || version.name}`));
+      if (series) console.log(chalk.dim(`  系列：${series.meta.name || series.name}${variant ? '  →  变体：' + (variant.meta.name || variant.name) : ''}`));
+
+      const { checkbox } = await import('@inquirer/prompts');
+      const navCopyItems = [
+        ...copyItems,
+        { name: '.. 返回上级', value: 'back' },
+        { name: '✕ 退出', value: 'exit' },
+      ];
+      const selected = await checkbox({
+        message: '选择要拷贝的内容：',
+        choices: navCopyItems,
       });
+
+      // Filter out nav values
+      if (selected.includes('exit')) { console.log(chalk.gray('已退出。\n')); return; }
+      if (selected.includes('back')) {
+        step = series ? 'variant' : 'series';
+        continue;
+      }
+
+      const realSelected = selected.filter(s => s !== 'back' && s !== 'exit');
+      if (realSelected.length === 0) {
+        console.log(chalk.gray('未选择任何内容，已跳过。\n'));
+        return;
+      }
+
+      // Output name
+      const defaultBaseName = variant
+        ? `${brand.name}-${version.name}-${series.name}-${variant.name}`
+        : `${brand.name}-${version.name}`;
+      const outputBaseName = await promptOutputName(defaultBaseName, cwd);
+
+      // Copy files
+      console.log(chalk.green('\n✔ 已拷贝：'));
+      const cwdRel = (p) => './' + path.relative(cwd, p);
+
+      if (realSelected.includes('template')) {
+        const destName = outputBaseName + path.extname(version.templatePath);
+        const dest = copyFileToCwd(version.templatePath, cwd, destName);
+        console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+      }
+
+      if (realSelected.includes('snippet') && variant) {
+        const snipPath = path.join(variant.path, 'snippet.html');
+        const destName = outputBaseName + '-snippet' + path.extname(snipPath);
+        const dest = copyFileToCwd(snipPath, cwd, destName);
+        console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+      }
+
+      if (realSelected.includes('config') && variant) {
+        const configs = findConfigs(variant.path);
+        const optimal = configs.find(c => c.isOptimal);
+        const cfgPath = optimal ? optimal.path : configs[0].path;
+        const dest = copyFileToCwd(cfgPath, cwd, 'juice.yaml');
+        console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+      }
+
+      console.log();
+      if (realSelected.includes('snippet') && realSelected.includes('template')) {
+        const snipFile = outputBaseName + '-snippet' + path.extname(path.join(variant.path, 'snippet.html'));
+        const tplFile = outputBaseName + path.extname(version.templatePath);
+        console.log(
+          '  ' + chalk.dim('💡 下一步：') + '\n' +
+          '     ' + chalk.cyan(`juice -s ${snipFile} -f ${tplFile}`) +
+          (realSelected.includes('config') ? chalk.cyan(' -c juice.yaml') : '') + '\n'
+        );
+      } else if (realSelected.includes('template')) {
+        const tplFile = outputBaseName + path.extname(version.templatePath);
+        console.log(
+          '  ' + chalk.dim('💡 下一步：') + '\n' +
+          '     ' + chalk.cyan(`juice -f ${tplFile}`) + '\n'
+        );
+      }
+      return;
     }
-  }
-
-  const { checkbox } = await import('@inquirer/prompts');
-  const selected = await checkbox({
-    message: '选择要拷贝的内容：',
-    choices: copyItems,
-  });
-
-  if (selected.length === 0) {
-    console.log(chalk.gray('未选择任何内容，已取消。\n'));
-    return;
-  }
-
-  // Output name
-  const defaultBaseName = variant
-    ? `${brand.name}-${version.name}-${series.name}-${variant.name}`
-    : `${brand.name}-${version.name}`;
-  const outputBaseName = await promptOutputName(defaultBaseName, cwd);
-
-  // Copy files
-  console.log(chalk.green('\n✔ 已拷贝：'));
-  const cwdRel = (p) => './' + path.relative(cwd, p);
-
-  if (selected.includes('template')) {
-    const destName = outputBaseName + path.extname(version.templatePath);
-    const dest = copyFileToCwd(version.templatePath, cwd, destName);
-    console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-  }
-
-  if (selected.includes('snippet') && variant) {
-    const snipPath = path.join(variant.path, 'snippet.html');
-    const destName = outputBaseName + '-snippet' + path.extname(snipPath);
-    const dest = copyFileToCwd(snipPath, cwd, destName);
-    console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-  }
-
-  if (selected.includes('config') && variant) {
-    const configs = findConfigs(variant.path);
-    let cfgPath;
-    if (configs.length === 1) {
-      cfgPath = configs[0].path;
-    } else {
-      // Use optimal config
-      const optimal = configs.find(c => c.isOptimal);
-      cfgPath = optimal ? optimal.path : configs[0].path;
-    }
-    const dest = copyFileToCwd(cfgPath, cwd, 'juice.yaml');
-    console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-  }
-
-  // Summary
-  console.log();
-  if (selected.includes('snippet') && selected.includes('template')) {
-    const snipFile = outputBaseName + '-snippet' + path.extname(path.join(variant.path, 'snippet.html'));
-    const tplFile = outputBaseName + path.extname(version.templatePath);
-    console.log(
-      '  ' + chalk.dim('💡 下一步：') + '\n' +
-      '     ' + chalk.cyan(`juice -s ${snipFile} -f ${tplFile}`) +
-      (selected.includes('config') ? chalk.cyan(' -c juice.yaml') : '') + '\n'
-    );
-  } else if (selected.includes('template')) {
-    const tplFile = outputBaseName + path.extname(version.templatePath);
-    console.log(
-      '  ' + chalk.dim('💡 下一步：') + '\n' +
-      '     ' + chalk.cyan(`juice -f ${tplFile}`) + '\n'
-    );
   }
 }
 
@@ -308,12 +366,12 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
         message: `目录 ${destDir} 已存在：`,
         choices: [
           { name: '覆盖', value: 'overwrite' },
-          { name: `自动版本号（${path.basename(vName)}）`, value: 'version' },
-          { name: '取消', value: 'cancel' },
+          { name: `版本（${path.basename(vName)}）`, value: 'version' },
+          { name: '跳过', value: 'skip' },
         ],
       });
-      if (action === 'cancel') {
-        console.log(chalk.gray('已取消。\n'));
+      if (action === 'skip') {
+        console.log(chalk.gray('已跳过。\n'));
         return;
       }
       if (action === 'version') {
