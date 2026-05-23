@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.15](https://github.com/GuoSirius/juice-cli/compare/v2.3.14...v2.3.15) (2026-05-23)
+
+
+### Bug Fixes
+
+* filterSeries in init, variant back-loop, remove dead collectConfigs ([2ee4912](https://github.com/GuoSirius/juice-cli/commit/2ee4912dc2c42916351d9b46043c1fcd89c7581b))
+* relative paths in snippet output, error handling for juice/minify ([63499f2](https://github.com/GuoSirius/juice-cli/commit/63499f23365bdd458a9e28b415362db1cb54b118))
+
 ### [2.3.14](https://github.com/GuoSirius/juice-cli/compare/v2.3.13...v2.3.14) (2026-05-23)
 
 
