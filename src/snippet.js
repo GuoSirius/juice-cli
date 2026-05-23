@@ -425,11 +425,11 @@ async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputB
   const outPaths = resolveSnippetOutputPaths(outputBaseName, cwd);
   const variables = Object.assign({}, config.variables || {});
 
-  // 1. 未渲染的片段插入模板 → .raw.html（Mustache 标签保留，无 juice）
+  // 1. 未渲染的片段插入模板 → .raw.html
   const rawMarkup = insertIntoContent(templateHtml, snippetRaw);
   fs.writeFileSync(outPaths.raw, rawMarkup, 'utf8');
 
-  // 2. Mustache 渲染合并 HTML → .html（已渲染，无 juice 内联）
+  // 2. Mustache 渲染 → .html
   const originalEscape = Mustache.escape;
   let renderedHtml;
   try {
@@ -442,34 +442,45 @@ async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputB
   }
   fs.writeFileSync(outPaths.normal, renderedHtml, 'utf8');
 
-  // 3. 收集模板目录的额外 CSS + Juice CSS 内联 → .output.html
+  // 3. Juice CSS 内联 → .output.html
   const templateDir = path.dirname(templatePath);
   const extraCss = collectExtraCss(templateDir, config);
   const juiceOpts = Object.assign({}, config.juice || {});
   delete juiceOpts.extraCssFiles;
-  const processed = juice(renderedHtml, { ...juiceOpts, extraCss });
+  let processed;
+  try {
+    processed = juice(renderedHtml, { ...juiceOpts, extraCss });
+  } catch (err) {
+    throw new Error(`CSS 内联失败：${err.message}`);
+  }
   fs.writeFileSync(outPaths.output, processed, 'utf8');
 
   // 4. 压缩 → .minified.html
-  const minified = await minifyHtml(processed, config.minify);
+  let minified;
+  try {
+    minified = await minifyHtml(processed, config.minify);
+  } catch (err) {
+    throw new Error(`压缩失败：${err.message}`);
+  }
   fs.writeFileSync(outPaths.minified, minified, 'utf8');
 
   // 5. 报告
+  const rel = (p) => './' + path.relative(cwd, p);
   const layers = config._layers || [];
-  const layerLines = layers
-    .map((l) => `    ${chalk.gray('·')} ${l.label}`)
-    .join('\n');
+  const layerLines = layers.length > 0
+    ? layers.map((l) => `    ${chalk.gray('·')} ${l.label}`).join('\n') + '\n'
+    : '';
 
   console.log(
     chalk.green('\n✔ 片段组装完成') + '\n' +
     `  ${chalk.bold('片段：')}  ${chalk.cyan(snippetPath)}\n` +
     `  ${chalk.bold('模板：')}  ${chalk.cyan(templatePath)}\n` +
-    `  ${chalk.bold('配置层（低→高）：')}\n${layerLines}\n` +
+    `  ${chalk.bold('配置层（低→高）：')}\n${layerLines}` +
     `  ${chalk.bold('输出：')}\n` +
-    `    ${chalk.green('·')} 原始组装  ${chalk.cyan(outPaths.raw)}  ${chalk.gray('(' + fmtSize(rawMarkup) + ')')}\n` +
-    `    ${chalk.green('·')} 已渲染    ${chalk.cyan(outPaths.normal)}  ${chalk.gray('(' + fmtSize(renderedHtml) + ')')}\n` +
-    `    ${chalk.green('·')} 内联后    ${chalk.cyan(outPaths.output)}  ${chalk.gray('(' + fmtSize(processed) + ')')}\n` +
-    `    ${chalk.green('·')} 压缩版    ${chalk.cyan(outPaths.minified)}  ${chalk.gray('(' + fmtSize(minified) + '，节省 ' + savings(processed, minified) + ')')}`
+    `    ${chalk.green('·')} 原始组装  ${chalk.cyan(rel(outPaths.raw))}      ${chalk.gray(fmtSize(rawMarkup))}\n` +
+    `    ${chalk.green('·')} 已渲染    ${chalk.cyan(rel(outPaths.normal))}  ${chalk.gray(fmtSize(renderedHtml))}\n` +
+    `    ${chalk.green('·')} 内联后    ${chalk.cyan(rel(outPaths.output))}  ${chalk.gray(fmtSize(processed))}\n` +
+    `    ${chalk.green('·')} 压缩版    ${chalk.cyan(rel(outPaths.minified))}  ${chalk.gray(fmtSize(minified) + '，节省 ' + savings(processed, minified))}`
   );
 
   return outPaths;
@@ -715,7 +726,7 @@ async function promptConfirm(summary) {
   console.log(`  片段变体：      ${chalk.green(summary.variantName)} ${chalk.gray(`(${summary.variant})`)}`);
   console.log(`  配置 YAML：     ${chalk.green(summary.configFile)}`);
   console.log(chalk.gray('───────────────────────────────────────────'));
-  console.log(`  输出目录：      ${chalk.cyan(summary.outputDir)}`);
+  console.log(`  输出目录：      ${chalk.cyan('./')}`);
   console.log(`  输出文件名：    ${chalk.green(summary.outputBaseName)}`);
   console.log(`  输出文件：`);
   console.log(`    ${chalk.green('·')} ${path.basename(outPaths.raw)}  ${chalk.gray('(未渲染，无 CSS 内联)')}`);
