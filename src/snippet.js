@@ -881,8 +881,26 @@ async function runInteractiveMode({ config: cliConfigPath }) {
   }
 
   // 5. 选择配置文件
-  const configs = findConfigs(variant.path, path.basename(variant.path));
-  const configChoice = await promptConfig(configs, cliConfigPath);
+  let configs = findConfigs(variant.path, path.basename(variant.path));
+
+  // If -c specified a config from outside the variant dir, add it to the list
+  let preferredPath = null;
+  if (cliConfigPath) {
+    preferredPath = path.resolve(cliConfigPath);
+    if (!configs.some(c => c.path === preferredPath) && fs.existsSync(preferredPath)) {
+      configs = [
+        {
+          name: path.basename(preferredPath),
+          path: preferredPath,
+          isOptimal: false,
+          source: '指定配置',
+        },
+        ...configs,
+      ];
+    }
+  }
+
+  const configChoice = await promptConfig(configs, preferredPath);
 
   let priorityConfigPath = null;
   let configFileName = '(跳过)';
