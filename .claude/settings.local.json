@@ -33,7 +33,10 @@
       "WebSearch",
       "WebFetch(domain:stackoverflow.com)",
       "Bash(reg query *)",
-      "Bash(gh release *)"
+      "Bash(gh release *)",
+      "Read(//tmp/juice-test-edm/**)",
+      "Read(//tmp/juice-test-edm/edm/**)",
+      "Bash(git checkout *)"
     ]
   }
 }
