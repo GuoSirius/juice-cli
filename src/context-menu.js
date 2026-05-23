@@ -313,7 +313,7 @@ function registerDirBgMenus(nodePath, scriptPath, iconPath, pwshPath) {
     `${HKCU_SHELL}\\Directory\\Background\\shell`,
   ];
   for (const root of roots) {
-    regAdd(`${root}\\${PARENT_KEY_NAME}`, 'MUIVerb', 'REG_SZ', '📧 juice 邮件工具');
+    regAdd(`${root}\\${PARENT_KEY_NAME}`, 'MUIVerb', 'REG_SZ', '📧 用 juice 生成邮件 HTML');
     regAdd(`${root}\\${PARENT_KEY_NAME}`, 'Icon', 'REG_SZ', iconPath);
     regAdd(`${root}\\${PARENT_KEY_NAME}`, 'SubCommands', 'REG_SZ', subCmds.join(';'));
   }
@@ -410,7 +410,7 @@ async function registerContextMenu() {
     `      ├── 📋 浏览资源库                →  juice view -i\n` +
     (pwshPath ? `      └── 📂 打开 PowerShell\n` : '') +
     `\n  ${chalk.bold('文件夹 / 空白处')} 右键：\n` +
-    `    ${chalk.bold('📧 juice 邮件工具')}\n` +
+    `    ${chalk.bold('📧 用 juice 生成邮件 HTML')}\n` +
     `      ├── 📋 查看可用资源             →  juice view\n` +
     `      ├── 📦 拷贝全部资源             →  juice init --all\n` +
     `      ├── 📥 选择资源拷贝             →  juice init\n` +
