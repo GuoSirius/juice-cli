@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.5](https://github.com/GuoSirius/juice-cli/compare/v2.3.4...v2.3.5) (2026-05-23)
+
+
+### Bug Fixes
+
+* rewrite context menu registration for ExtendedSubCommandsKey on all contexts ([40d6f08](https://github.com/GuoSirius/juice-cli/commit/40d6f088e71a3cca4c8270f816df889e9c3cb67a))
+
+
+### Documentation
+
+* sync context menu structure and features in CLAUDE.md and README.md ([3be11ab](https://github.com/GuoSirius/juice-cli/commit/3be11ab148054902936a417ea0e8513924fc5f22))
+
 ### [2.3.4](https://github.com/GuoSirius/juice-cli/compare/v2.3.3...v2.3.4) (2026-05-23)
 
 
