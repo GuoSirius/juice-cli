@@ -204,12 +204,12 @@ async function interactiveInit(edmDir, cwd) {
           .map(c => c.name.replace(/^[^\s]+\s/, ''));
         const summary = picked.length > 0 ? picked.join(' + ') : '(未选择)';
         const mainChoices = [];
-        if (picked.length > 0) {
-          mainChoices.push({ name: `✅ 确认拷贝（${summary}）`, value: 'confirm' });
-        }
         // Quick shortcut: snippet + config only (skip template)
         if (variant && copyItems.some(c => c.value === 'snippet') && copyItems.some(c => c.value === 'config')) {
           mainChoices.push({ name: '🧩 仅片段 + 配置', value: 'snippet-config' });
+        }
+        if (picked.length > 0) {
+          mainChoices.push({ name: `✅ 确认拷贝（${summary}）`, value: 'confirm' });
         }
         mainChoices.push({ name: `🔄 自定义选择（${summary}）`, value: 'edit' });
 
