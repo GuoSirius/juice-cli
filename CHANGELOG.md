@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.4](https://github.com/GuoSirius/juice-cli/compare/v2.3.3...v2.3.4) (2026-05-23)
+
+
+### Features
+
+* juice init --all and Directory/Background submenu ([43075f6](https://github.com/GuoSirius/juice-cli/commit/43075f6decf10563b0f6a64a54718af2d4a8ac61))
+
+
+### Bug Fixes
+
+* code review findings - copy-multi overwrite, process.exit, init pause ([8b53317](https://github.com/GuoSirius/juice-cli/commit/8b53317a426accf638444c523da87e180d72f5b8))
+* init --all conflict offers overwrite/version/cancel instead of yes/no ([6c7f768](https://github.com/GuoSirius/juice-cli/commit/6c7f768eeb0c9038c72b1f263e252946815149b6))
+* unify Directory/Background parent menu name with file type menus ([d764d93](https://github.com/GuoSirius/juice-cli/commit/d764d93d35a1cf6f57496f42382af12b73431868))
+
+
+### Chores
+
+* update local permissions ([db50f79](https://github.com/GuoSirius/juice-cli/commit/db50f7994c1727a9805fef820e8898dc1cfc8d18))
+
 ### [2.3.3](https://github.com/GuoSirius/juice-cli/compare/v2.3.2...v2.3.3) (2026-05-22)
 
 
