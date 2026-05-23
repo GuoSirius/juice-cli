@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.12](https://github.com/GuoSirius/juice-cli/compare/v2.3.11...v2.3.12) (2026-05-23)
+
+
+### Features
+
+* multi-source config collection with source display in snippet mode ([fb71edc](https://github.com/GuoSirius/juice-cli/commit/fb71edc97a6e1d734d07b977421bc39db21f1252))
+
+
+### Bug Fixes
+
+* snippet+config shortcut loops instead of proceeding ([e751aaf](https://github.com/GuoSirius/juice-cli/commit/e751aaf185fc3bcd77f963258b724007f5791ccf))
+
 ### [2.3.11](https://github.com/GuoSirius/juice-cli/compare/v2.3.10...v2.3.11) (2026-05-23)
 
 
