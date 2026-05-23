@@ -29,7 +29,6 @@ function formatName(meta, dirName) {
 function copyFileToCwd(srcPath, cwd, destName) {
   const dest = path.join(cwd, destName || path.basename(srcPath));
   if (fs.existsSync(dest)) {
-    // Find a non-conflicting name
     const parsed = path.parse(dest);
     let v = 1;
     while (true) {
@@ -50,20 +49,12 @@ function copyFileToCwd(srcPath, cwd, destName) {
 
 // ─── Direct Copy (--template / --snippet / --config) ─────────────────────────
 
-/**
- * Derive a human-friendly default name from an EDM file path.
- * e.g. edm/elabscience/templates/standard/template.html → elabscience-standard
- *      edm/elabscience/series/literature/default/snippet.html → elabscience-literature-default-snippet
- */
 function deriveDefaultName(filePath) {
   const normalized = filePath.replace(/\\/g, '/');
-  // Try to match edm/<brand>/templates/<version>/...
   const tplMatch = normalized.match(/edm\/([^/]+)\/templates\/([^/]+)/);
   if (tplMatch) return `${tplMatch[1]}-${tplMatch[2]}`;
-  // Try to match edm/<brand>/series/<series>/<variant>/...
   const snipMatch = normalized.match(/edm\/([^/]+)\/series\/([^/]+)\/([^/]+)/);
   if (snipMatch) return `${snipMatch[1]}-${snipMatch[2]}-${snipMatch[3]}`;
-  // Fallback: source file basename
   return path.parse(filePath).name;
 }
 
@@ -89,10 +80,6 @@ async function directCopy(srcPath, cwd) {
 
 // ─── Interactive Init ────────────────────────────────────────────────────────
 
-/**
- * Wrap @inquirer/prompts select with back/exit navigation.
- * Returns the chosen value, 'back', or 'exit'.
- */
 async function selectWithNav(message, choices, showBack) {
   const { select } = await import('@inquirer/prompts');
   const all = [];
@@ -176,7 +163,6 @@ async function interactiveInit(edmDir, cwd) {
     }
 
     if (step === 'copy') {
-      // Multi-select what to copy
       const copyItems = [];
       copyItems.push({
         name: `📋 模板 HTML（${version.meta.name || version.name}）`,
@@ -206,85 +192,97 @@ async function interactiveInit(edmDir, cwd) {
         }
       }
 
-      // Show summary
       console.log(chalk.dim(`\n  品牌：${brand.meta.name || brand.name}  →  模板：${version.meta.name || version.name}`));
       if (series) console.log(chalk.dim(`  系列：${series.meta.name || series.name}${variant ? '  →  变体：' + (variant.meta.name || variant.name) : ''}`));
 
-      // Step 1: confirm intent (arrow-key nav, easy to back out)
-      const n = copyItems.length;
-      const desc = copyItems.map(c => c.name.replace(/^[^\s]+\s/, '')).join(' + ');
-      const action = await selectWithNav(
-        `将拷贝 ${n} 项（${desc}）：`,
-        [{ name: '📥 拷贝到当前目录', value: 'go' }],
-        true
-      );
-      if (action === 'back') { step = series ? 'variant' : 'series'; continue; }
-      if (action === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
+      // Loop: select → checkbox → confirm, allow back/modify at any point
+      let selected = copyItems.filter(c => c.checked).map(c => c.value);
+      while (true) {
+        const picked = selected
+          .map(v => copyItems.find(c => c.value === v))
+          .filter(Boolean)
+          .map(c => c.name.replace(/^[^\s]+\s/, ''));
+        const summary = picked.length > 0 ? picked.join(' + ') : '(未选择)';
+        const mainChoices = [];
+        if (picked.length > 0) {
+          mainChoices.push({ name: `✅ 确认拷贝（${summary}）`, value: 'confirm' });
+        }
+        mainChoices.push({ name: `🔄 修改选择（${summary}）`, value: 'edit' });
 
-      // Step 2: customize selection via checkbox
-      const { checkbox } = await import('@inquirer/prompts');
-      const selected = await checkbox({
-        message: '选择要拷贝的内容：',
-        choices: copyItems,
-      });
-
-      if (selected.length === 0) {
-        console.log(chalk.gray('未选择任何内容。\n'));
-        step = series ? 'variant' : 'series';
-        continue;
-      }
-
-      // Output name
-      const defaultBaseName = variant
-        ? `${brand.name}-${version.name}-${series.name}-${variant.name}`
-        : `${brand.name}-${version.name}`;
-      const outputBaseName = await promptOutputName(defaultBaseName, cwd);
-
-      // Copy files
-      console.log(chalk.green('\n✔ 已拷贝：'));
-      const cwdRel = (p) => './' + path.relative(cwd, p);
-
-      if (selected.includes('template')) {
-        const destName = outputBaseName + path.extname(version.templatePath);
-        const dest = copyFileToCwd(version.templatePath, cwd, destName);
-        console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-        // Auto-copy icon
-        const icon = copyIcon(variant ? variant.path : null, version.path, brand.path, cwd);
-        if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
-      }
-
-      if (selected.includes('snippet') && variant) {
-        const snipPath = path.join(variant.path, 'snippet.html');
-        const destName = outputBaseName + '-snippet' + path.extname(snipPath);
-        const dest = copyFileToCwd(snipPath, cwd, destName);
-        console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-      }
-
-      if (selected.includes('config') && variant) {
-        const configs = findConfigs(variant.path);
-        const optimal = configs.find(c => c.isOptimal);
-        const cfgPath = optimal ? optimal.path : configs[0].path;
-        const dest = copyFileToCwd(cfgPath, cwd, 'juice.yaml');
-        console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-      }
-
-      console.log();
-      if (selected.includes('snippet') && selected.includes('template')) {
-        const snipFile = outputBaseName + '-snippet' + path.extname(path.join(variant.path, 'snippet.html'));
-        const tplFile = outputBaseName + path.extname(version.templatePath);
-        console.log(
-          '  ' + chalk.dim('💡 下一步：') + '\n' +
-          '     ' + chalk.cyan(`juice -s ${snipFile} -f ${tplFile}`) +
-          (selected.includes('config') ? chalk.cyan(' -c juice.yaml') : '') + '\n'
+        const action = await selectWithNav(
+          '拷贝操作：',
+          mainChoices,
+          true
         );
-      } else if (selected.includes('template')) {
-        const tplFile = outputBaseName + path.extname(version.templatePath);
-        console.log(
-          '  ' + chalk.dim('💡 下一步：') + '\n' +
-          '     ' + chalk.cyan(`juice -f ${tplFile}`) + '\n'
-        );
+        if (action === 'back') { step = series ? 'variant' : 'series'; break; }
+        if (action === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
+        if (action === 'edit') {
+          const { checkbox } = await import('@inquirer/prompts');
+          selected = await checkbox({
+            message: '选择要拷贝的内容：',
+            choices: copyItems,
+          });
+          if (selected.length === 0) { console.log(chalk.dim('  (已清空选择)\n')); }
+          continue;
+        }
+
+        if (selected.length === 0) {
+          console.log(chalk.gray('未选择任何内容。\n'));
+          step = series ? 'variant' : 'series';
+          break;
+        }
+
+        const defaultBaseName = variant
+          ? `${brand.name}-${version.name}-${series.name}-${variant.name}`
+          : `${brand.name}-${version.name}`;
+        const outputBaseName = await promptOutputName(defaultBaseName, cwd);
+
+        console.log(chalk.green('\n✔ 已拷贝：'));
+        const cwdRel = (p) => './' + path.relative(cwd, p);
+
+        if (selected.includes('template')) {
+          const destName = outputBaseName + path.extname(version.templatePath);
+          const dest = copyFileToCwd(version.templatePath, cwd, destName);
+          console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+          const icon = copyIcon(variant ? variant.path : null, version.path, brand.path, cwd);
+          if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
+        }
+
+        if (selected.includes('snippet') && variant) {
+          const snipPath = path.join(variant.path, 'snippet.html');
+          const destName = outputBaseName + '-snippet' + path.extname(snipPath);
+          const dest = copyFileToCwd(snipPath, cwd, destName);
+          console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+        }
+
+        if (selected.includes('config') && variant) {
+          const configs = findConfigs(variant.path);
+          const optimal = configs.find(c => c.isOptimal);
+          const cfgPath = optimal ? optimal.path : configs[0].path;
+          const dest = copyFileToCwd(cfgPath, cwd, 'juice.yaml');
+          console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+        }
+
+        console.log();
+        if (selected.includes('snippet') && selected.includes('template')) {
+          const snipFile = outputBaseName + '-snippet' + path.extname(path.join(variant.path, 'snippet.html'));
+          const tplFile = outputBaseName + path.extname(version.templatePath);
+          console.log(
+            '  ' + chalk.dim('💡 下一步：') + '\n' +
+            '     ' + chalk.cyan(`juice -s ${snipFile} -f ${tplFile}`) +
+            (selected.includes('config') ? chalk.cyan(' -c juice.yaml') : '') + '\n'
+          );
+        } else if (selected.includes('template')) {
+          const tplFile = outputBaseName + path.extname(version.templatePath);
+          console.log(
+            '  ' + chalk.dim('💡 下一步：') + '\n' +
+            '     ' + chalk.cyan(`juice -f ${tplFile}`) + '\n'
+          );
+        }
+        break;
       }
-      return;
+      if (step === 'copy') return; // confirmed and copied
+      continue; // went back
     }
   }
 }
@@ -329,15 +327,10 @@ function countFiles(dir) {
   return count;
 }
 
-/**
- * Find and copy favicon.ico alongside the template.
- * Lookup: variant dir → template version dir → brand's first template → skip
- */
 function copyIcon(variantDir, versionDir, brandDir, cwd) {
   const candidates = [];
   if (variantDir) candidates.push(path.join(variantDir, 'favicon.ico'));
   if (versionDir) candidates.push(path.join(versionDir, 'favicon.ico'));
-  // First template version in brand
   try {
     const versions = findTemplateVersions(brandDir);
     if (versions.length > 0) {
@@ -365,9 +358,7 @@ function findNextEdmVersion(targetDir) {
 async function runInitMode({ initPath, template, snippet, config, all }) {
   const cwd = process.cwd();
 
-  // --all: copy entire EDM directory
   if (all) {
-    // Always use package built-in EDM for --all (not CWD's local copy)
     const pkgEdm = path.resolve(__dirname, '..', 'edm');
     const edmDir = fs.existsSync(pkgEdm) ? pkgEdm : (() => {
       try { return resolveEdmDir(); } catch (_) { return null; }
@@ -379,7 +370,6 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
     const target = all === true ? cwd : path.resolve(all);
     const destDir = path.join(target, 'edm');
 
-    // Prevent deleting the source when target overlaps
     if (path.resolve(edmDir) === path.resolve(destDir)) {
       console.log(chalk.yellow('目标目录与 EDM 资源库相同，无需拷贝。\n'));
       return;
@@ -408,7 +398,6 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
         console.log(chalk.green(`\n✔ 已拷贝 EDM 资源库 → ${path.basename(vName)}（${fileCount} 个文件，${fmtBytes(edmSize)}）\n`));
         return;
       }
-      // overwrite: remove and replace
       fs.rmSync(destDir, { recursive: true, force: true });
     }
 
@@ -419,7 +408,6 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
     return;
   }
 
-  // Direct copy modes
   if (template) {
     await directCopy(template, cwd);
     return;
@@ -433,7 +421,6 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
     return;
   }
 
-  // Path-based from EDM
   if (initPath) {
     const { parseViewPath } = require('./view');
     let edmDir;
@@ -455,12 +442,11 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
     if (parsed.type === 'template') {
       await directCopy(parsed.versionData.templatePath, cwd);
     } else if (parsed.type === 'variant') {
-      // Multi-select copy
       const snipPath = path.join(parsed.variantData.path, 'snippet.html');
       const configs = findConfigs(parsed.variantData.path);
       const brandDir = path.join(edmDir, parsed.brand);
       const versions = findTemplateVersions(brandDir);
-      const version = versions[0]; // default to first version
+      const version = versions[0];
       const tplPath = version.templatePath;
 
       const copyItems = [
@@ -519,7 +505,6 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
     return;
   }
 
-  // No arguments: interactive mode
   let edmDir;
   try {
     edmDir = resolveEdmDir();
