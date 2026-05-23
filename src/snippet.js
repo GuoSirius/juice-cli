@@ -772,11 +772,8 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
     // 命令行完整指定（-s + -f），自动检测
     priorityConfigPath = findLocalConfig(snippetDir) || findLocalConfig(process.cwd());
   } else {
-    // 交互模式（只有 -s），收集 CWD + 片段目录配置
-    const configs = collectConfigs([
-      { dir: snippetDir, label: path.basename(snippetDir), markOptimal: true },
-      { dir: process.cwd(), label: '当前目录' },
-    ]);
+    // 交互模式（只有 -s），列出片段目录下的全部配置
+    const configs = findConfigs(snippetDir, path.basename(snippetDir));
     const configChoice = await promptConfig(configs);
     priorityConfigPath = (configChoice.type === 'file') ? configChoice.path : null;
   }
