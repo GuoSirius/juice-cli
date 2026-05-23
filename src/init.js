@@ -1,11 +1,14 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 import {
   resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
   findSeriesDirs, filterSeries, findSnippetVariants, findConfigs,
   promptOutputName,
 } from './snippet.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function fmtBytes(b) {
   return b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`;

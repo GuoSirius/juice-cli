@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { fileURLToPath } from 'url';
 import juice from 'juice';
 import Mustache from 'mustache';
 import chalk from 'chalk';
@@ -13,6 +14,8 @@ import {
   savings,
   DEFAULT_CONFIG_PATH,
 } from './index.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ─── EDM 目录解析 ──────────────────────────────────────────────────────────────
 
