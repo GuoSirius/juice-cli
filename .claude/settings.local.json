@@ -36,7 +36,9 @@
       "Bash(gh release *)",
       "Read(//tmp/juice-test-edm/**)",
       "Read(//tmp/juice-test-edm/edm/**)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm install *)"
     ]
   }
 }
