@@ -627,6 +627,18 @@ async function interactiveBrowse(edmDir, startParsed) {
             const dest = path.join(cwd, outputBaseName + path.extname(src));
             const actual = copyFileSafe(src, dest);
             console.log(`   ${chalk.cyan('·')} ${cwdRel(actual)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(actual).size) + ')')}`);
+            // Auto-copy icon: variant dir → template version dir → first version in brand
+            const iconSrcs = [
+              path.join(current.variantData.path, 'favicon.ico'),
+              path.join(versions[0].path, 'favicon.ico'),
+            ];
+            for (const isrc of iconSrcs) {
+              if (fs.existsSync(isrc)) {
+                const idest = copyFileSafe(isrc, path.join(cwd, 'favicon.ico'));
+                console.log(`   ${chalk.cyan('·')} ${cwdRel(idest)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(idest).size) + ')')}`);
+                break;
+              }
+            }
           }
           if (selected.includes('snippet') && fs.existsSync(snipPath)) {
             const dest = path.join(cwd, outputBaseName + '-snippet' + path.extname(snipPath));

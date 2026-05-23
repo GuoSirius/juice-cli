@@ -248,6 +248,9 @@ async function interactiveInit(edmDir, cwd) {
         const destName = outputBaseName + path.extname(version.templatePath);
         const dest = copyFileToCwd(version.templatePath, cwd, destName);
         console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+        // Auto-copy icon
+        const icon = copyIcon(variant ? variant.path : null, version.path, brand.path, cwd);
+        if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
       }
 
       if (realSelected.includes('snippet') && variant) {
@@ -324,6 +327,30 @@ function countFiles(dir) {
     }
   }
   return count;
+}
+
+/**
+ * Find and copy favicon.ico alongside the template.
+ * Lookup: variant dir → template version dir → brand's first template → skip
+ */
+function copyIcon(variantDir, versionDir, brandDir, cwd) {
+  const candidates = [];
+  if (variantDir) candidates.push(path.join(variantDir, 'favicon.ico'));
+  if (versionDir) candidates.push(path.join(versionDir, 'favicon.ico'));
+  // First template version in brand
+  try {
+    const versions = findTemplateVersions(brandDir);
+    if (versions.length > 0) {
+      candidates.push(path.join(versions[0].path, 'favicon.ico'));
+    }
+  } catch (_) {}
+  for (const src of candidates) {
+    if (fs.existsSync(src)) {
+      const dest = copyFileToCwd(src, cwd, 'favicon.ico');
+      return dest;
+    }
+  }
+  return null;
 }
 
 function findNextEdmVersion(targetDir) {
@@ -467,6 +494,8 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
         const destName = outputBaseName + path.extname(tplPath);
         const dest = copyFileToCwd(tplPath, cwd, destName);
         console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
+        const icon = copyIcon(parsed.variantData.path, version.path, brandDir, cwd);
+        if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
       }
       if (selected.includes('snippet') && fs.existsSync(snipPath)) {
         const destName = outputBaseName + '-snippet' + path.extname(snipPath);
