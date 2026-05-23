@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.7](https://github.com/GuoSirius/juice-cli/compare/v2.3.6...v2.3.7) (2026-05-23)
+
+
+### Bug Fixes
+
+* catch Ctrl+C gracefully in all interactive commands ([ad2a5ac](https://github.com/GuoSirius/juice-cli/commit/ad2a5acd81d76ec050dc517c87e8873b6404c187))
+
 ### [2.3.6](https://github.com/GuoSirius/juice-cli/compare/v2.3.5...v2.3.6) (2026-05-23)
 
 
