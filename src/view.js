@@ -1,12 +1,10 @@
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const {
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
+import {
   resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
   findSeriesDirs, findSnippetVariants, findConfigs,
-} = require('./snippet');
+} from './snippet.js';
 
 function fmtBytes(b) {
   return b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`;
@@ -349,7 +347,7 @@ async function showCheckbox(title, choices) {
  */
 async function copyResource(type, resourcePath, cwd) {
   try {
-    const { runInitMode } = require('./init');
+    const { runInitMode } = await import('./init.js');
     if (type === 'template') {
       await runInitMode({ template: resourcePath });
     } else if (type === 'snippet') {
@@ -616,7 +614,7 @@ async function interactiveBrowse(edmDir, startParsed) {
           // Include template version in default name for clarity
           const versionName = versions.length > 0 ? versions[0].name : 'template';
           const defaultBaseName = `${current.brand}-${versionName}-${current.series}-${current.variant}`;
-          const { promptOutputName: pn } = require('./snippet');
+          const { promptOutputName: pn } = await import('./snippet.js');
           const outputBaseName = await pn(defaultBaseName, process.cwd());
           const cwd = process.cwd();
           const cwdRel = (p) => './' + path.relative(cwd, p);
@@ -714,7 +712,7 @@ async function runViewMode({ viewPath, interactive, scope }) {
       });
       if (action === 'copy') {
         console.log();
-        const { runInitMode } = require('./init');
+        const { runInitMode } = await import('./init.js');
         await runInitMode({ template: picked.version.templatePath });
         console.log();
       }
@@ -792,7 +790,7 @@ async function runViewMode({ viewPath, interactive, scope }) {
         actions
       );
       if (action === 'exit') return;
-      const { runInitMode } = require('./init');
+      const { runInitMode } = await import('./init.js');
       console.log();
       if (action === 'snippet') {
         await runInitMode({ snippet: snipPath });
@@ -872,7 +870,7 @@ async function runViewMode({ viewPath, interactive, scope }) {
           variantData: picked.variant,
         };
       } else {
-        const { runInitMode } = require('./init');
+        const { runInitMode } = await import('./init.js');
         console.log();
         if (action === 'copy-snippet') {
           await runInitMode({ snippet: picked.snippetPath });
@@ -938,4 +936,4 @@ async function runViewMode({ viewPath, interactive, scope }) {
   printFullTree(edmDir);
 }
 
-module.exports = { runViewMode, parseViewPath };
+export { runViewMode, parseViewPath };

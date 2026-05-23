@@ -1,33 +1,35 @@
 #!/usr/bin/env node
-'use strict';
+import { Command } from 'commander';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import chalk from 'chalk';
+import { run } from '../src/index.js';
 
-const { program } = require('commander');
-const path = require('path');
-const pkg = require('../package.json');
-const { run } = require('../src/index');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(resolve(__dirname, '..', 'package.json'), 'utf8'));
+
 let ExitPromptError;
 try {
-  ({ ExitPromptError } = require('@inquirer/core'));
+  ({ ExitPromptError } = await import('@inquirer/core'));
 } catch (_) {}
 
-/**
- * Wrap an async action handler to catch Ctrl+C and other errors gracefully.
- */
 function safeAction(fn) {
   return async (...args) => {
     try {
       await fn(...args);
     } catch (err) {
       if (ExitPromptError && err instanceof ExitPromptError) {
-        // Ctrl+C — exit silently
         process.exit(0);
       }
-      console.error('\n' + require('chalk').red(`  ✘ ${err.message}`));
+      console.error('\n' + chalk.red(`  ✘ ${err.message}`));
       if (process.env.DEBUG) console.error(err);
       process.exit(1);
     }
   };
 }
+
+const program = new Command();
 
 program
   .name('juice')
@@ -67,6 +69,24 @@ program
 
   交互模式（逐步选择品牌、模板、片段、配置）：
     juice
+
+════════════════════════════════════════════════════════════════
+  资源浏览
+════════════════════════════════════════════════════════════════
+
+  查看资源树：
+    juice view                      查看所有品牌、模板、系列、片段
+    juice view elabscience          查看指定品牌的模板和系列
+    juice view --templates          列出所有模板
+    juice view --series             列出所有系列
+    juice view --snippets           列出所有片段
+
+  拷贝到当前目录：
+    juice init                      交互式选择并拷贝模板/片段/配置
+    juice init --template <file>    仅拷贝指定模板 HTML
+    juice init --snippet <file>     仅拷贝指定片段 HTML
+    juice init --config <file>      仅拷贝指定配置 YAML
+    juice init --all [target]       拷贝整个 EDM 资源库
 
 ════════════════════════════════════════════════════════════════
   输出文件说明
@@ -111,7 +131,7 @@ program
   .option('--series', '列出所有系列')
   .option('--snippets', '列出所有片段')
   .action(safeAction(async (viewPath, options) => {
-    const { runViewMode } = require('../src/view');
+    const { runViewMode } = await import('../src/view.js');
     await runViewMode({
       viewPath: viewPath || null,
       interactive: !!options.interactive,
@@ -130,7 +150,7 @@ program
   .option('-c, --config <file-path>', '仅拷贝配置 YAML 文件')
   .option('--all [target]', '拷贝整个 EDM 资源目录到当前或指定目录')
   .action(safeAction(async (initPath, options) => {
-    const { runInitMode } = require('../src/init');
+    const { runInitMode } = await import('../src/init.js');
     await runInitMode({
       initPath: initPath || null,
       template: options.template || null,
@@ -143,21 +163,19 @@ program
 // ─── Default action (backward compatible) ───────────────────────────────
 program
   .action(safeAction(async (options) => {
-    // 注册/卸载右键菜单
     if (options.install) {
-      const { registerContextMenu } = require('../src/context-menu');
+      const { registerContextMenu } = await import('../src/context-menu.js');
       await registerContextMenu();
       return;
     }
     if (options.uninstall) {
-      const { unregisterContextMenu } = require('../src/context-menu');
+      const { unregisterContextMenu } = await import('../src/context-menu.js');
       await unregisterContextMenu();
       return;
     }
 
-    // --snippet / -s 模式：片段组装
     if (options.snippet) {
-      const { runSnippetMode } = require('../src/snippet');
+      const { runSnippetMode } = await import('../src/snippet.js');
       await runSnippetMode({
         snippet: options.snippet,
         template: options.file,
@@ -167,7 +185,6 @@ program
       return;
     }
 
-    // 普通模式：-f 指定文件
     let inputFile = options.file;
     if (!inputFile && program.args.length > 0) {
       inputFile = program.args[0];
@@ -181,10 +198,8 @@ program
       return;
     }
 
-    // 全交互模式：无 --snippet，无 -f
-    const { runInteractiveMode } = require('../src/snippet');
+    const { runInteractiveMode } = await import('../src/snippet.js');
     await runInteractiveMode({ config: options.config });
   }));
 
-program.allowUnknownOption(false);
 program.parse(process.argv);

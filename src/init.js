@@ -1,13 +1,11 @@
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const {
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
+import {
   resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
   findSeriesDirs, filterSeries, findSnippetVariants, findConfigs,
   promptOutputName,
-} = require('./snippet');
+} from './snippet.js';
 
 function fmtBytes(b) {
   return b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`;
@@ -433,7 +431,7 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
   }
 
   if (initPath) {
-    const { parseViewPath } = require('./view');
+    const { parseViewPath } = await import('./view.js');
     let edmDir;
     try {
       edmDir = resolveEdmDir();
@@ -526,4 +524,4 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
   await interactiveInit(edmDir, cwd);
 }
 
-module.exports = { runInitMode };
+export { runInitMode };

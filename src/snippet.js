@@ -1,12 +1,10 @@
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const juice = require('juice');
-const Mustache = require('mustache');
-const chalk = require('chalk');
-const {
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import juice from 'juice';
+import Mustache from 'mustache';
+import chalk from 'chalk';
+import {
   loadYaml,
   deepMerge,
   collectExtraCss,
@@ -14,7 +12,7 @@ const {
   fmtSize,
   savings,
   DEFAULT_CONFIG_PATH,
-} = require('./index');
+} from './index.js';
 
 // ─── EDM 目录解析 ──────────────────────────────────────────────────────────────
 
@@ -948,7 +946,7 @@ async function runInteractiveMode({ config: cliConfigPath }) {
   });
 }
 
-module.exports = {
+export {
   runSnippetMode,
   runInteractiveMode,
   // EDM resolution & scanning

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Windows 右键菜单注册 / 取消注册
  *
@@ -32,10 +30,13 @@
  *       └── 📂 在此打开终端           （可选）
  */
 
-const { spawnSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
+import { spawnSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import chalk from 'chalk';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ─── 路径工具 ─────────────────────────────────────────────────────────────────
 
@@ -459,4 +460,4 @@ async function unregisterContextMenu() {
   }
 }
 
-module.exports = { registerContextMenu, unregisterContextMenu };
+export { registerContextMenu, unregisterContextMenu };
