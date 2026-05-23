@@ -268,6 +268,15 @@ function countFiles(dir) {
   return count;
 }
 
+function findNextEdmVersion(targetDir) {
+  let v = 1;
+  while (true) {
+    const candidate = path.join(targetDir, 'edm-v' + v);
+    if (!fs.existsSync(candidate)) return candidate;
+    v++;
+  }
+}
+
 async function runInitMode({ initPath, template, snippet, config, all }) {
   const cwd = process.cwd();
 
@@ -293,15 +302,28 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
     console.log(chalk.gray(`  目标：${destDir}`));
 
     if (fs.existsSync(destDir)) {
-      const { confirm } = await import('@inquirer/prompts');
-      const overwrite = await confirm({
-        message: `目标已存在 ${destDir}，是否覆盖？`,
-        default: false,
+      const { select } = await import('@inquirer/prompts');
+      const vName = findNextEdmVersion(target);
+      const action = await select({
+        message: `目录 ${destDir} 已存在：`,
+        choices: [
+          { name: '覆盖', value: 'overwrite' },
+          { name: `自动版本号（${path.basename(vName)}）`, value: 'version' },
+          { name: '取消', value: 'cancel' },
+        ],
       });
-      if (!overwrite) {
+      if (action === 'cancel') {
         console.log(chalk.gray('已取消。\n'));
         return;
       }
+      if (action === 'version') {
+        copyDir(edmDir, vName);
+        const edmSize = dirSize(vName);
+        const fileCount = countFiles(vName);
+        console.log(chalk.green(`\n✔ 已拷贝 EDM 资源库 → ${path.basename(vName)}（${fileCount} 个文件，${fmtBytes(edmSize)}）\n`));
+        return;
+      }
+      // overwrite: remove and replace
       fs.rmSync(destDir, { recursive: true, force: true });
     }
 
