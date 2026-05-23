@@ -210,29 +210,30 @@ async function interactiveInit(edmDir, cwd) {
       console.log(chalk.dim(`\n  品牌：${brand.meta.name || brand.name}  →  模板：${version.meta.name || version.name}`));
       if (series) console.log(chalk.dim(`  系列：${series.meta.name || series.name}${variant ? '  →  变体：' + (variant.meta.name || variant.name) : ''}`));
 
+      // Step 1: multi-select resources (checkbox only, no nav items)
       const { checkbox } = await import('@inquirer/prompts');
-      const navCopyItems = [
-        ...copyItems,
-        { name: '.. 返回上级', value: 'back' },
-        { name: '✕ 退出', value: 'exit' },
-      ];
       const selected = await checkbox({
         message: '选择要拷贝的内容：',
-        choices: navCopyItems,
+        choices: copyItems,
       });
 
-      // Filter out nav values
-      if (selected.includes('exit')) { console.log(chalk.gray('已退出。\n')); return; }
-      if (selected.includes('back')) {
+      if (selected.length === 0) {
+        console.log(chalk.gray('未选择任何内容。\n'));
         step = series ? 'variant' : 'series';
         continue;
       }
 
-      const realSelected = selected.filter(s => s !== 'back' && s !== 'exit');
-      if (realSelected.length === 0) {
-        console.log(chalk.gray('未选择任何内容，已跳过。\n'));
-        return;
+      // Step 2: confirm / back / exit (select, arrow-key navigation)
+      const action = await selectWithNav(
+        `已选 ${selected.length} 项，确认操作：`,
+        [{ name: '✅ 确认拷贝', value: 'confirm' }],
+        true
+      );
+      if (action === 'back') {
+        step = 'copy'; // redo the checkbox selection
+        continue;
       }
+      if (action === 'exit') { console.log(chalk.gray('已退出。\n')); return; }
 
       // Output name
       const defaultBaseName = variant
@@ -244,7 +245,7 @@ async function interactiveInit(edmDir, cwd) {
       console.log(chalk.green('\n✔ 已拷贝：'));
       const cwdRel = (p) => './' + path.relative(cwd, p);
 
-      if (realSelected.includes('template')) {
+      if (selected.includes('template')) {
         const destName = outputBaseName + path.extname(version.templatePath);
         const dest = copyFileToCwd(version.templatePath, cwd, destName);
         console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
@@ -253,14 +254,14 @@ async function interactiveInit(edmDir, cwd) {
         if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
       }
 
-      if (realSelected.includes('snippet') && variant) {
+      if (selected.includes('snippet') && variant) {
         const snipPath = path.join(variant.path, 'snippet.html');
         const destName = outputBaseName + '-snippet' + path.extname(snipPath);
         const dest = copyFileToCwd(snipPath, cwd, destName);
         console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
       }
 
-      if (realSelected.includes('config') && variant) {
+      if (selected.includes('config') && variant) {
         const configs = findConfigs(variant.path);
         const optimal = configs.find(c => c.isOptimal);
         const cfgPath = optimal ? optimal.path : configs[0].path;
@@ -269,15 +270,15 @@ async function interactiveInit(edmDir, cwd) {
       }
 
       console.log();
-      if (realSelected.includes('snippet') && realSelected.includes('template')) {
+      if (selected.includes('snippet') && selected.includes('template')) {
         const snipFile = outputBaseName + '-snippet' + path.extname(path.join(variant.path, 'snippet.html'));
         const tplFile = outputBaseName + path.extname(version.templatePath);
         console.log(
           '  ' + chalk.dim('💡 下一步：') + '\n' +
           '     ' + chalk.cyan(`juice -s ${snipFile} -f ${tplFile}`) +
-          (realSelected.includes('config') ? chalk.cyan(' -c juice.yaml') : '') + '\n'
+          (selected.includes('config') ? chalk.cyan(' -c juice.yaml') : '') + '\n'
         );
-      } else if (realSelected.includes('template')) {
+      } else if (selected.includes('template')) {
         const tplFile = outputBaseName + path.extname(version.templatePath);
         console.log(
           '  ' + chalk.dim('💡 下一步：') + '\n' +
