@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.9](https://github.com/GuoSirius/juice-cli/compare/v2.3.8...v2.3.9) (2026-05-23)
+
+
+### Bug Fixes
+
+* loop-based copy step - allow return/modify at any point ([c784abf](https://github.com/GuoSirius/juice-cli/commit/c784abf457c51482385b1315e0579c27cf34534b))
+* separate resource checkbox from back/exit navigation in init ([7e9d0a1](https://github.com/GuoSirius/juice-cli/commit/7e9d0a1735642c4aa657ecd4f07edf20d91afe8b))
+* simplify init UX - back-before-checkbox, shorter --all messages ([cf069fe](https://github.com/GuoSirius/juice-cli/commit/cf069fe2ed6b789f8891fdc14f8dc23254eb0db7))
+
 ### [2.3.8](https://github.com/GuoSirius/juice-cli/compare/v2.3.7...v2.3.8) (2026-05-23)
 
 
