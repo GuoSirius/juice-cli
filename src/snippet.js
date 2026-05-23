@@ -773,8 +773,22 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
     priorityConfigPath = findLocalConfig(snippetDir) || findLocalConfig(process.cwd());
   } else {
     // 交互模式（只有 -s），列出片段目录下的全部配置
-    const configs = findConfigs(snippetDir, path.basename(snippetDir));
-    const configChoice = await promptConfig(configs);
+    let configs = findConfigs(snippetDir, path.basename(snippetDir));
+    // If -c also specified, collect from its directory too
+    let preferredPath = null;
+    if (cliConfigPath) {
+      preferredPath = path.resolve(cliConfigPath);
+      if (fs.existsSync(preferredPath)) {
+        const cfgDir = path.dirname(preferredPath);
+        if (path.resolve(cfgDir) !== path.resolve(snippetDir)) {
+          configs = [
+            ...findConfigs(cfgDir, path.basename(cfgDir)),
+            ...configs,
+          ];
+        }
+      }
+    }
+    const configChoice = await promptConfig(configs, preferredPath);
     priorityConfigPath = (configChoice.type === 'file') ? configChoice.path : null;
   }
 
@@ -877,23 +891,21 @@ async function runInteractiveMode({ config: cliConfigPath }) {
     return;
   }
 
-  // 5. 选择配置文件
+  // 5. 选择配置文件 — 收集：变体目录 + 指定配置的目录
   let configs = findConfigs(variant.path, path.basename(variant.path));
 
-  // If -c specified a config from outside the variant dir, add it to the list
   let preferredPath = null;
   if (cliConfigPath) {
     preferredPath = path.resolve(cliConfigPath);
-    if (!configs.some(c => c.path === preferredPath) && fs.existsSync(preferredPath)) {
-      configs = [
-        {
-          name: path.basename(preferredPath),
-          path: preferredPath,
-          isOptimal: false,
-          source: '指定配置',
-        },
-        ...configs,
-      ];
+    if (fs.existsSync(preferredPath)) {
+      const cfgDir = path.dirname(preferredPath);
+      // Collect from specified config's directory if different from variant dir
+      if (path.resolve(cfgDir) !== path.resolve(variant.path)) {
+        configs = [
+          ...findConfigs(cfgDir, path.basename(cfgDir)),
+          ...configs,
+        ];
+      }
     }
   }
 
