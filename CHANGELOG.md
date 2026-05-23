@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.13](https://github.com/GuoSirius/juice-cli/compare/v2.3.12...v2.3.13) (2026-05-23)
+
+
+### Bug Fixes
+
+* -s mode only shows snippet directory configs, not CWD ([316210c](https://github.com/GuoSirius/juice-cli/commit/316210c6d5c09d44036dbc730cee1dc7a13e2741))
+* include -c specified config in interactive config prompt ([7f673fb](https://github.com/GuoSirius/juice-cli/commit/7f673fb75dd4619f69cac6ae1ab81327e54da08b))
+
 ### [2.3.12](https://github.com/GuoSirius/juice-cli/compare/v2.3.11...v2.3.12) (2026-05-23)
 
 
