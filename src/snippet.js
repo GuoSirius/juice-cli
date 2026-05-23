@@ -186,9 +186,9 @@ function findSnippetVariants(seriesDir) {
 
 /**
  * 列出变体目录下所有 YAML 配置，标记 juice.yaml 为最优配对。
- * 返回 { name, path, isOptimal }。
+ * 返回 { name, path, isOptimal, source }。
  */
-function findConfigs(variantDir) {
+function findConfigs(variantDir, sourceLabel) {
   const yamlFiles = findYamlFiles(variantDir);
   return yamlFiles
     .filter((f) => f.name !== '_meta.yaml' && f.name !== '_meta.yml')
@@ -196,7 +196,30 @@ function findConfigs(variantDir) {
       name: f.name,
       path: f.path,
       isOptimal: f.name === 'juice.yaml',
+      source: sourceLabel || path.basename(path.dirname(f.path)),
     }));
+}
+
+/**
+ * Collect configs from multiple directories, deduplicating by path.
+ * Returns { name, path, isOptimal, source }[].
+ */
+function collectConfigs(dirs) {
+  const seen = new Set();
+  const result = [];
+  for (const { dir, label, markOptimal } of dirs) {
+    if (!fs.existsSync(dir)) continue;
+    const configs = findConfigs(dir, label);
+    for (const c of configs) {
+      if (seen.has(c.path)) continue;
+      seen.add(c.path);
+      if (markOptimal && c.name === 'juice.yaml') {
+        c.isOptimal = true;
+      }
+      result.push(c);
+    }
+  }
+  return result;
 }
 
 function findFiles(dir, regex) {
@@ -525,21 +548,42 @@ async function promptSnippetVariant(variants) {
   });
 }
 
-async function promptConfig(configs) {
+async function promptConfig(configs, preferredPath) {
   const { select, input } = await import('@inquirer/prompts');
+
+  // Check if any names collide — if so, show source in the label
+  const nameCounts = {};
+  for (const c of configs) {
+    nameCounts[c.name] = (nameCounts[c.name] || 0) + 1;
+  }
+  const hasCollisions = Object.values(nameCounts).some(n => n > 1);
 
   const choices = [];
   let defaultIdx = 0;
+  let preferredIdx = -1;
 
   for (const c of configs) {
-    choices.push({
-      name: c.isOptimal
-        ? `${chalk.green('●')} ${c.name} ${chalk.green('(最优配对)')}`
-        : `  ${c.name}`,
-      value: { type: 'file', path: c.path, name: c.name },
-    });
-    if (c.isOptimal) defaultIdx = choices.length - 1;
+    let label = c.name;
+    if (hasCollisions && c.source) {
+      label += ` ${chalk.dim('(' + c.source + ')')}`;
+    }
+    const isPreferred = preferredPath && c.path === preferredPath;
+    if (isPreferred) preferredIdx = choices.length;
+    if (isPreferred || c.isOptimal) {
+      const tag = isPreferred ? '指定' : '最优配对';
+      choices.push({
+        name: `${chalk.green('●')} ${label} ${chalk.green('(' + tag + ')')}`,
+        value: { type: 'file', path: c.path, name: c.name },
+      });
+    } else {
+      choices.push({
+        name: `  ${label}`,
+        value: { type: 'file', path: c.path, name: c.name },
+      });
+    }
+    if (!isPreferred && c.isOptimal) defaultIdx = choices.length - 1;
   }
+  if (preferredIdx >= 0) defaultIdx = preferredIdx;
 
   choices.push(
     { name: '  [自定义] 输入其他路径...', value: { type: 'custom' } },
@@ -720,16 +764,19 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
     templatePath = version.templatePath;
   }
 
-  // 配置文件：非交互模式自动检测片段目录，交互模式提示用户选择
+  // 配置文件：收集当前目录和片段目录的配置，片段目录优先
   const snippetDir = path.dirname(snippetPath);
   let priorityConfigPath;
 
   if (template) {
     // 命令行完整指定（-s + -f），自动检测
-    priorityConfigPath = findLocalConfig(snippetDir);
+    priorityConfigPath = findLocalConfig(snippetDir) || findLocalConfig(process.cwd());
   } else {
-    // 交互模式（只有 -s），提示选择配置
-    const configs = findConfigs(snippetDir);
+    // 交互模式（只有 -s），收集 CWD + 片段目录配置
+    const configs = collectConfigs([
+      { dir: snippetDir, label: path.basename(snippetDir), markOptimal: true },
+      { dir: process.cwd(), label: '当前目录' },
+    ]);
     const configChoice = await promptConfig(configs);
     priorityConfigPath = (configChoice.type === 'file') ? configChoice.path : null;
   }
@@ -834,8 +881,8 @@ async function runInteractiveMode({ config: cliConfigPath }) {
   }
 
   // 5. 选择配置文件
-  const configs = findConfigs(variant.path);
-  const configChoice = await promptConfig(configs, variant.path);
+  const configs = findConfigs(variant.path, path.basename(variant.path));
+  const configChoice = await promptConfig(configs, cliConfigPath);
 
   let priorityConfigPath = null;
   let configFileName = '(跳过)';
@@ -895,6 +942,7 @@ module.exports = {
   findHtmlFiles,
   findYamlFiles,
   findLocalConfig,
+  collectConfigs,
   getBrand,
   filterSeries,
   // config
