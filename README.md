@@ -351,34 +351,46 @@ edm/
 
 ## Windows 右键菜单
 
-### 文件右键（.html / .htm）
+### .html / .htm 文件右键
 
 ```
 📧 用 juice 生成邮件 HTML
-  ├── 📄 作为模板，生成邮件 HTML   → juice -f %1（后台执行）
-  ├── 🧩 作为片段，拼接邮件 HTML   → juice -s %1（交互选择模板）
-  ├── 📦 查看资源列表              → juice view
-  ├── 📋 浏览资源库                → juice view -i
+  ├── 📄 作为模板，生成邮件 HTML     → juice -f %1（后台执行）
+  ├── 🧩 作为片段，拼接邮件 HTML     → juice -s %1（交互选择模板）
+  ├── 📋 查看可用资源                → juice view
+  ├── 📦 拷贝全部资源                → juice init --all
+  ├── 📥 选择资源拷贝                → juice init
   └── 📂 打开 PowerShell           ← 仅已安装 pwsh 时出现
 ```
 
-### 文件右键（.yaml / .yml）
+### .yaml / .yml 文件右键
 
 ```
 📧 用 juice 生成邮件 HTML
-  ├── ⚙️ 作为配置，拼接邮件 HTML   → juice -c %1（交互选择品牌/模板/片段）
-  ├── 📦 查看资源列表              → juice view
-  ├── 📋 浏览资源库                → juice view -i
+  ├── ⚙️ 作为配置，拼接邮件 HTML     → juice -c %1（交互选择品牌/模板/片段）
+  ├── 📋 查看可用资源
+  ├── 📦 拷贝全部资源
+  ├── 📥 选择资源拷贝
   └── 📂 打开 PowerShell
 ```
 
-### 文件夹 / 空白处右键
+### 文件夹右键
 
 ```
-📧 juice 邮件工具
-  ├── 📥 从资源库拷贝到此处         → juice init
-  ├── 📦 查看资源列表              → juice view
-  ├── 📋 浏览资源库                → juice view -i
+📧 用 juice 生成邮件 HTML
+  ├── 📋 查看可用资源
+  ├── 📦 拷贝全部资源
+  ├── 📥 选择资源拷贝
+  └── 📂 在此打开终端
+```
+
+### 空白处右键
+
+```
+📧 用 juice 生成邮件 HTML
+  ├── 📋 查看可用资源
+  ├── 📦 拷贝全部资源
+  ├── 📥 选择资源拷贝
   └── 📂 在此打开终端
 ```
 

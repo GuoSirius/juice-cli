@@ -11,15 +11,16 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 - `juice -s snippet.html -f template.html` — 片段组装模式：片段 + 模板拼接，输出 4 个文件。跨品牌时给出警告但仍可执行
 - `juice -s snippet.html` — 片段模式，交互式选择品牌和模板，跨品牌时给出警告
 - `juice` — 全交互模式：逐步选择品牌、模板、片段系列、片段 HTML、配置（同品牌内组合，不会跨品牌）
-- `juice view` — 查看 EDM 资源树（品牌、模板、系列、片段变体、配置文件）
-- `juice view -i` — 交互式浏览 EDM 资源库，可上下翻层级，叶节点可直接拷贝资源
+- `juice view` — 查看 EDM 资源树（品牌、模板、系列、片段变体）
+- `juice view -i` — 交互式浏览，叶节点可多选拷贝到当前目录
 - `juice init` — 交互式选择并拷贝模板/片段/配置到当前目录
+- `juice init --all` — 拷贝整个 EDM 资源库到当前目录
 - `juice init --template <file>` / `--snippet <file>` / `--config <file>` — 仅拷贝指定文件
 - `juice --install` / `juice --uninstall` — Windows 右键菜单注册/卸载（npm install 时自动执行 postinstall）
 - 右键菜单：
-  - `.html`/`.htm` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为模板生成 / 作为片段拼接 / 查看资源列表 / 浏览资源库 / 打开 PowerShell）
-  - `.yaml`/`.yml` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为配置拼接 / 查看资源列表 / 浏览资源库 / 打开 PowerShell）
-  - 文件夹 / 空白处 → "📧 juice 邮件工具" → 子菜单（从资源库拷贝 / 查看资源列表 / 浏览资源库 / 打开终端）
+  - `.html`/`.htm` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为模板生成 / 作为片段拼接 / 查看可用资源 / 拷贝全部资源 / 选择资源拷贝 / 打开 PowerShell）
+  - `.yaml`/`.yml` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为配置拼接 / 查看可用资源 / 拷贝全部资源 / 选择资源拷贝 / 打开 PowerShell）
+  - 文件夹 / 空白处 → "📧 用 juice 生成邮件 HTML" → 子菜单（查看可用资源 / 拷贝全部资源 / 选择资源拷贝 / 打开终端）
 
 ## npm 生命周期（自动菜单注册）
 
