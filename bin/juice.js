@@ -5,6 +5,29 @@ const { program } = require('commander');
 const path = require('path');
 const pkg = require('../package.json');
 const { run } = require('../src/index');
+let ExitPromptError;
+try {
+  ({ ExitPromptError } = require('@inquirer/core'));
+} catch (_) {}
+
+/**
+ * Wrap an async action handler to catch Ctrl+C and other errors gracefully.
+ */
+function safeAction(fn) {
+  return async (...args) => {
+    try {
+      await fn(...args);
+    } catch (err) {
+      if (ExitPromptError && err instanceof ExitPromptError) {
+        // Ctrl+C — exit silently
+        process.exit(0);
+      }
+      console.error('\n' + require('chalk').red(`  ✘ ${err.message}`));
+      if (process.env.DEBUG) console.error(err);
+      process.exit(1);
+    }
+  };
+}
 
 program
   .name('juice')
@@ -87,7 +110,7 @@ program
   .option('--templates', '列出所有模板')
   .option('--series', '列出所有系列')
   .option('--snippets', '列出所有片段')
-  .action(async (viewPath, options) => {
+  .action(safeAction(async (viewPath, options) => {
     const { runViewMode } = require('../src/view');
     await runViewMode({
       viewPath: viewPath || null,
@@ -96,7 +119,7 @@ program
         : (options.series ? 'series'
         : (options.snippets ? 'snippets' : null)),
     });
-  });
+  }));
 
 // ─── Subcommand: juice init ─────────────────────────────────────────────
 program
@@ -106,7 +129,7 @@ program
   .option('-s, --snippet <file-path>', '仅拷贝片段 HTML 文件')
   .option('-c, --config <file-path>', '仅拷贝配置 YAML 文件')
   .option('--all [target]', '拷贝整个 EDM 资源目录到当前或指定目录')
-  .action(async (initPath, options) => {
+  .action(safeAction(async (initPath, options) => {
     const { runInitMode } = require('../src/init');
     await runInitMode({
       initPath: initPath || null,
@@ -115,11 +138,11 @@ program
       config: options.config || null,
       all: options.all !== undefined ? (options.all || true) : null,
     });
-  });
+  }));
 
 // ─── Default action (backward compatible) ───────────────────────────────
 program
-  .action(async (options) => {
+  .action(safeAction(async (options) => {
     // 注册/卸载右键菜单
     if (options.install) {
       const { registerContextMenu } = require('../src/context-menu');
@@ -161,7 +184,7 @@ program
     // 全交互模式：无 --snippet，无 -f
     const { runInteractiveMode } = require('../src/snippet');
     await runInteractiveMode({ config: options.config });
-  });
+  }));
 
 program.allowUnknownOption(false);
 program.parse(process.argv);
