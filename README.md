@@ -122,8 +122,11 @@ juice view -i elabscience
 ### 拷贝资源到当前目录
 
 ```bash
-# 交互式选择并多选拷贝
+# 交互式选择（每步支持返回/退出）
 juice init
+
+# 拷贝整个 EDM 资源库
+juice init --all
 
 # 从指定 EDM 路径拷贝
 juice init elabscience/templates/standard
@@ -133,6 +136,13 @@ juice init --template edm/elabscience/templates/standard/template.html
 juice init --snippet edm/elabscience/series/literature/default/snippet.html
 juice init --config edm/elabscience/series/literature/default/juice.yaml
 ```
+
+交互拷贝进入变体后提供三个操作：
+- `🧩 仅片段+配置` — 快捷拷贝片段 HTML + juice.yaml（跳过模板）
+- `✅ 确认拷贝` — 按当前选择执行
+- `🔄 自定义选择` — 打开多选 checkbox 调整
+
+拷贝模板时自动附带 `favicon.ico`。配置文件冲突自动加版本号。
 
 ### 参数说明
 

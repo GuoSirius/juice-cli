@@ -208,29 +208,44 @@ juice view -i --snippets            # 从片段列表开始
 ### 用法
 
 ```
-juice init                                    # 交互式：选择品牌 → 模板 → 系列(可选) → 变体 → 多选拷贝内容
+juice init                                    # 交互式：选择品牌 → 模板 → 系列(可选) → 变体 → 拷贝操作
 juice init <brand>/templates/<version>        # 从指定模板版本交互式多选拷贝
 juice init <brand>/<series>/<variant>         # 从指定变体交互式多选拷贝
 juice init --template <文件路径>               # 仅拷贝模板 HTML 到当前目录
 juice init --snippet <文件路径>                # 仅拷贝片段 HTML 到当前目录
 juice init --config <文件路径>                 # 仅拷贝配置 YAML 到当前目录
+juice init --all [目标目录]                    # 拷贝整个 EDM 资源库
 ```
 
 ### 交互流程
 
+每步支持 `.. 返回上级` 和 `✕ 退出`，选错可回退：
+
 ```
 juice init
 
-? 选择品牌：        伊莱瑞特 (elabscience)
+? 选择品牌：         伊莱瑞特 (elabscience)
 ? 选择模板版本：     标准版 (standard)
 ? 选择系列：         文献推广 (literature) / [跳过，仅用模板]
   → 选了系列 → 选变体
-? 拷贝内容：（多选）
-  ☑ 模板 HTML
-  ☑ 片段 HTML
-  ☑ 配置文件
-? 输出文件名：       [elabscience-standard]
+
+ 品牌：伊莱瑞特  →  模板：标准版
+ 系列：文献推广  →  变体：标准文献
+
+? 拷贝操作：
+  ● 🧩 仅片段 + 配置                   ← 快捷选项（跳过模板和 ico）
+  ○ ✅ 确认拷贝（模板 HTML + 片段 HTML + 配置文件）
+  ○ 🔄 自定义选择（模板 HTML + 片段 HTML + 配置文件）
+  ─────────────────
+  .. 返回上级
+  ✕ 退出
 ```
+
+- `🧩 仅片段+配置`：直接拷贝片段 HTML + juice.yaml，跳过模板和 ico
+- `✅ 确认拷贝`：按当前选择执行，输入输出文件名
+- `🔄 自定义选择`：打开多选 checkbox 勾选/取消模板、片段、配置
+- 拷贝模板时自动附带 `favicon.ico`（ico 冲突直接覆盖，不版本）
+- 配置文件冲突自动加版本号（`juice-v1.yaml`、`juice-v2.yaml`...）
 
 输出示例（片段模式）：
 ```
@@ -250,8 +265,11 @@ juice init
 | `deriveDefaultName(filePath)` | 从 EDM 路径推导友好的默认输出名 |
 | `directCopy(srcPath, cwd)` | `--template`/`--snippet`/`--config` 直接拷贝 |
 | `copyFileToCwd(srcPath, cwd, destName)` | 拷贝单个文件，自动处理重名 |
-| `interactiveInit(edmDir, cwd)` | 交互式初始化流程 |
-| `runInitMode({ initPath, template, snippet, config })` | 主入口 |
+| `copyIcon(variantDir, versionDir, brandDir, cwd)` | 查找并拷贝 favicon.ico（不版本） |
+| `copyDir(src, dest)` | 递归拷贝目录（用于 `--all`） |
+| `selectWithNav(message, choices, showBack)` | 带返回/退出导航的 select 封装 |
+| `interactiveInit(edmDir, cwd)` | 交互式初始化流程（状态机 + 每步可回退） |
+| `runInitMode({ initPath, template, snippet, config, all })` | 主入口 |
 
 ---
 
