@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.11](https://github.com/GuoSirius/juice-cli/compare/v2.3.10...v2.3.11) (2026-05-23)
+
+
+### Bug Fixes
+
+* prioritize snippet+config shortcut before confirm in copy menu ([3f5f436](https://github.com/GuoSirius/juice-cli/commit/3f5f43615ac383c0d3cd95eb67e21dba6cbc4895))
+
+
+### Documentation
+
+* update init flow docs with shortcuts, ICO, and back/exit navigation ([57063d7](https://github.com/GuoSirius/juice-cli/commit/57063d744a0a716ab933cdf5a1aaa6752b53bd7b))
+
 ### [2.3.10](https://github.com/GuoSirius/juice-cli/compare/v2.3.9...v2.3.10) (2026-05-23)
 
 
