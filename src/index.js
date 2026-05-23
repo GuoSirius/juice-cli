@@ -7,7 +7,7 @@ const yaml = require('js-yaml');
 const juice = require('juice');
 const Mustache = require('mustache');
 const chalk = require('chalk');
-const ora = require('ora');
+const ora = require('ora').default;
 const { minify: htmlMinify } = require('html-minifier-terser');
 
 // ─── 从 defaults/juice.yaml 加载默认配置 ─────────────────────────────────────
