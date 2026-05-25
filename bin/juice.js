@@ -111,13 +111,13 @@ program
     juice --uninstall         （卸载右键菜单）
 
   菜单结构：
-    📧 用 juice 生成邮件 HTML
-      ├── 📄 作为模板，生成邮件 HTML  →  juice -f（后台执行）
-      ├── 🧩 作为片段，拼接邮件 HTML  →  juice -s（交互选择模板）
-      ├── 📋 查看可用资源              →  juice view
-      ├── 📦 拷贝全部资源              →  juice init --all
-      ├── 📥 选择资源拷贝              →  juice init
-      └── 📂 打开 PowerShell          （仅已安装 pwsh 时出现）
+    用 juice 生成邮件 HTML
+      +-- 作为模板，生成邮件 HTML  ->  juice -f
+      +-- 作为片段，拼接邮件 HTML  ->  juice -s
+      +-- 查看可用资源              ->  juice view
+      +-- 拷贝全部资源              ->  juice init --all
+      +-- 选择资源拷贝              ->  juice init
+      +-- 打开 PowerShell          （仅已安装 pwsh 时出现）
 
 更多信息：https://gitee.com/siriussupreme/juice-cli
 `);
