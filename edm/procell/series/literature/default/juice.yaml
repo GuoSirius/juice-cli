@@ -11,9 +11,9 @@
 # ─── 模板变量（Mustache 语法）────────────────────────────────────────────────
 variables:
   overview:
-    image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605211020/Nature Medicine.webp
+    image: https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/Ischemic stroke.webp
     title: "Low-dose oral nicotinamide mononucleotide for immune thrombocytopenia: a phase 1/2 trial"
-    link: https://www.nature.com/articles/s41591-026-04366-x
+    link: https://www.nature.com/articles/s41467-026-70340-3
     publicationDate: April 29 2026
     journal: Nature Medicine
     impactFactor: 50.0
@@ -21,11 +21,11 @@ variables:
     keywords: Immune Thrombocytopenia (ITP), Nicotinamide Mononucleotide (NMN), CD38-NAD<sup>+</sup> Axis
 
   information:
-    image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605211020/CD38-NAD.webp
+    image: https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/View More Publications.webp
     content: "This study identifies the CD38-NAD<sup>+</sup> axis as an immunometabolic checkpoint in ITP. Anti-CD38 antibodies deplete NAD<sup>+</sup>, driving M1 macrophages and FcγRI upregulation, which increases platelet phagocytosis. Restoring NAD<sup>+</sup> via CD38 inhibition or NMN reprograms macrophages to a resting state and blocks platelet destruction without affecting humoral immunity. In 25 refractory ITP patients, low-dose NMN (450 mg bid × 2 weeks) was well tolerated: 20% achieved platelets ≥50×10<sup>9</sup>/L, and 52% maintained response at week 8, with stable immunoglobulin levels. Thus, targeting CD38-NAD<sup>+</sup> metabolism offers a non-antibody-depleting therapeutic strategy."
     link: https://www.procellsystem.com/resources/publications
     buttonText: View More Publications
-    summary: Human plasma and mouse cell supernatant iNOS level were measured using Elabscience<sup>&reg;</sup> Human/Mouse NOS2/iNOS(Nitric Oxide Synthase 2, Inducible) ELISA Kit, respectively.
+    summary:
 
   # ── 产品列表 ────────────────────────────────────────────────────────────────
   # 使用 {{#productLists}}...{{/productLists}} 循环遍历
@@ -38,3 +38,19 @@ variables:
     - name: Mouse NOS2/iNOS(Nitric Oxide Synthase 2, Inducible) ELISA Kit
       catNo: E-EL-M0696
       link: https://www.elabscience.com/p/mouse-nos2-inos-nitric-oxide-synthase-2-inducible-elisa-kit--e-el-m0696
+
+  recommendedLists:
+    - name: DMEM/F12
+      catNo: PM150312
+      link: https://www.procellsystem.com/p/dmem-f12-pm150312-68139
+      image: https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150312-500mL-cropped.webp
+
+    - name: DMEM (Low glucose)
+      catNo: PM150220
+      link: https://www.procellsystem.com/p/dmem-low-glucose-pm150220-70471
+      image: https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150220-500mL-cropped.webp
+
+    - name: MEM, with NEAA
+      catNo: PM150410
+      link: https://www.procellsystem.com/p/mem-with-neaa-pm150410-71162
+      image: https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/PM150410-500mL-cropped.webp
