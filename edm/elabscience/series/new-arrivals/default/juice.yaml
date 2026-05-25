@@ -1,0 +1,164 @@
+# juice.yaml - 用户配置文件示例
+#
+# 放置位置（优先级从低到高）：
+#   ~/juice.yaml          ← 用户主目录，对所有项目生效
+#   <模板文件目录>/juice.yaml ← 仅对当前项目生效（推荐）
+#   juice -c <此文件>       ← 命令行指定
+#
+# 所有配置项均与 CLI 内置默认值深度合并，未填写的字段自动使用内置值。
+# 完整默认配置见：<CLI安装目录>/defaults/juice.yaml
+
+# ─── 模板变量（Mustache 语法）────────────────────────────────────────────────
+variables:
+  banner:
+    image: https://file.elabscience.com/edm/202605201608/banner.webp
+    link: http://www.elabscience.com/products/flow-cytometry-antibodies
+    keywords: We're excited to announce the launch of <strong class="color-red text-size-[20px]">66</strong> new flow cytometry antibodies, now available with 34 indicators and 35 clone numbers.
+
+  indicator:
+    title: Indicators
+    className: title
+    lists:
+      - text: CD14
+        color: "#D100DE"
+        link:
+      - text: TNFα
+        color: "#FF0207"
+        link: https://www.elabscience.com/search?keywords=TNF-%CE%B1
+      - text: CD195
+        color: "#000000"
+        link:
+      - text: CD25
+        color: "#00BF54"
+        link:
+      - text: TCR Vβ7.1
+        color: "#FF0207"
+        link:
+      - text: CD1d
+        color: "#000000"
+        link:
+      - text: Integrin β7
+        color: "#2A77FE"
+        link:
+      - text: CD2
+        color: "#FF0207"
+        link:
+      - text: CD8
+        color: "#FF7800"
+        link:
+      - text: HLA-A2,B7
+        color: "#B10202"
+        link:
+      - text: CD8a
+        color: "#FF7800"
+        link:
+      - text: CD123
+        color: "#2A77FE"
+        link: https://www.elabscience.com/search?keywords=CD123
+      - text: TCR Vβ1
+        color: "#B10202"
+        link:
+      - text: CD1b
+        color: "#00BF54"
+        link:
+      - text: CD272/BTLA
+        color: "#000000"
+        link: https://www.elabscience.com/search?keywords=CD272/BTLA
+      - text: CD151
+        color: "#BF37FA"
+        link:
+      - text: CD180
+        color: "#000000"
+        link:
+      - text: CD122
+        color: "#FF0000"
+        link:
+      - text: IL-10
+        color: "#00BF54"
+        link:
+      - text: ROR1
+        color: "#2A77FE"
+        link:
+      - text: CD90.2
+        color: "#FF0207"
+        link:
+      - text: FOXP3
+        color: "#FF7800"
+        link:
+      - text: FMC63
+        color: "#D100DE"
+        link:
+      - text: CD159a
+        color: "#B10202"
+        link:
+      - text: TNF-alpha
+        color: "#D100DE"
+        link:
+      - text: CD206
+        color: "#FF0207"
+        link:
+      - text: FcεRIα
+        color: "#000000"
+        link:
+      - text: IgD
+        color: "#00BF54"
+        link:
+      - text: CD3
+        color: "#FF0207"
+        link:
+      - text: CD200
+        color: "#000000"
+        link:
+      - text: CD68
+        color: "#2A77FE"
+        link:
+      - text: CD43
+        color: "#FF0207"
+        link:
+      - text: CD335
+        color: "#FF7800"
+        link:
+      - text: CD52
+        color: "#B10202"
+        link:
+      - text: ......
+        color: "#FF7805"
+        link:
+
+  antibodyOffer:
+    title: "Designed for Multicolor Panel Flexibility, These Antibodies Offer:"
+    className: title
+    itemClassName: circle
+    lists:
+      - More FCM experimental panel design options
+      - Lower background interference in FCM staining with optimized fluorescence coupling technique
+      - Good separation effect across multiple concentration gradientss
+
+  indicatorIntroduction:
+    title: New Indicators Introduction (Paticial)
+    className: title
+    itemClassName: gold-star
+    lists:
+      - "Immunotherapy for Hepatocellular Carcinoma Research: Human TCR Vβ7.1"
+      - "Autoimmune Diseases Research: Human TCR Vβ1"
+      - "Auxiliary Diagnosis of Tumors: Human CD151"
+
+  # ── 产品列表 ────────────────────────────────────────────────────────────────
+  # 使用 {{#productLists}}...{{/productLists}} 循环遍历
+  # {{#productLists}}{{name}}{{catNo}}{{/productLists}}
+  productLists:
+    - name: Human TCR Vβ7.1
+      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human TCR Vβ7.1.webp
+      link: https://www.elabscience.com/search?keywords=Human TCR V%CE%B27.1
+      buttonText: Learn More
+
+    - name: Human TCR Vβ1
+      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human TCR Vβ1.webp
+      link: https://www.elabscience.com/search?keywords=Human TCR V%CE%B21
+      buttonText: Learn More
+
+    - name: Human CD151
+      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human CD151.webp
+      link: https://www.elabscience.com/search?keywords=Human CD151
+      buttonText: Learn More
+      width: 20%

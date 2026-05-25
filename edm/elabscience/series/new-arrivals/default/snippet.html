@@ -1,0 +1,175 @@
+<tr>
+  <td colspan="4" class="image-box">
+    {{#banner.link}}
+      <a href="{{banner.link}}">
+        <img src="{{banner.image}}" />
+      </a>
+    {{/banner.link}}
+
+    {{^banner.link}}
+      <img src="{{banner.image}}" />
+    {{/banner.link}}
+  </td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-16"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">{{banner.keywords}}</td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td colspan="4">
+    <table cellspacing="0" cellpadding="0" border="0" class="bg-light-primary">
+      <colgroup>
+        <col width="10px" />
+        <col />
+        <col width="10px" />
+      </colgroup>
+
+      <tbody>
+        <tr>
+          <td></td>
+          <td class="pt-3">
+            <span class="{{indicator.className}}">{{indicator.title}}</span>
+          </td>
+          <td></td>
+        </tr>
+
+        <tr>
+          <td colspan="3" class="h-12"></td>
+        </tr>
+
+        <tr>
+          <td></td>
+          <td class="pb-5" style="padding-left: 6px; padding-right: 6px;">
+            {{#indicator.lists}}
+            <span class="word-cloud-item">
+              <a class="cursor-default" style="color: {{color}}" {{#link}}href="{{link}}"{{/link}}>{{text}}</a>
+            </span>
+            {{/indicator.lists}}
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0">
+      <colgroup>
+        <col />
+      </colgroup>
+
+      <tbody class="align-middle">
+        <tr>
+          <td><span class="{{antibodyOffer.className}}">{{antibodyOffer.title}}</span></td>
+        </tr>
+
+        <tr>
+          <td class="h-12"></td>
+        </tr>
+
+        <tr>
+          <td>
+            {{#antibodyOffer.lists}}
+            <p class="pb-5 {{antibodyOffer.itemClassName}} color-primary">{{.}}</p>
+            {{/antibodyOffer.lists}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0">
+      <colgroup>
+        <col />
+      </colgroup>
+
+      <tbody class="align-middle">
+        <tr>
+          <td><span class="{{indicatorIntroduction.className}}">{{indicatorIntroduction.title}}</span></td>
+        </tr>
+
+        <tr>
+          <td class="h-12"></td>
+        </tr>
+
+        <tr>
+          <td>
+            {{#indicatorIntroduction.lists}}
+            <p class="pb-5 {{indicatorIntroduction.itemClassName}} color-primary">{{.}}</p>
+            {{/indicatorIntroduction.lists}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-16"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0" class="text-center">
+      <colgroup>
+        {{#productLists}}
+        <col {{#width}}width="{{width}}"{{/width}} />
+        {{/productLists}}
+      </colgroup>
+
+      <tbody>
+        <tr>
+          {{#productLists}}
+          <td class="image-box">
+            <img src="{{image}}" alt="{{name}}" />
+          </td>
+          {{/productLists}}
+        </tr>
+
+        <tr>
+          {{#productLists}}
+          <td>{{name}}</td>
+          {{/productLists}}
+        </tr>
+
+        <tr>
+          {{#productLists}}
+          <td class="pt-8">
+            <a href="{{link}}" class="button font-bold decoration-none" style="border-radius: 16px;">{{buttonText}}</a>
+          </td>
+          {{/productLists}}
+        </tr>
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
