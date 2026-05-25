@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.5](https://github.com/GuoSirius/juice-cli/compare/v2.4.4...v2.4.5) (2026-05-25)
+
+
+### Chores
+
+* delete test file ([b1f5220](https://github.com/GuoSirius/juice-cli/commit/b1f522051cb07734ecbe49667a6dc7a6e9f05d2f))
+
 ### [2.4.4](https://github.com/GuoSirius/juice-cli/compare/v2.4.3...v2.4.4) (2026-05-25)
 
 
