@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.6](https://github.com/GuoSirius/juice-cli/compare/v2.4.5...v2.4.6) (2026-05-25)
+
+
+### Bug Fixes
+
+* context menu commands run silently without visible feedback ([e47c6c0](https://github.com/GuoSirius/juice-cli/commit/e47c6c0c594ef81e22f7bd4ac27e7c6ec6f92fbf))
+
 ### [2.4.5](https://github.com/GuoSirius/juice-cli/compare/v2.4.4...v2.4.5) (2026-05-25)
 
 
