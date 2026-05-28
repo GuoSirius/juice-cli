@@ -38,7 +38,8 @@
       "Read(//tmp/juice-test-edm/edm/**)",
       "Bash(git checkout *)",
       "WebFetch(domain:github.com)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(git status *)"
     ]
   }
 }

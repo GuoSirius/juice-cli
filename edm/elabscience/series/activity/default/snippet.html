@@ -1,0 +1,9 @@
+{{#banner}}
+<div>
+  <img class="{{#banner.mobile}}d-none d-md-block{{/banner.mobile}}{{^banner.mobile}}d-block{{/banner.mobile}} img-fluid m-auto border-0" src="{{banner.pc}}" />
+
+  {{#banner.mobile}}
+  <img class="d-block d-md-none img-fluid m-auto border-0" src="{{banner.mobile}}" />
+  {{/banner.mobile}}
+</div>
+{{/banner}}
