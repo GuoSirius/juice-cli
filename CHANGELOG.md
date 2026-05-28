@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.7](https://github.com/GuoSirius/juice-cli/compare/v2.4.6...v2.4.7) (2026-05-28)
+
+
+### Features
+
+* interactive config selection in template mode when multiple/non-default configs exist ([8fb990c](https://github.com/GuoSirius/juice-cli/commit/8fb990c5a95e4c3a4186a729f57a10a8a4b21302))
+
+
+### Documentation
+
+* delete docs ([0590da8](https://github.com/GuoSirius/juice-cli/commit/0590da8a583cc73779f7a5872fee835f4580c4c8))
+
 ### [2.4.6](https://github.com/GuoSirius/juice-cli/compare/v2.4.5...v2.4.6) (2026-05-25)
 
 
