@@ -65,6 +65,71 @@ export function findConfigs(configPath, inputFile) {
   return { highPriorityPath, homePath: resolveHomeConfig() };
 }
 
+// ─── 列出目录下所有配置文件 ─────────────────────────────────────────────────────
+
+function findYamlConfigFiles(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  return entries
+    .filter(e => e.isFile() && /\.ya?ml$/i.test(e.name) && e.name !== '_meta.yaml' && e.name !== '_meta.yml')
+    .map(e => ({ name: e.name, path: path.join(dir, e.name) }));
+}
+
+async function resolveProjectConfig(inputFile) {
+  const inputDir = path.dirname(path.resolve(inputFile));
+  const yamlFiles = findYamlConfigFiles(inputDir);
+
+  if (yamlFiles.length === 0) return null;
+
+  if (yamlFiles.length === 1) {
+    const name = yamlFiles[0].name;
+    if (name === 'juice.yaml' || name === 'juice.yml') {
+      return yamlFiles[0].path;
+    }
+  }
+
+  const { select, input } = await import('@inquirer/prompts');
+
+  const choices = yamlFiles.map(f => {
+    const isOptimal = f.name === 'juice.yaml';
+    if (isOptimal) {
+      return {
+        name: `${chalk.green('●')} ${f.name} ${chalk.green('(最优配对)')}`,
+        value: { type: 'file', path: f.path },
+      };
+    }
+    return {
+      name: `  ${f.name}`,
+      value: { type: 'file', path: f.path },
+    };
+  });
+
+  const defaultIdx = yamlFiles.findIndex(f => f.name === 'juice.yaml');
+
+  choices.push(
+    { name: '  [自定义] 输入其他路径...', value: { type: 'custom' } },
+    { name: '  [跳过] 不使用项目配置', value: { type: 'skip' } },
+  );
+
+  const result = await select({
+    message: '请选择配置文件：',
+    choices,
+    default: defaultIdx >= 0 ? defaultIdx : 0,
+  });
+
+  if (result.type === 'custom') {
+    const customPath = await input({ message: '请输入配置文件路径：' });
+    const resolved = path.resolve(customPath);
+    if (!fs.existsSync(resolved)) {
+      throw new Error(`指定的配置文件不存在：${resolved}`);
+    }
+    return resolved;
+  }
+
+  if (result.type === 'skip') return null;
+  return result.path;
+}
+
 // ─── 配置文件加载 ─────────────────────────────────────────────────────────────
 
 export function loadYaml(filePath) {
@@ -207,7 +272,21 @@ export async function run({ file, config: configPath }) {
       process.exit(1);
     }
 
-    const { highPriorityPath, homePath } = findConfigs(configPath, inputFile);
+    let highPriorityPath = null;
+
+    if (configPath) {
+      const resolved = path.resolve(configPath);
+      if (!fs.existsSync(resolved)) {
+        throw new Error(`指定的配置文件不存在：${resolved}`);
+      }
+      highPriorityPath = resolved;
+    } else {
+      spinner.stop();
+      highPriorityPath = await resolveProjectConfig(inputFile);
+      spinner.start();
+    }
+
+    const homePath = resolveHomeConfig();
     const { config, layers } = buildConfig(highPriorityPath, homePath);
     const encoding = (config.output && config.output.encoding) || 'utf8';
 

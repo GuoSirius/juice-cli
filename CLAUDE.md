@@ -135,7 +135,12 @@ description: "含产品引用表格的标准布局"
 
 ### 普通模式（-f）
 
-低 → 高：`defaults/juice.yaml` → `~/juice.yaml` → `-c` 指定 或 输入文件同级 `juice.yaml`（二者互斥，只生效一个）
+低 → 高：`defaults/juice.yaml` → `~/juice.yaml` → 项目配置（`-c` 指定 或 输入文件同级目录自动检测）
+
+当 `-c` 未指定时，扫描输入文件同级目录下的所有 `.yaml`/`.yml` 文件（排除 `_meta.yaml`）：
+- 无配置文件 → 跳过
+- 仅有 `juice.yaml`（或 `juice.yml`）→ 直接使用，无需交互
+- 多个配置文件 或 单个非默认配置 → 交互式选择（可选列表中的配置 / 自定义路径 / 跳过）
 
 ### 片段模式（--snippet）
 
@@ -408,6 +413,8 @@ juice init
 ### 验证清单
 
 - [x] `juice -f edm/elabscience/templates/standard/template.html` — 普通模式正常
+- [x] `juice -f template.html`（同级仅有 juice.yaml）— 自动使用，无需交互
+- [ ] `juice -f template.html`（同级有多个配置 / 非默认配置）— 交互式选择配置（需 TTY）
 - [x] `juice -s edm/elabscience/series/literature/default/snippet.html -f edm/elabscience/templates/standard/template.html` — 命令行片段模式，同品牌输出 4 文件
 - [x] `juice -s edm/elabscience/series/literature/default/snippet.html -f edm/procell/templates/standard/template.html` — 跨品牌警告
 - [x] `juice view` — 完整资源树
