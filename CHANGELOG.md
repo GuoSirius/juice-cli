@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.8](https://github.com/GuoSirius/juice-cli/compare/v2.4.7...v2.4.8) (2026-05-29)
+
+
+### Features
+
+* add activity snippet ([53e881c](https://github.com/GuoSirius/juice-cli/commit/53e881ca20a8ac8652b6974811fbc5dc94c9fc0c))
+
 ### [2.4.7](https://github.com/GuoSirius/juice-cli/compare/v2.4.6...v2.4.7) (2026-05-28)
 
 
