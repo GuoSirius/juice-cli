@@ -11,8 +11,10 @@
 # ─── 模板变量（Mustache 语法）────────────────────────────────────────────────
 variables:
   banner:
-    pc: https://files.elabscience.cn/assets/images/article/202604221646/pc.webp
-    mobile: https://files.elabscience.cn/assets/images/article/202604221646/mobile.webp
+    pc: https://files.procell.com.cn/article-imgs/1920x420 0528N.webp
+    mobile: https://files.procell.com.cn/article-imgs/750x376.webp
+
+  datetime: 2026.6.11-2026.7.24
 
   activity:
     comment: 以上4个活动可同享，单个产线内活动可叠享，此活动不与其他优惠活动叠享

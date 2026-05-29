@@ -1,0 +1,123 @@
+{{#banner}}
+<div class="d-flex align-item-center justify-content-center mb-3">
+  <img class="{{#mobile}}d-none d-md-block{{/mobile}}{{^mobile}}d-block{{/mobile}} img-fluid m-auto border-0" src="{{pc}}" />
+
+  {{#mobile}}
+  <img class="d-block d-md-none img-fluid m-auto border-0" src="{{mobile}}" />
+  {{/mobile}}
+</div>
+{{/banner}}
+
+{{#datetime}}
+<p><strong>活动时间：{{datetime}}</strong></p>
+{{/datetime}}
+
+{{#activity}}
+<div class="row no-gutters" style="background-color: #f9fafb;">
+  {{#lists}}
+  <div class="col-12 col-md-6" style="padding: 10px 15px;">
+    <div style="background-color: #ffffff; border: 1px solid #ececec; padding: 10px 10px 42px; {{^buttonText}}padding-bottom: 10px;{{/buttonText}} position: relative; height: 100%; font-size: 16px;">
+      <div style="color: #00747a; margin-bottom: 10px;">
+        <img src="https://files.procell.com.cn/assets/images/article/202505091550/1722403448475807.png" style="width: 24px; margin-top: -6px;" />
+        <strong style="font-weight: bolder;">{{title}}</strong>
+      </div>
+
+      {{#content}}
+      <div>{{.}}</div>
+      {{/content}}
+
+      {{#condition}}
+      <div class="d-flex align-items-center">
+        <strong style="margin-top: -6px; margin-right: 5px; font-weight: bolder; font-family: 微软雅黑;">·</strong>
+        <span>{{.}}</span>
+      </div>
+      {{/condition}}
+
+      {{#note}}
+      <div style="font-size: 14px;">{{.}}</div>
+      {{/note}}
+
+      {{#buttonText}}
+      <a {{#link}}href="{{link}}"{{/link}} style="text-decoration: none; background-color: #4a8d90; color: #ffffff;  padding: 3px 8px; border-radius: 4px; position: absolute; bottom: 10px; left: 10px; cursor: pointer; font-size: 12px;">{{buttonText}}</a>
+      {{/buttonText}}
+    </div>
+  </div>
+  {{/lists}}
+
+  {{#comment}}
+  <div class="col-12" style="padding: 10px 15px;">
+    <div style="background: #ffffff; border: 1px solid #ececec; padding: 10px; font-size: 16px;">
+      <span style="color: #ff0000;">*</span>{{comment}}
+    </div>
+  </div>
+  {{/comment}}
+</div>
+{{/activity}}
+
+{{#needSearch}}
+<div class="search-box-wrapper mt-3 mb-4">
+  <form id="search_form_top-detail" onsubmit="return false;" action="" accept-charset="utf-8" class="position-relative needs-validation" novalidate="">
+    <div class="col-12 col-md-6 pl-0 pr-0 pr-md-3">
+      <div class="d-flex">
+        <div class="position-relative flex-grow-1 form-group mb-0 ">
+          <div class="search-clear" >
+            <i class="fa-solid fa-close"></i>
+          </div>
+          <input id="keywords_top-detail" autocomplete="off" class="py-2 w-100 border text-truncate search-text bg-white" type="text" name="keywords" placeholder="请输入产品货号、名称等关键词" required="" />
+          <div id="error_keywords-detail" class="tip keywords-error invalid-feedback keywordstips-detail" >请输入关键词！</div>
+        </div>
+        <input id="search_btn_top-detail" class="search_btn-detail btn btn-primary border-0 rounded-0 position-relative" type="button" value="">
+      </div>
+    </div>
+  </form>
+
+  <div id="search-result-list-empty" class="search-result-list-empty mt-4" style="display: none;">
+    <div class="px-3">
+      <div class="py-3 fs_20">
+        <i class="iconfont icon-dianji pr-1 fs_18 text-primary"></i>很抱歉，没有找到“<span id="searchedKeywords" class="text-danger"></span>”的相关产品。
+      </div>
+      <div class="row mx-0">
+        <div class="col-lg-8 p-0">
+          <h5 class="fs_16">搜索建议</h5>
+          <p> > 确保所有单词拼写正确 </p>
+          <p> > 尝试不同关键字 </p>
+          <p> > <a class="pl-0 text-primary" href="/about_us-contact_us">联系我们</a>，我们会帮您找到您需要的产品。</p>
+        </div>
+        <div class="col-lg-4 p-0 text-center text-md-right">
+          <img class="img-fluid lazy_load d-inline-block" src="//files.procell.com.cn/assets/images/loading.png" data-src="//files.procell.com.cn/assets/images/search/empty.jpg" style="height: 158px;"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-result-list-detail w-100 mt-4" style="display: none;">
+    <div draggable="false" data-v-c8b454df="">
+      <div style="background: #f9fafb; margin-top: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px;">
+        <div style="text-align: center;">
+          <div style="width: 100%; overflow-x: auto;">
+            <table style="box-sizing: border-box; border-collapse: collapse; width: 100%; text-align: center;" border="1" width="100%" cellpadding="4">
+              <thead>
+                <tr class="firstRow" style="background: #4a8d90;">
+                  <th style="border-style: none none solid none; box-sizing: border-box; font-size: 14.4px; z-index: 10; top: 0px; border-bottom-color: #cacaca; border-bottom-width: 1px; background-color: #4a8d90; text-align: inherit; min-width: 102px; color: #fff;">货号</th>
+                  <th style="border-style: none none solid none; box-sizing: border-box; font-size: 14.4px; z-index: 10; top: 0px; border-bottom-color: #cacaca; border-bottom-width: 1px; background-color: #4a8d90; text-align: inherit; min-width: 270px; color: #fff;">产品名称</th>
+                  <th style="border-style: none none solid none; box-sizing: border-box; font-size: 14.4px; z-index: 10; top: 0px; border-bottom-color: #cacaca; border-bottom-width: 1px; background-color: #4a8d90; text-align: inherit; min-width: 64px; color: #fff;">规格</th>
+                </tr>
+              </thead>
+
+              <tbody id="search-result-list-detail-tbody" class="use-table" style="text-align: center;">
+                <!-- <tr>
+                  <td><a style="color: #00747a; text-decoration: none;" href="/p/mbmmsc-osteogenic-differentiation-medium-pd-003-71613">PD-003</a></td>
+                  <td>小鼠骨髓间充质干细胞成骨诱导分化培养基</td>
+                  <td>200 mL</td>
+                </tr> -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{/needSearch}}
+
+<div id="searchedHidden">searchedHidden</div>
