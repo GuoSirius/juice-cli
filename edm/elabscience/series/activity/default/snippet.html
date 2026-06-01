@@ -1,5 +1,5 @@
 {{#banner}}
-<div class="d-flex align-item-center justify-content-center mb-2">
+<div class="d-flex align-item-center justify-content-center mb-3">
   <img class="{{#mobile}}d-none d-md-block{{/mobile}}{{^mobile}}d-block{{/mobile}} img-fluid m-auto border-0" src="{{pc}}" />
 
   {{#mobile}}
@@ -7,6 +7,10 @@
   {{/mobile}}
 </div>
 {{/banner}}
+
+{{#datetime}}
+<p><strong>活动时间：{{datetime}}</strong></p>
+{{/datetime}}
 
 {{#activity}}
 <div class="row no-gutters" style="background-color: #f9fafb;">
