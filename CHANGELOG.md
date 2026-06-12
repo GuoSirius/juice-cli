@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.12](https://github.com/GuoSirius/juice-cli/compare/v2.4.11...v2.4.12) (2026-06-12)
+
+
+### Chores
+
+* update template ([4b8cd21](https://github.com/GuoSirius/juice-cli/commit/4b8cd21b1648e3c938f6cce112d5e217878b3ef2))
+
 ### [2.4.11](https://github.com/GuoSirius/juice-cli/compare/v2.4.10...v2.4.11) (2026-06-02)
 
 
