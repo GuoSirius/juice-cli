@@ -1,0 +1,22 @@
+<p>
+  <iframe
+    src="
+    {{#youkuId}}https://player.youku.com/embed/{{youkuId}}{{/youkuId}}
+    {{#youtubeId}}https://www.youtube.com/embed/{{youtubeId}}{{/youtubeId}}
+    {{#tencentVid}}https://v.qq.com/txp/iframe/player.html?vid={{tencentVid}}{{/tencentVid}}
+    {{#bilibiliBvid}}https://player.bilibili.com/player.html?bvid={{bilibiliBvid}}{{/bilibiliBvid}}
+    "
+    width="100%"
+    height="450"
+    scrolling="no"
+    frameborder="0"
+    allowpaymentrequest
+    allowfullscreen
+    mozallowfullscreen
+    webkitallowfullscreen
+  ></iframe>
+</p>
+
+{{#content}}
+<p>{{content}}</p>
+{{/content}}

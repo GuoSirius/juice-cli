@@ -1,0 +1,18 @@
+# juice.yaml - 用户配置文件示例
+#
+# 放置位置（优先级从低到高）：
+#   ~/juice.yaml          ← 用户主目录，对所有项目生效
+#   <模板文件目录>/juice.yaml ← 仅对当前项目生效（推荐）
+#   juice -c <此文件>       ← 命令行指定
+#
+# 所有配置项均与 CLI 内置默认值深度合并，未填写的字段自动使用内置值。
+# 完整默认配置见：<CLI安装目录>/defaults/juice.yaml
+
+# ─── 模板变量（Mustache 语法）────────────────────────────────────────────────
+variables:
+  youkuId:
+  youtubeId: xD-zaxlDqYQ
+  tencentVid:
+  bilibiliBvid:
+
+  content: This video is a laboratory operation video for human naive CD8+ T cell isolation, produced by Elabscience®. It primarily demonstrates the process of isolating human naive CD8+ T cells from human blood samples using EasySort™ Human Naïve CD8+T Cell Isolation Kit, including steps such as reagent preparation, sample preparation and processing, and cell isolation. The video is designed to help experimenters better understand the experimental procedure of magnetic bead sorting.
