@@ -63,7 +63,9 @@
 
         <tr>
           <td rowspan="2" style="padding-right: 12px;" class="image-box align-middle">
-            <img src="{{information.image}}" />
+            {{#information.image}}
+            <img src="{{.}}" />
+            {{/information.image}}
           </td>
           <td class="h-0 {{#information.link}}pb-24{{/information.link}}">
             <p>{{information.content}}</p>

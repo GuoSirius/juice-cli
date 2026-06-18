@@ -11,7 +11,7 @@
 # ─── 模板变量（Mustache 语法）────────────────────────────────────────────────
 variables:
   overview:
-    image: https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/Ischemic stroke.webp
+    image: https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/overview.webp
     title: "Low-dose oral nicotinamide mononucleotide for immune thrombocytopenia: a phase 1/2 trial"
     link: https://www.nature.com/articles/s41467-026-70340-3
     publicationDate: April 29 2026
@@ -21,7 +21,8 @@ variables:
     keywords: Immune Thrombocytopenia (ITP), Nicotinamide Mononucleotide (NMN), CD38-NAD<sup>+</sup> Axis
 
   information:
-    image: https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/View More Publications.webp
+    image:
+      - https://pri-cella.oss-ap-southeast-1.aliyuncs.com/edm/202604211419/information.webp
     content: "This study identifies the CD38-NAD<sup>+</sup> axis as an immunometabolic checkpoint in ITP. Anti-CD38 antibodies deplete NAD<sup>+</sup>, driving M1 macrophages and FcγRI upregulation, which increases platelet phagocytosis. Restoring NAD<sup>+</sup> via CD38 inhibition or NMN reprograms macrophages to a resting state and blocks platelet destruction without affecting humoral immunity. In 25 refractory ITP patients, low-dose NMN (450 mg bid × 2 weeks) was well tolerated: 20% achieved platelets ≥50×10<sup>9</sup>/L, and 52% maintained response at week 8, with stable immunoglobulin levels. Thus, targeting CD38-NAD<sup>+</sup> metabolism offers a non-antibody-depleting therapeutic strategy."
     link: https://www.procellsystem.com/resources/publications
     buttonText: View More Publications
