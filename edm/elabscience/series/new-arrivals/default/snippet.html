@@ -44,13 +44,15 @@
           <td></td>
         </tr>
 
+        {{^indicator.needCondensed}}
         <tr>
           <td colspan="3" class="h-12"></td>
         </tr>
+        {{/indicator.needCondensed}}
 
         <tr>
           <td></td>
-          <td class="pb-5" style="padding-left: 6px; padding-right: 6px;">
+          <td class="pb-5" {{^indicator.needCondensed}}style="padding-left: 6px; padding-right: 6px;"{{/indicator.needCondensed}}>
             {{#indicator.lists}}
             <span class="word-cloud-item">
               <a class="cursor-default" style="color: {{color}}" {{#link}}href="{{link}}"{{/link}}>{{text}}</a>

@@ -18,6 +18,7 @@ variables:
   indicator:
     title: Indicators
     className: title
+    needCondensed: false
     lists:
       - text: CD14
         color: "#D100DE"
