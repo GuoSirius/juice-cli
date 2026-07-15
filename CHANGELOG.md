@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.18](https://github.com/GuoSirius/juice-cli/compare/v2.4.17...v2.4.18) (2026-07-15)
+
+
+### Chores
+
+* optimize series ([7a10645](https://github.com/GuoSirius/juice-cli/commit/7a10645256d2b3ca9e48c6dfc736b6b34199b75e))
+
 ### [2.4.17](https://github.com/GuoSirius/juice-cli/compare/v2.4.16...v2.4.17) (2026-07-13)
 
 
