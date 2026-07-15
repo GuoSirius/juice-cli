@@ -132,13 +132,39 @@
   <td></td>
 </tr>
 
+{{^isGridProduct}}
 <tr>
   <td colspan="4" class="h-16"></td>
 </tr>
+{{/isGridProduct}}
 
 <tr>
   <td></td>
   <td colspan="2">
+    {{#isGridProduct}}
+    <table cellspacing="0" cellpadding="0" border="0" class="text-center">
+      <colgroup>
+        <col />
+        <col />
+      </colgroup>
+
+      <tbody>
+        {{#productLists}}
+        <tr>
+          {{#.}}
+          <td class="pt-24">
+            <p class="image-box"><img src="{{image}}" alt="{{name}}" /></p>
+            <p class="pt-8">{{name}}</p>
+            <p class="pt-12"><a href="{{link}}" class="button font-bold decoration-none" style="border-radius: 16px;">{{buttonText}}</a></p>
+          </td>
+          {{/.}}
+        </tr>
+        {{/productLists}}
+      </tbody>
+    </table>
+    {{/isGridProduct}}
+
+    {{^isGridProduct}}
     <table cellspacing="0" cellpadding="0" border="0" class="text-center">
       <colgroup>
         {{#productLists}}
@@ -170,6 +196,7 @@
         </tr>
       </tbody>
     </table>
+    {{/isGridProduct}}
   </td>
   <td></td>
 </tr>

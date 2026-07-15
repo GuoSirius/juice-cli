@@ -52,36 +52,43 @@
   <td colspan="2">
     <table cellspacing="0" cellpadding="0" border="0" class="table-dashed border-separate" style="padding: 16px;">
       <colgroup>
+        {{^information.isHorizontal}}
         <col width="40%" />
+        {{/information.isHorizontal}}
         <col />
       </colgroup>
 
       <tbody class="align-top">
         <tr>
-          <td colspan="2"></td>
+          <td {{^information.isHorizontal}}colspan="2"{{/information.isHorizontal}}></td>
         </tr>
 
         <tr>
-          <td rowspan="2" style="padding-right: 12px;" class="image-box align-middle">
+          <td {{^information.isHorizontal}}rowspan="2"{{/information.isHorizontal}} {{^information.isHorizontal}}style="padding-right: 12px;"{{/information.isHorizontal}} class="image-box align-middle {{#information.isHorizontal}}pb-12{{/information.isHorizontal}}">
             {{#information.image}}
             <img src="{{.}}" />
             {{/information.image}}
           </td>
+        {{#information.isHorizontal}}
+        </tr>
+
+        <tr>
+        {{/information.isHorizontal}}
           <td class="h-0 {{#information.link}}pb-24{{/information.link}}">
             <p>{{information.content}}</p>
           </td>
         </tr>
 
+        {{#information.link}}
         <tr>
-          <td>
-            {{#information.link}}
+          <td class="{{#information.isHorizontal}}text-center{{/information.isHorizontal}}">
             <a href="{{information.link}}" class="button decoration-none">{{information.buttonText}}</a>
-            {{/information.link}}
           </td>
         </tr>
+        {{/information.link}}
 
         <tr>
-          <td colspan="2"></td>
+          <td {{^information.isHorizontal}}colspan="2"{{/information.isHorizontal}}></td>
         </tr>
       </tbody>
     </table>
@@ -106,7 +113,7 @@
 <tr>
   <td></td>
   <td colspan="2">
-    <span class="square-title">Elabscience<sup>&reg;</sup> Product Cited in This Literature</span>
+    <span class="square-title">{{productTitle}}</span>
   </td>
   <td></td>
 </tr>
@@ -126,7 +133,7 @@
 
       <tbody>
         <tr>
-          <td>Product</td>
+          <td>Product Name</td>
           <td>Cat. No.</td>
         </tr>
 

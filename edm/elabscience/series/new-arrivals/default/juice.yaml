@@ -146,6 +146,7 @@ variables:
   # ── 产品列表 ────────────────────────────────────────────────────────────────
   # 使用 {{#productLists}}...{{/productLists}} 循环遍历
   # {{#productLists}}{{name}}{{catNo}}{{/productLists}}
+  isGridProduct: false
   productLists:
     - name: Human TCR Vβ7.1
       image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human TCR Vβ7.1.webp
