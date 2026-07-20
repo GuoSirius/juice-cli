@@ -486,7 +486,7 @@ async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputB
   try {
     processed = juice(renderedHtml, { ...juiceOpts, extraCss });
   } catch (err) {
-    throw new Error(`CSS 内联失败：${err.message}`);
+    throw new Error(`CSS 内联失败：${err.message}`, { cause: err });
   }
   fs.writeFileSync(outPaths.output, processed, 'utf8');
 
@@ -495,7 +495,7 @@ async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputB
   try {
     minified = await minifyHtml(processed, config.minify);
   } catch (err) {
-    throw new Error(`压缩失败：${err.message}`);
+    throw new Error(`压缩失败：${err.message}`, { cause: err });
   }
   fs.writeFileSync(outPaths.minified, minified, 'utf8');
 

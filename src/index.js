@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import juice from 'juice';
 import Mustache from 'mustache';
 import chalk from 'chalk';
@@ -113,7 +113,7 @@ export function loadYaml(filePath) {
   try {
     return yaml.load(fs.readFileSync(filePath, 'utf8')) || {};
   } catch (e) {
-    throw new Error(`配置文件解析失败（${filePath}）：${e.message}`);
+    throw new Error(`配置文件解析失败（${filePath}）：${e.message}`, { cause: e });
   }
 }
 

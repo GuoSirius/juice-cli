@@ -226,3 +226,44 @@
 
 - 全部 14 项（A~N，除 **C** 用户明确保持 `node >= 24` 外）现已落地。
 - `describeVariant`（P2-7）抽取仍是可选的后续打磨项，影响面大（多处展示逻辑），建议单独评估。
+
+---
+
+## 十一、本轮整改（2026-07-20 第四轮：文档清理 + 依赖升级）
+
+用户指令：① N 链接最终指向 GitHub（确认上一轮改 GitHub 是对的）；② 整理/完善文档、删除多余文件；③ 所有 npm 依赖升级到最新版。
+
+### 文档清理（减少歧义）
+
+| 操作 | 文件 | 原因 |
+|---|---|---|
+| 删除 | `TECH_ASSESSMENT.md` | 与 `CODE_REVIEW.md` 高度重叠的冗余评估稿，且未被 git 跟踪，易引发歧义 |
+| 删除 | `dist/` | 空构建产物目录，已被 `.gitignore` 忽略 |
+| 删除 | 根目录 `favicon.ico` | 未被任何代码/文档引用的遗留资产（真实图标在 `icons/juice-icon.ico`；模板内 `href="favicon.ico"` 为相对路径，解析到各自 `edm/<brand>/templates/standard/favicon.ico`） |
+| 完善 | `README.md` / `CLAUDE.md` | 目录结构补齐 `src/constants.js`、`src/format.js`；修正 `CLAUDE.md` 中与现状不符的表述（如 `postinstall` 现已为条件式注册右键菜单） |
+
+### N 链接（最终确认）
+
+`bin/juice.js` 的 help 文本与 `package.json` 的 `repository` 一致指向 **GitHub `GuoSirius`**（`https://github.com/GuoSirius/juice-cli`）。
+
+### 依赖升级（全部 latest，保留 `engines.node >= 24`）
+
+主要大版本跃迁：`commander 14→15`、`eslint 9→10`、`eslint-config-prettier 9→10`、`js-yaml 4→5`、`juice 11→12`、`vitest 2→4`。
+
+升级中暴露并修复的问题：
+1. **`js-yaml@5` 移除默认导出** → `src/index.js` 的 `import yaml from 'js-yaml'` 改为具名导入 `import { load } from 'js-yaml'`（仅用到 `load`）。
+2. **eslint 10 不再内置 `@eslint/js`** → 新增 `@eslint/js` 为 devDependency。
+3. **新规则 `preserve-caught-error`** → `catch` 内 `throw new Error(...)` 需保留原始错误链，补 `{ cause: err }`：`src/index.js` `loadYaml`、`src/snippet.js` CSS 内联与压缩两处。
+4. **`npm install ... -D` 误将运行时依赖挪入 `devDependencies`** → 已手动将 `@inquirer/prompts`/`chalk`/`commander`/`html-minifier-terser`/`js-yaml`/`juice`/`mustache`/`ora` 移回 `dependencies` 块，并以 `--package-lock-only` 重建 `package-lock.json`（确保消费者 `npm install juice-email-cli` 能拿到运行库）。
+
+### 验证结果
+
+- `npm run lint` → 0 error / 0 warning
+- `npm run test:unit` → 4 文件 / 36 用例全过
+- `npm test`（smoke）→ 5/5 通过（`juice -f template.html` 已真实跑通 `juice@12` + `js-yaml@5` + `mustache` 运行时链路）
+- `npm outdated` → 空（直接依赖均已是当天最新）
+
+### 备注
+
+- 至此 A~N 除 **C**（用户明确保持 `node >= 24`）外全部落地；文档体系精简为 `README.md` / `CLAUDE.md` / `CODE_REVIEW.md` 三份，职责分明。
+- 未提交项：`edm/elabscience/series/webinar/default/` 下两个 yaml 为与本次无关的改动，按用户要求不纳入提交；`.workbuddy/` 为内部记录不提交。

@@ -24,7 +24,7 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 
 ## npm 生命周期（自动菜单注册）
 
-- `postinstall` → 自动运行 `juice --install`，注册右键菜单。无管理员权限时静默跳过（reg add 失败不阻塞安装）
+- `postinstall` → 运行 `scripts/postinstall.mjs`：仅当「Windows 桌面 + 有右键菜单场景」时自动执行 `juice --install` 注册；CI / SSH 无头环境静默跳过（不写注册表）
 - `preuninstall` → 自动运行 `juice --uninstall`，移除右键菜单
 - 非 Windows 系统 → `reg` 命令不存在，catch 后静默跳过
 - 包更新时 → postinstall 重新执行，`/f` 覆盖旧的注册表键，确保路径指向最新版本
@@ -32,15 +32,18 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 ## 项目结构
 
 ```
-bin/juice.js              # CLI 入口（Commander.js, CJS）
+bin/juice.js              # CLI 入口（Commander.js, ESM）
 src/index.js              # 核心逻辑：配置加载、模板处理、输出
 src/snippet.js            # 片段组装模式逻辑 + 交互式提示
 src/view.js               # EDM 资源查看/浏览（juice view）
 src/init.js               # EDM 资源拷贝初始化（juice init）
 src/context-menu.js       # Windows 右键菜单注册
+src/constants.js          # 集中常量（文件名/配置名/输出后缀）
+src/format.js             # 统一格式化函数（formatName / fmtBytes）
 defaults/juice.yaml       # CLI 内置默认配置
 edm/                      # EDM 模板库（npm 发布时包含，全局安装后可用）
 scripts/release.mjs       # 发布脚本（ESM，使用 @inquirer/prompts）
+scripts/postinstall.mjs   # 安装后钩子：桌面环境自动注册右键菜单，无头环境跳过
 ```
 
 ### EDM 目录结构

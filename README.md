@@ -424,7 +424,9 @@ juice-cli/
 │   ├── snippet.js             # 片段组装模式 + 交互式提示
 │   ├── view.js                # EDM 资源查看/浏览（juice view）
 │   ├── init.js                # EDM 资源拷贝初始化（juice init）
-│   └── context-menu.js        # Windows 右键菜单注册
+│   ├── context-menu.js        # Windows 右键菜单注册
+│   ├── constants.js           # 集中常量（文件名/配置名/输出后缀等魔法字符串）
+│   └── format.js              # 统一格式化函数（formatName / fmtBytes）
 ├── defaults/
 │   └── juice.yaml             # CLI 内置默认配置
 ├── edm/                       # EDM 模板库（npm 发布时包含）
