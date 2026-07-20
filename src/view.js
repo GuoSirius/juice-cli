@@ -117,6 +117,29 @@ function formatDesc(meta) {
   return meta.description ? ' ' + chalk.dim('— ' + meta.description) : '';
 }
 
+/**
+ * 收集变体的资源清单（snippet.html 与配对配置），供树形展示与拷贝共用，
+ * 消除 printBrandTree / printSubTree / printFlatSnippets / 交互浏览 copy-multi
+ * 四处重复的"找 snippet.html + 找 configs + 算大小"逻辑（评审 P2-7）。
+ *
+ * @param {{path:string, meta?:object, name?:string}} v 变体对象
+ * @returns {{ snippet: {path:string, size:number}|null, configs: Array<{name:string, path:string, isOptimal:boolean}> }}
+ */
+function describeVariant(v) {
+  const snippetPath = path.join(v.path, SNIPPET_FILE);
+  const snippet = fs.existsSync(snippetPath)
+    ? { path: snippetPath, size: fs.statSync(snippetPath).size }
+    : null;
+
+  const configs = findConfigs(v.path).map((c) => ({
+    name: c.name,
+    path: c.path,
+    isOptimal: c.isOptimal,
+  }));
+
+  return { snippet, configs };
+}
+
 function printBrandTree(edmDir, brand, depth) {
   const d = depth || 0;
   const meta = brand.meta;
@@ -143,14 +166,11 @@ function printBrandTree(edmDir, brand, depth) {
       const variants = findSnippetVariants(s.path);
       console.log(ind(d + 2) + '└─ ' + formatName(s.meta, s.name) + formatDesc(s.meta));
       for (const v of variants) {
+        const { snippet, configs } = describeVariant(v);
         const files = [];
-        if (fs.existsSync(path.join(v.path, SNIPPET_FILE))) {
-          const stat = fs.statSync(path.join(v.path, SNIPPET_FILE));
-          files.push('📄 snippet.html (' + fmtBytes(stat.size) + ')');
-        }
-        const configs = findConfigs(v.path);
+        if (snippet) files.push('📄 snippet.html (' + fmtBytes(snippet.size) + ')');
         if (configs.length > 0) {
-          const optimal = configs.find(c => c.isOptimal) || configs[0];
+          const optimal = configs.find((c) => c.isOptimal) || configs[0];
           files.push('⚙️ ' + optimal.name + (optimal.isOptimal ? ' (最优配对)' : ''));
         }
         console.log(ind(d + 3) + '└─ ' + formatName(v.meta, v.name) + formatDesc(v.meta));
@@ -189,14 +209,11 @@ function printSubTree(edmDir, parsed) {
       const variants = findSnippetVariants(parsed.seriesData.path);
       console.log(ind(0) + '📑 ' + formatName(parsed.seriesData.meta, parsed.series) + formatDesc(parsed.seriesData.meta));
       for (const v of variants) {
+        const { snippet, configs } = describeVariant(v);
         const files = [];
-        if (fs.existsSync(path.join(v.path, SNIPPET_FILE))) {
-          const stat = fs.statSync(path.join(v.path, SNIPPET_FILE));
-          files.push('📄 snippet.html (' + fmtBytes(stat.size) + ')');
-        }
-        const configs = findConfigs(v.path);
+        if (snippet) files.push('📄 snippet.html (' + fmtBytes(snippet.size) + ')');
         if (configs.length > 0) {
-          const optimal = configs.find(c => c.isOptimal) || configs[0];
+          const optimal = configs.find((c) => c.isOptimal) || configs[0];
           files.push('⚙️ ' + optimal.name + (optimal.isOptimal ? ' (最优配对)' : ''));
         }
         console.log(ind(1) + '└─ ' + formatName(v.meta, v.name) + formatDesc(v.meta));
@@ -209,12 +226,11 @@ function printSubTree(edmDir, parsed) {
     case 'variant': {
       console.log(chalk.bold(`\n📧 ${brandMeta.name || parsed.brand} / ${parsed.seriesData.meta.name || parsed.series} / ${parsed.variantData.meta.name || parsed.variant}\n`));
       const v = parsed.variantData;
+      const { snippet, configs } = describeVariant(v);
       console.log(ind(0) + '📌 ' + formatName(v.meta, parsed.variant) + formatDesc(v.meta));
-      if (fs.existsSync(path.join(v.path, SNIPPET_FILE))) {
-        const stat = fs.statSync(path.join(v.path, SNIPPET_FILE));
-        console.log(ind(1) + '├─ 📄 snippet.html (' + fmtBytes(stat.size) + ')');
+      if (snippet) {
+        console.log(ind(1) + '├─ 📄 snippet.html (' + fmtBytes(snippet.size) + ')');
       }
-      const configs = findConfigs(v.path);
       for (const c of configs) {
         const marker = c.isOptimal ? chalk.green(' (最优配对)') : '';
         console.log(ind(1) + '├─ ⚙️ ' + c.name + marker);
@@ -282,10 +298,10 @@ function printFlatSnippets(edmDir) {
       for (const v of variants) {
         count++;
         const relPath = b.name + '/' + s.name + '/' + v.name;
-        const filePath = path.join(v.path, SNIPPET_FILE);
+        const { snippet } = describeVariant(v);
         let size = '';
-        if (fs.existsSync(filePath)) {
-          size = ' ' + chalk.gray('(' + fmtBytes(fs.statSync(filePath).size) + ')');
+        if (snippet) {
+          size = ' ' + chalk.gray('(' + fmtBytes(snippet.size) + ')');
         }
         console.log(ind(1) + '└─ 🧩 ' + formatName(v.meta, v.name) + (' ' + chalk.dim('(' + relPath + ')') + size + formatDesc(v.meta)));
       }
@@ -491,13 +507,11 @@ async function interactiveBrowse(edmDir, startParsed) {
         const v = current.variantData;
         title = `${v.meta.name || current.variant} 变体`;
         // Show file info via console.log before the prompt
-        const snipPath = path.join(v.path, SNIPPET_FILE);
+        const { snippet: snipInfo, configs } = describeVariant(v);
         let infoLines = [];
-        if (fs.existsSync(snipPath)) {
-          const stat = fs.statSync(snipPath);
-          infoLines.push('📄 snippet.html (' + fmtBytes(stat.size) + ')');
+        if (snipInfo) {
+          infoLines.push('📄 snippet.html (' + fmtBytes(snipInfo.size) + ')');
         }
-        const configs = findConfigs(v.path);
         for (const c of configs) {
           const marker = c.isOptimal ? ' (最优配对)' : '';
           infoLines.push('⚙️ ' + c.name + marker);
@@ -506,7 +520,7 @@ async function interactiveBrowse(edmDir, startParsed) {
           console.log(chalk.dim('\n  ' + infoLines.join('\n  ') + '\n'));
         }
         // Multi-select copy
-        const hasResources = fs.existsSync(snipPath) || configs.length > 0;
+        const hasResources = !!snipInfo || configs.length > 0;
         let versions;
         const brandDir = path.join(edmDir, current.brand);
         try { versions = findTemplateVersions(brandDir); } catch (_) { versions = []; }
@@ -567,19 +581,19 @@ async function interactiveBrowse(edmDir, startParsed) {
         });
       }
 
-      // Snippet
-      const snipPath = path.join(current.variantData.path, 'snippet.html');
-      if (fs.existsSync(snipPath)) {
+      // Snippet & Config
+      const { snippet: snipInfo, configs } = describeVariant(current.variantData);
+      const snipPath = snipInfo ? snipInfo.path : null;
+      if (snipInfo) {
         copyItems.push({
           name: '🧩 片段 HTML',
           value: 'snippet',
-          description: path.basename(snipPath),
+          description: path.basename(snipInfo.path),
           checked: true,
         });
       }
 
       // Config
-      const configs = findConfigs(current.variantData.path);
       if (configs.length > 0) {
         copyItems.push({
           name: '⚙️ 配置文件',
