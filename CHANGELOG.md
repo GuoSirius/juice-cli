@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.20](https://github.com/GuoSirius/juice-cli/compare/v2.4.19...v2.4.20) (2026-07-20)
+
+
+### Chores
+
+* add webinar series ([7e41367](https://github.com/GuoSirius/juice-cli/commit/7e4136716386f62a00555fe37441cc823b4ab15b))
+
 ### [2.4.19](https://github.com/GuoSirius/juice-cli/compare/v2.4.18...v2.4.19) (2026-07-15)
 
 
