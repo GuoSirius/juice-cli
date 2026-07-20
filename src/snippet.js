@@ -247,6 +247,31 @@ function getBrand(filePath, edmDir) {
   return parts[0] || null;
 }
 
+/**
+ * 解析某个品牌「对应模板」的 favicon.ico 路径。
+ * 候选优先级：指定版本目录 → 品牌首个模板版本的 favicon.ico。
+ * 资源库中 ico 仅存在于模板版本目录，故系列/变体拷贝统一回退到品牌首个模板 ico。
+ * 找不到时返回 null。
+ *
+ * @param {string} brandDir   品牌目录（含 templates/）
+ * @param {string|null} versionDir  可选，指定模板版本目录
+ * @returns {string|null}
+ */
+export function resolveTemplateIcon(brandDir, versionDir = null) {
+  const candidates = [];
+  if (versionDir) candidates.push(path.join(versionDir, 'favicon.ico'));
+  try {
+    const versions = findTemplateVersions(brandDir);
+    if (versions.length > 0) {
+      candidates.push(path.join(versions[0].path, 'favicon.ico'));
+    }
+  } catch (_) {}
+  for (const src of candidates) {
+    if (fs.existsSync(src)) return src;
+  }
+  return null;
+}
+
 // ─── 配置合并 ─────────────────────────────────────────────────────────────────
 
 /**
@@ -694,6 +719,11 @@ async function copyTemplateToCwd(templatePath) {
   const destPath = path.join(process.cwd(), baseName + '.html');
 
   fs.copyFileSync(templatePath, destPath);
+  // 所有拷贝必拷对应模板的 ico（覆盖）：模板同级 favicon.ico
+  const icoSrc = path.join(path.dirname(templatePath), 'favicon.ico');
+  if (fs.existsSync(icoSrc)) {
+    fs.copyFileSync(icoSrc, path.join(process.cwd(), 'favicon.ico'));
+  }
   console.log(chalk.green(`\n✔ 模板已拷贝到：${destPath}`));
 }
 

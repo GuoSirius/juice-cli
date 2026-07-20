@@ -3,9 +3,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 import {
-  resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
+  resolveEdmDir, findBrands, findTemplateVersions,
   findSeriesDirs, filterSeries, findSnippetVariants, findConfigs,
-  promptOutputName,
+  promptOutputName, resolveTemplateIcon,
 } from './snippet.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -359,22 +359,11 @@ function countFiles(dir) {
  * Returns the destination path if an ico was copied, otherwise null.
  */
 function copyIcon(versionDir, brandDir, cwd) {
-  const candidates = [];
-  if (versionDir) candidates.push(path.join(versionDir, 'favicon.ico'));
-  try {
-    const versions = findTemplateVersions(brandDir);
-    if (versions.length > 0) {
-      candidates.push(path.join(versions[0].path, 'favicon.ico'));
-    }
-  } catch (_) {}
-  for (const src of candidates) {
-    if (fs.existsSync(src)) {
-      const dest = path.join(cwd, 'favicon.ico');
-      fs.copyFileSync(src, dest); // always overwrite, never version
-      return dest;
-    }
-  }
-  return null;
+  const src = resolveTemplateIcon(brandDir, versionDir);
+  if (!src) return null;
+  const dest = path.join(cwd, 'favicon.ico');
+  fs.copyFileSync(src, dest); // always overwrite, never version
+  return dest;
 }
 
 /**
@@ -395,13 +384,7 @@ function findIconForFile(srcPath) {
     const sib = path.join(path.dirname(srcPath), 'favicon.ico');
     if (fs.existsSync(sib)) return sib;
   }
-  try {
-    const versions = findTemplateVersions(brandDir);
-    if (versions.length > 0) {
-      return path.join(versions[0].path, 'favicon.ico');
-    }
-  } catch (_) {}
-  return null;
+  return resolveTemplateIcon(brandDir);
 }
 
 function findNextEdmVersion(targetDir) {

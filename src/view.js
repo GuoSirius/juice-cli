@@ -3,7 +3,7 @@ import path from 'path';
 import chalk from 'chalk';
 import {
   resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
-  findSeriesDirs, findSnippetVariants, findConfigs,
+  findSeriesDirs, findSnippetVariants, findConfigs, resolveTemplateIcon,
 } from './snippet.js';
 
 function fmtBytes(b) {
@@ -334,18 +334,10 @@ async function showMenu(title, choices) {
   });
 }
 
-async function showCheckbox(title, choices) {
-  const { checkbox } = await import('@inquirer/prompts');
-  return checkbox({
-    message: title,
-    choices,
-  });
-}
-
 /**
  * Trigger copy via the init module.
  */
-async function copyResource(type, resourcePath, cwd) {
+async function copyResource(type, resourcePath, _cwd) {
   try {
     const { runInitMode } = await import('./init.js');
     if (type === 'template') {
@@ -641,13 +633,11 @@ async function interactiveBrowse(edmDir, startParsed) {
 
           // Always copy the series' corresponding template's ico (overwrite),
           // regardless of which items were selected.
-          if (versions.length > 0) {
-            const isrc = path.join(versions[0].path, 'favicon.ico');
-            if (fs.existsSync(isrc)) {
-              const idest = path.join(cwd, 'favicon.ico');
-              fs.copyFileSync(isrc, idest);
-              console.log(`   ${chalk.cyan('·')} ${cwdRel(idest)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(idest).size) + ')')}`);
-            }
+          const isrc = resolveTemplateIcon(brandDir, versions.length > 0 ? versions[0].path : null);
+          if (isrc) {
+            const idest = path.join(cwd, 'favicon.ico');
+            fs.copyFileSync(isrc, idest);
+            console.log(`   ${chalk.cyan('·')} ${cwdRel(idest)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(idest).size) + ')')}`);
           }
           console.log();
         }

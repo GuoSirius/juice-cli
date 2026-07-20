@@ -146,16 +146,17 @@ program
   .command('init [path]')
   .description('从 EDM 资源拷贝模板/片段/配置到当前目录')
   .option('-t, --template <file-path>', '仅拷贝模板 HTML 文件')
-  .option('-s, --snippet <file-path>', '仅拷贝片段 HTML 文件')
-  .option('-c, --config <file-path>', '仅拷贝配置 YAML 文件')
   .option('--all [target]', '拷贝整个 EDM 资源目录到当前或指定目录')
   .action(safeAction(async (initPath, options) => {
+    // -s/--snippet 与 -c/--config 与根命令同名，作为全局选项解析，
+    // 故从此处的 program.opts() 读取（见下方根命令定义）。
+    const globalOpts = program.opts();
     const { runInitMode } = await import('../src/init.js');
     await runInitMode({
       initPath: initPath || null,
       template: options.template || null,
-      snippet: options.snippet || null,
-      config: options.config || null,
+      snippet: globalOpts.snippet || null,
+      config: globalOpts.config || null,
       all: options.all !== undefined ? (options.all || true) : null,
     });
   }));
