@@ -463,7 +463,7 @@ function resolveSnippetOutputPaths(outputBaseName, cwd) {
  *   3. Juice CSS 内联 → .output.html
  *   4. 压缩 → .minified.html
  */
-async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputBaseName }) {
+async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputBaseName, layers = [] }) {
   const templateHtml = fs.readFileSync(templatePath, 'utf8');
   const snippetRaw = fs.readFileSync(snippetPath, 'utf8');
   const outPaths = resolveSnippetOutputPaths(outputBaseName, cwd);
@@ -510,8 +510,7 @@ async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputB
 
   // 5. 报告
   const rel = (p) => './' + path.relative(cwd, p);
-  const layers = config._layers || [];
-  const layerLines = layers.length > 0
+  const layerLines = (layers || []).length > 0
     ? layers.map((l) => `    ${chalk.gray('·')} ${l.label}`).join('\n') + '\n'
     : '';
 
@@ -865,7 +864,6 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
   }
 
   const { config, layers } = buildSnippetConfig({ priorityConfigPath, cliConfigPath });
-  config._layers = layers;
 
   // 确定输出文件名
   const defaultBaseName = outputName || path.parse(templatePath).name;
@@ -901,6 +899,7 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
     config,
     cwd: process.cwd(),
     outputBaseName,
+    layers,
   });
 }
 
@@ -1002,7 +1001,6 @@ async function runInteractiveMode({ config: cliConfigPath }) {
 
   // 8. 构建配置并执行
   const { config, layers } = buildSnippetConfig({ priorityConfigPath, cliConfigPath });
-  config._layers = layers;
 
   await assembleSnippet({
     snippetPath: snippetPath,
@@ -1010,6 +1008,7 @@ async function runInteractiveMode({ config: cliConfigPath }) {
     config,
     cwd: process.cwd(),
     outputBaseName,
+    layers,
   });
 }
 
