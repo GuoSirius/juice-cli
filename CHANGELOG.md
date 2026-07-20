@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/GuoSirius/juice-cli/compare/v2.4.20...v3.0.0) (2026-07-20)
+
+
+### Bug Fixes
+
+* **index:** 普通模式输出冲突时自动版本号，与片段模式统一 (P3-6) ([138131e](https://github.com/GuoSirius/juice-cli/commit/138131ee28d1cbb774b528b4f77846e98ea7d812))
+* **init:** 所有拷贝均强制覆盖拷贝对应模板的 favicon.ico ([aa13551](https://github.com/GuoSirius/juice-cli/commit/aa13551bcd245d302ea3af78692812b8319a6aa3))
+* **snippet:** findTemplateVersions 多模板时优先选 template.html 并发警告 (P3-3) ([2e4530e](https://github.com/GuoSirius/juice-cli/commit/2e4530e386afab6a055ab7b368a3f84f4612964a))
+
+
+### Chores
+
+* 文档清理与依赖升级到最新版 ([a790f33](https://github.com/GuoSirius/juice-cli/commit/a790f331f821d0ed20c336cad7c05be2da495d23))
+
+
+### Refactoring
+
+* 代码评审整改（参数解析/ico 统一/工程质量） ([de3ad76](https://github.com/GuoSirius/juice-cli/commit/de3ad768c810ecde3b44f2dbcf5b14f9b332cab7))
+* 收尾代码评审 F/I/J/L/M/N ([35725b6](https://github.com/GuoSirius/juice-cli/commit/35725b6c933a44faebaf7531a317406e610c7c1d))
+* **snippet:** 去除 assembleSnippet 的 config._layers hack (P3-4) ([0997eb6](https://github.com/GuoSirius/juice-cli/commit/0997eb62a5066c2103893660fb8bfa19838e00cd))
+* **view:** 抽取 describeVariant 消除变体资源清单的重复逻辑 (P2-7) ([7f220fb](https://github.com/GuoSirius/juice-cli/commit/7f220fb3836e50a4a1dacc0c0112241c0f4a105a))
+
+
+### Documentation
+
+* 评审文档收尾 + 提交 webinar 配置 + 忽略 .workbuddy ([1bc1d3d](https://github.com/GuoSirius/juice-cli/commit/1bc1d3d1b5cc41e8bccef1bb573628b46433e6f8))
+
+
+### CI/CD
+
+* 合并 CI 与发布流程，验证不通过则终止发布 ([3b962ec](https://github.com/GuoSirius/juice-cli/commit/3b962eca9bedf85c73233f7531d9e5c2d0f5ab91))
+
 ### [2.4.20](https://github.com/GuoSirius/juice-cli/compare/v2.4.19...v2.4.20) (2026-07-20)
 
 
