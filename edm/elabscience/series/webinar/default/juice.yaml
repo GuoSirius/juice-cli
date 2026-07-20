@@ -1,0 +1,72 @@
+# juice.yaml - 用户配置文件示例
+#
+# 放置位置（优先级从低到高）：
+#   ~/juice.yaml          ← 用户主目录，对所有项目生效
+#   <模板文件目录>/juice.yaml ← 仅对当前项目生效（推荐）
+#   juice -c <此文件>       ← 命令行指定
+#
+# 所有配置项均与 CLI 内置默认值深度合并，未填写的字段自动使用内置值。
+# 完整默认配置见：<CLI安装目录>/defaults/juice.yaml
+
+# ─── 模板变量（Mustache 语法）────────────────────────────────────────────────
+variables:
+  banner:
+    image: https://file.elabscience.com/edm/202607201058/banner.webp
+    link: https://www.elabscience.com/events/webinars
+    keywords: CAR-T cell therapy has achieved remarkable success in hematological malignancies. However, translating this success to solid tumors remains challenging due to antigen heterogeneity, limited tumor infiltration, an immunosuppressive tumor microenvironment, and insufficient CAR-T cell persistence.
+    keywords2: Join our upcoming webinar, we will discuss how advances in cell engineering, synthetic biology, and immune modulation are helping researchers develop more effective CAR-T strategies for solid tumors.
+
+  introduction:
+    title: What You'll Get
+    className: color-black
+    itemClassName: color-primary1
+    lists:
+      - <span class="color-blue text-size-[12px]">·</span>Key biological barriers limiting CAR-T efficacy in solid tumors
+      - <span class="color-blue text-size-[12px]">·</span>Emerging approaches to improve CAR-T cell persistence and tumor targeting
+      - <span class="color-blue text-size-[12px]">·</span>Innovations in receptor design and immune modulation
+      - <span class="color-blue text-size-[12px]">·</span>Strategies for remodeling the tumor microenvironment
+      - <span class="color-blue text-size-[12px]">·</span>Translational considerations for next-generation cellular therapies
+    buttonLink:
+    buttonText: Register for the Webinar
+
+  reserve:
+    title: Secure Your Spot
+    className: color-black
+    itemClassName: color-primary1
+    lists:
+      - Next-Generation CAR-T Cell Engineering for Solid Tumors
+      - Overcoming Biological Barriers and Advancing Clinical Translation
+    weekDate: Thursday, 6 August 2026
+    time: 12:00 CEST (Berlin, UTC+2); 14:00 GST (Dubai, UTC+4); 15:30 IST (Delhi, UTC+5:30); 17:00 WIB (Jakarta, UTC+7); 06:00 EDT (New York, UTC−4)
+    buttonLink:
+    buttonText: Reserve Your Seat
+
+  gift: Participants will receive a digital certificate of participation and will also have the opportunity to receive a free sample.
+
+  speaker:
+    avatar: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202607201058/speaker.webp
+    username: Dr. Faheem Ahmed Khan
+    jobTitle: Senior Researcher, Stem Cell & Cancer Research (SCCR) Indonesia
+    registerLink:
+    email: events@elabscience.com
+
+  # ── 产品列表 ────────────────────────────────────────────────────────────────
+  # 使用 {{#productLists}}...{{/productLists}} 循环遍历
+  # {{#productLists}}{{name}}{{catNo}}{{/productLists}}
+  isGridProduct: false
+  productLists:
+    - name: Human TCR Vβ7.1
+      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human TCR Vβ7.1.webp
+      link: https://www.elabscience.com/search?keywords=Human TCR V%CE%B27.1
+      buttonText: Learn More
+
+    - name: Human TCR Vβ1
+      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human TCR Vβ1.webp
+      link: https://www.elabscience.com/search?keywords=Human TCR V%CE%B21
+      buttonText: Learn More
+
+    - name: Human CD151
+      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human CD151.webp
+      link: https://www.elabscience.com/search?keywords=Human CD151
+      buttonText: Learn More
+      width: 20%

@@ -1,0 +1,186 @@
+<tr>
+  <td colspan="4" class="image-box">
+    {{#banner.link}}
+    <a href="{{banner.link}}">
+      <img src="{{banner.image}}" />
+    </a>
+    {{/banner.link}}
+
+    {{^banner.link}}
+    <img src="{{banner.image}}" />
+    {{/banner.link}}
+  </td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0">
+      <colgroup>
+        <col />
+      </colgroup>
+
+      <tbody>
+        <tr>
+          <td>{{banner.keywords}}</td>
+        </tr>
+
+        {{#banner.keywords2}}
+        <tr>
+          <td class="h-12"></td>
+        </tr>
+
+        <tr>
+          <td>{{banner.keywords2}}</td>
+        </tr>
+        {{/banner.keywords2}}
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2" class="bg-gray" style="padding: 0 16px 16px;">
+    <table cellspacing="0" cellpadding="0" border="0">
+      <colgroup>
+        <col />
+      </colgroup>
+
+      <tbody class="align-middle">
+        <tr>
+          <td class="relative">
+            <div class="bg-white absolute" style="width: calc(100% + 32px); height: 20px; left: -16px;"></div>
+            <span class="title relative {{introduction.className}}">{{introduction.title}}</span>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="h-12"></td>
+        </tr>
+
+        <tr>
+          <td>
+            {{#introduction.lists}}
+            <p class="pb-5 {{introduction.itemClassName}}">{{.}}</p>
+            {{/introduction.lists}}
+          </td>
+        </tr>
+
+        {{#introduction.buttonText}}
+        <tr>
+          <td class="text-right pt-18">
+            <a {{#introduction.buttonLink}}href="{{introduction.buttonLink}}"{{/introduction.buttonLink}} class="button-linear-orange font-bold decoration-none">{{introduction.buttonText}}</a>
+          </td>
+        </tr>
+        {{/introduction.buttonText}}
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2" class="bg-gray" style="padding: 0 16px 16px;">
+    <table cellspacing="0" cellpadding="0" border="0">
+      <colgroup>
+        <col />
+      </colgroup>
+
+      <tbody class="align-middle">
+        <tr>
+          <td class="relative">
+            <div class="bg-white absolute" style="width: calc(100% + 32px); height: 20px; left: -16px;"></div>
+            <span class="title relative {{reserve.className}}">{{reserve.title}}</span></td>
+        </tr>
+
+        <tr>
+          <td class="h-12"></td>
+        </tr>
+
+        <tr>
+          <td>
+            {{#reserve.lists}}
+            <p class="pb-5 {{reserve.itemClassName}}">{{.}}</p>
+            {{/reserve.lists}}
+            <p class="pb-5 calendar {{reserve.itemClassName}}"><strong>{{reserve.weekDate}}</strong></p>
+            <p class="pb-5 {{reserve.itemClassName}}"><span class="clock" style="display: inline-block; width: 18px; height: 24px; margin-bottom: -3px;"></span>{{reserve.time}}</p>
+          </td>
+        </tr>
+
+        {{#reserve.buttonText}}
+        <tr>
+          <td class="text-right pt-18">
+            <a {{#reserve.buttonLink}}href="{{reserve.buttonLink}}"{{/reserve.buttonLink}} class="button-linear-orange font-bold decoration-none">{{reserve.buttonText}}</a>
+          </td>
+        </tr>
+        {{/reserve.buttonText}}
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
+
+{{#gift}}
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <p class="color-blue gift">{{gift}}</p>
+  </td>
+  <td></td>
+</tr>
+{{/gift}}
+
+<tr>
+  <td colspan="4" class="h-24"></td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan="2">
+    <table cellspacing="0" cellpadding="0" border="0">
+      <colgroup>
+        <col width="25%" />
+        <col />
+      </colgroup>
+
+      <tbody class="align-top">
+        <tr>
+          <td rowspan="2" style="padding-right: 12px;" class="image-box">
+            <img src="{{speaker.avatar}}" />
+          </td>
+          <td class="h-0 pb-24">
+            <p><strong class="text-size-[27px] font-bold" style="margin-right: 20px;">Speaker</strong> {{speaker.username}}</p>
+            <p>{{speaker.jobTitle}}</p>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <p class="pb-3">Limited seats available. <a {{#speaker.registerLink}}href="{{speaker.registerLink}}"{{/speaker.registerLink}} class="finger color-blue">Register in 30 seconds</a></p>
+            <p>Questions? {{#speaker.email}}<a href="mailto:{{speaker.email}}" class="color-blue">{{speaker.email}}</a>{{/speaker.email}}</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+</tr>
