@@ -227,9 +227,24 @@ function resolveOutputPaths(inputFile, config) {
   const parsed = path.parse(path.resolve(inputFile));
   const ns = (config.output && config.output.normalSuffix) || DEFAULT_NORMAL_SUFFIX;
   const ms = (config.output && config.output.minifiedSuffix) || DEFAULT_MINIFIED_SUFFIX;
+  const dir = parsed.dir;
+  const conflicts = (base) =>
+    fs.existsSync(path.join(dir, base + ns)) || fs.existsSync(path.join(dir, base + ms));
+
+  // 输出冲突时自动版本号（与片段模式 findNextVersion 的 -vN 约定一致，P3-6）
+  let base = parsed.name;
+  if (conflicts(base)) {
+    let v = 1;
+    do {
+      v++;
+      base = `${parsed.name}-v${v}`;
+    } while (conflicts(base));
+  }
   return {
-    normal: path.join(parsed.dir, parsed.name + ns),
-    minified: path.join(parsed.dir, parsed.name + ms),
+    base,
+    versioned: base !== parsed.name,
+    normal: path.join(dir, base + ns),
+    minified: path.join(dir, base + ms),
   };
 }
 
@@ -279,17 +294,14 @@ export async function run({ file, config: configPath }) {
     const resultHtml = processTemplate(inputFile, config);
 
     const outPaths = resolveOutputPaths(inputFile, config);
+    if (outPaths.versioned) {
+      spinner.warn(chalk.yellow(`输出文件已存在，自动重命名为：${path.basename(outPaths.normal)}`));
+    }
 
     spinner.text = '写出 .output.html ...';
-    if (fs.existsSync(outPaths.normal)) {
-      spinner.warn(chalk.yellow(`目标文件已存在，将覆盖：${outPaths.normal}`));
-    }
     fs.writeFileSync(outPaths.normal, resultHtml, encoding);
 
     spinner.text = '写出 .minified.html ...';
-    if (fs.existsSync(outPaths.minified)) {
-      spinner.warn(chalk.yellow(`目标文件已存在，将覆盖：${outPaths.minified}`));
-    }
     const minified = await minifyHtml(resultHtml, config.minify);
     fs.writeFileSync(outPaths.minified, minified, encoding);
 
