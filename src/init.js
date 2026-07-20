@@ -76,6 +76,15 @@ async function directCopy(srcPath, cwd) {
 
   console.log(chalk.green('\n✔ 已拷贝：'));
   console.log(`   ${chalk.cyan('·')} ./${path.relative(cwd, dest)}  ${chalk.gray('(' + fmtBytes(stat.size) + ')')}`);
+
+  // Always copy the corresponding template's ico (overwrite), even for
+  // snippet/config copies whose source has no sibling ico.
+  const iconSrc = findIconForFile(resolved);
+  if (iconSrc && fs.existsSync(iconSrc)) {
+    const iconDest = path.join(cwd, 'favicon.ico');
+    fs.copyFileSync(iconSrc, iconDest);
+    console.log(`   ${chalk.cyan('·')} ./${path.relative(cwd, iconDest)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(iconDest).size) + ')')}`);
+  }
   console.log();
 }
 
@@ -255,8 +264,6 @@ async function interactiveInit(edmDir, cwd) {
           const destName = outputBaseName + path.extname(version.templatePath);
           const dest = copyFileToCwd(version.templatePath, cwd, destName);
           console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-          const icon = copyIcon(variant ? variant.path : null, version.path, brand.path, cwd);
-          if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
         }
 
         if (selected.includes('snippet') && variant) {
@@ -273,6 +280,11 @@ async function interactiveInit(edmDir, cwd) {
           const dest = copyFileToCwd(cfgPath, cwd, 'juice.yaml');
           console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
         }
+
+        // Always copy the corresponding template's ico (overwrite), regardless of
+        // which items were selected.
+        const icon = copyIcon(version.path, brand.path, cwd);
+        if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
 
         console.log();
         if (selected.includes('snippet') && selected.includes('template')) {
@@ -338,9 +350,16 @@ function countFiles(dir) {
   return count;
 }
 
-function copyIcon(variantDir, versionDir, brandDir, cwd) {
+/**
+ * Always copy the corresponding template's favicon.ico into CWD, overwriting any
+ * existing file. Source priority: the template version dir → the brand's first
+ * template version. (The variant's own ico is intentionally NOT used — the user
+ * wants the series' corresponding *template* ico.)
+ *
+ * Returns the destination path if an ico was copied, otherwise null.
+ */
+function copyIcon(versionDir, brandDir, cwd) {
   const candidates = [];
-  if (variantDir) candidates.push(path.join(variantDir, 'favicon.ico'));
   if (versionDir) candidates.push(path.join(versionDir, 'favicon.ico'));
   try {
     const versions = findTemplateVersions(brandDir);
@@ -351,10 +370,37 @@ function copyIcon(variantDir, versionDir, brandDir, cwd) {
   for (const src of candidates) {
     if (fs.existsSync(src)) {
       const dest = path.join(cwd, 'favicon.ico');
-      fs.copyFileSync(src, dest);
+      fs.copyFileSync(src, dest); // always overwrite, never version
       return dest;
     }
   }
+  return null;
+}
+
+/**
+ * Resolve the favicon.ico that should accompany a directly-copied file
+ * (--template / --snippet / --config, or a browse copy action).
+ *  - Template file (.../templates/<version>/x.html): its sibling ico.
+ *  - Series/snippet/config file: the brand's first template version ico.
+ * Returns the ico source path, or null if it cannot be resolved.
+ */
+function findIconForFile(srcPath) {
+  const normalized = srcPath.replace(/\\/g, '/');
+  const parts = normalized.split('/');
+  const idx = parts.indexOf('edm');
+  if (idx === -1 || idx + 1 >= parts.length) return null;
+  const brandDir = parts.slice(0, idx + 2).join(path.sep);
+
+  if (normalized.includes('/templates/')) {
+    const sib = path.join(path.dirname(srcPath), 'favicon.ico');
+    if (fs.existsSync(sib)) return sib;
+  }
+  try {
+    const versions = findTemplateVersions(brandDir);
+    if (versions.length > 0) {
+      return path.join(versions[0].path, 'favicon.ico');
+    }
+  } catch (_) {}
   return null;
 }
 
@@ -492,8 +538,6 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
         const destName = outputBaseName + path.extname(tplPath);
         const dest = copyFileToCwd(tplPath, cwd, destName);
         console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
-        const icon = copyIcon(parsed.variantData.path, version.path, brandDir, cwd);
-        if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
       }
       if (selected.includes('snippet') && fs.existsSync(snipPath)) {
         const destName = outputBaseName + '-snippet' + path.extname(snipPath);
@@ -506,6 +550,11 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
         const dest = copyFileToCwd(cfgPath, cwd, 'juice.yaml');
         console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(配置, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
       }
+
+      // Always copy the corresponding template's ico (overwrite).
+      const icon = copyIcon(version.path, brandDir, cwd);
+      if (icon) console.log(`   ${chalk.cyan('·')} ${cwdRel(icon)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(icon).size) + ')')}`);
+
       console.log();
     } else {
       console.error(chalk.red(
