@@ -12,7 +12,7 @@
 variables:
   banner:
     image: https://file.elabscience.com/edm/202607201058/banner.webp
-    link: https://www.elabscience.com/events/webinars
+    link:
     keywords: CAR-T cell therapy has achieved remarkable success in hematological malignancies. However, translating this success to solid tumors remains challenging due to antigen heterogeneity, limited tumor infiltration, an immunosuppressive tumor microenvironment, and insufficient CAR-T cell persistence.
     keywords2: Join our upcoming webinar, we will discuss how advances in cell engineering, synthetic biology, and immune modulation are helping researchers develop more effective CAR-T strategies for solid tumors.
 
@@ -53,20 +53,3 @@ variables:
   # ── 产品列表 ────────────────────────────────────────────────────────────────
   # 使用 {{#productLists}}...{{/productLists}} 循环遍历
   # {{#productLists}}{{name}}{{catNo}}{{/productLists}}
-  isGridProduct: false
-  productLists:
-    - name: Human TCR Vβ7.1
-      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human TCR Vβ7.1.webp
-      link: https://www.elabscience.com/search?keywords=Human TCR V%CE%B27.1
-      buttonText: Learn More
-
-    - name: Human TCR Vβ1
-      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human TCR Vβ1.webp
-      link: https://www.elabscience.com/search?keywords=Human TCR V%CE%B21
-      buttonText: Learn More
-
-    - name: Human CD151
-      image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202605201608/Human CD151.webp
-      link: https://www.elabscience.com/search?keywords=Human CD151
-      buttonText: Learn More
-      width: 20%

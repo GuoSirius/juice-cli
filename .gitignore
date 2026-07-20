@@ -32,3 +32,6 @@ coverage/
 # Misc
 *.bak
 *.tmp
+
+# Agent internal memory (not project source)
+.workbuddy/

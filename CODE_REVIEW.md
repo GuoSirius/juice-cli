@@ -267,3 +267,25 @@
 
 - 至此 A~N 除 **C**（用户明确保持 `node >= 24`）外全部落地；文档体系精简为 `README.md` / `CLAUDE.md` / `CODE_REVIEW.md` 三份，职责分明。
 - 未提交项：`edm/elabscience/series/webinar/default/` 下两个 yaml 为与本次无关的改动，按用户要求不纳入提交；`.workbuddy/` 为内部记录不提交。
+
+---
+
+## 十二、最终收尾（2026-07-20：describeVariant + P3 残余项）
+
+用户最终要求：除 **C**（保持 `node >= 24`）外所有建议项必须完成。此前 A~N 主体已完成，仅余 **M 项里的 `describeVariant`（P2-7）** 与 **Section 五中 N 项未覆盖的 3 个 P3 小项**。本轮按"逐个做 → 验证 → 提交"节奏收尾，现已全部落地。
+
+| # | 状态 | 说明 |
+|---|---|---|
+| M·P2-7 | ✅ | `view.js` 新增 `describeVariant(v)` 统一返回 `{ snippet, configs }`，消除 `printBrandTree` / `printSubTree`(series+variant) / `printFlatSnippets` / 交互浏览 `copy-multi` 五处重复的"找 snippet.html + 找 configs + 算大小"逻辑。 |
+| N·P3-3 | ✅ | `findTemplateVersions` 多 `.html` 文件时优先选 `template.html` 并发 `console.warn`，避免静默选错模板（原静默取 `htmlFiles[0]`）。新增单测覆盖多 / 单 html 场景。 |
+| N·P3-4 | ✅ | 去除 `assembleSnippet` 通过 `config._layers` 传递内部状态的 hack，改为显式 `layers` 参数，删除两处 `config._layers = layers` 写入，调用方透传 `layers`。 |
+| N·P3-6 | ✅ | 普通模式写 `.output.html` / `.minified.html` 原仅警告后覆盖，与片段模式 UX 不一致；`resolveOutputPaths` 现于冲突时按 `-vN` 约定（同 `snippet.findNextVersion`）自动重命名，避免静默覆盖用户文件。 |
+
+### 验证结果
+- `npm run lint` → 0 error / 0 warning
+- `npm run test:unit` → 4 文件 / **38 用例**全过（新增 `findTemplateVersions` 多 / 单 html 2 例）
+- `npm test`（smoke）→ 5/5 通过
+- 真实 CLI：连续两次 `juice -f`（同目录）实测第二次生成 `t-v2.output.html` 而非覆盖；`view --snippets/--templates` 正常；`describeVariant` 重构后展示与拷贝无回归。
+
+### 结论
+**A~N 除 C（node >= 24，用户明确保持）外，全部建议项已落地并验证通过。**
