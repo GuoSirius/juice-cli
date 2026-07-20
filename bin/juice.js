@@ -119,7 +119,7 @@ program
       +-- 选择资源拷贝              ->  juice init
       +-- 打开 PowerShell          （仅已安装 pwsh 时出现）
 
-更多信息：https://gitee.com/siriussupreme/juice-cli
+更多信息：https://github.com/GuoSirius/juice-cli
 `);
 
 // ─── Subcommand: juice view ─────────────────────────────────────────────

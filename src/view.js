@@ -1,14 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
+import { Separator } from '@inquirer/prompts';
 import {
   resolveEdmDir, loadMeta, findBrands, findTemplateVersions,
   findSeriesDirs, findSnippetVariants, findConfigs, resolveTemplateIcon,
+  findVersionForSeries,
 } from './snippet.js';
-
-function fmtBytes(b) {
-  return b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`;
-}
+import { fmtBytes, formatName } from './format.js';
+import { ICON_FILE, SNIPPET_FILE } from './constants.js';
 
 /**
  * Copy src to dest, auto-versioning (-v1, -v2, ...) if dest exists.
@@ -113,13 +113,6 @@ function parseViewPath(rawPath, edmDir) {
 
 function ind(n) { return '  '.repeat(n); }
 
-function formatName(meta, dirName) {
-  const display = meta.name || dirName;
-  return display !== dirName
-    ? chalk.bold.cyan(display) + ' ' + chalk.gray(`(${dirName})`)
-    : chalk.bold.cyan(dirName);
-}
-
 function formatDesc(meta) {
   return meta.description ? ' ' + chalk.dim('— ' + meta.description) : '';
 }
@@ -151,8 +144,8 @@ function printBrandTree(edmDir, brand, depth) {
       console.log(ind(d + 2) + '└─ ' + formatName(s.meta, s.name) + formatDesc(s.meta));
       for (const v of variants) {
         const files = [];
-        if (fs.existsSync(path.join(v.path, 'snippet.html'))) {
-          const stat = fs.statSync(path.join(v.path, 'snippet.html'));
+        if (fs.existsSync(path.join(v.path, SNIPPET_FILE))) {
+          const stat = fs.statSync(path.join(v.path, SNIPPET_FILE));
           files.push('📄 snippet.html (' + fmtBytes(stat.size) + ')');
         }
         const configs = findConfigs(v.path);
@@ -197,8 +190,8 @@ function printSubTree(edmDir, parsed) {
       console.log(ind(0) + '📑 ' + formatName(parsed.seriesData.meta, parsed.series) + formatDesc(parsed.seriesData.meta));
       for (const v of variants) {
         const files = [];
-        if (fs.existsSync(path.join(v.path, 'snippet.html'))) {
-          const stat = fs.statSync(path.join(v.path, 'snippet.html'));
+        if (fs.existsSync(path.join(v.path, SNIPPET_FILE))) {
+          const stat = fs.statSync(path.join(v.path, SNIPPET_FILE));
           files.push('📄 snippet.html (' + fmtBytes(stat.size) + ')');
         }
         const configs = findConfigs(v.path);
@@ -217,8 +210,8 @@ function printSubTree(edmDir, parsed) {
       console.log(chalk.bold(`\n📧 ${brandMeta.name || parsed.brand} / ${parsed.seriesData.meta.name || parsed.series} / ${parsed.variantData.meta.name || parsed.variant}\n`));
       const v = parsed.variantData;
       console.log(ind(0) + '📌 ' + formatName(v.meta, parsed.variant) + formatDesc(v.meta));
-      if (fs.existsSync(path.join(v.path, 'snippet.html'))) {
-        const stat = fs.statSync(path.join(v.path, 'snippet.html'));
+      if (fs.existsSync(path.join(v.path, SNIPPET_FILE))) {
+        const stat = fs.statSync(path.join(v.path, SNIPPET_FILE));
         console.log(ind(1) + '├─ 📄 snippet.html (' + fmtBytes(stat.size) + ')');
       }
       const configs = findConfigs(v.path);
@@ -289,7 +282,7 @@ function printFlatSnippets(edmDir) {
       for (const v of variants) {
         count++;
         const relPath = b.name + '/' + s.name + '/' + v.name;
-        const filePath = path.join(v.path, 'snippet.html');
+        const filePath = path.join(v.path, SNIPPET_FILE);
         let size = '';
         if (fs.existsSync(filePath)) {
           size = ' ' + chalk.gray('(' + fmtBytes(fs.statSync(filePath).size) + ')');
@@ -498,7 +491,7 @@ async function interactiveBrowse(edmDir, startParsed) {
         const v = current.variantData;
         title = `${v.meta.name || current.variant} 变体`;
         // Show file info via console.log before the prompt
-        const snipPath = path.join(v.path, 'snippet.html');
+        const snipPath = path.join(v.path, SNIPPET_FILE);
         let infoLines = [];
         if (fs.existsSync(snipPath)) {
           const stat = fs.statSync(snipPath);
@@ -531,7 +524,7 @@ async function interactiveBrowse(edmDir, startParsed) {
       console.log(chalk.yellow('  该层级无可用内容。'));
     }
 
-    const allChoices = [...choices, ...(navChoices.length > 0 ? [new (await import('@inquirer/prompts')).Separator()] : []), ...navChoices];
+    const allChoices = [...choices, ...(navChoices.length > 0 ? [new Separator()] : []), ...navChoices];
     const result = await showMenu(title, allChoices);
 
     if (result === 'exit' || !result) break;
@@ -563,10 +556,11 @@ async function interactiveBrowse(edmDir, startParsed) {
       // Template
       let versions;
       try { versions = findTemplateVersions(brandDir); } catch (_) { versions = []; }
-      if (versions.length > 0) {
-        const tplPath = versions[0].templatePath;
+      const version = findVersionForSeries(versions, current.series);
+      if (version) {
+        const tplPath = version.templatePath;
         copyItems.push({
-          name: `📋 模板 HTML（${versions[0].meta.name || versions[0].name}）`,
+          name: `📋 模板 HTML（${version.meta.name || version.name}）`,
           value: 'template',
           description: path.basename(tplPath),
           checked: true,
@@ -604,7 +598,7 @@ async function interactiveBrowse(edmDir, startParsed) {
 
         if (selected.length > 0) {
           // Include template version in default name for clarity
-          const versionName = versions.length > 0 ? versions[0].name : 'template';
+          const versionName = version ? version.name : 'template';
           const defaultBaseName = `${current.brand}-${versionName}-${current.series}-${current.variant}`;
           const { promptOutputName: pn } = await import('./snippet.js');
           const outputBaseName = await pn(defaultBaseName, process.cwd());
@@ -612,8 +606,8 @@ async function interactiveBrowse(edmDir, startParsed) {
           const cwdRel = (p) => './' + path.relative(cwd, p);
 
           console.log(chalk.green('\n✔ 已拷贝：'));
-          if (selected.includes('template') && versions.length > 0) {
-            const src = versions[0].templatePath;
+          if (selected.includes('template') && version) {
+            const src = version.templatePath;
             const dest = path.join(cwd, outputBaseName + path.extname(src));
             const actual = copyFileSafe(src, dest);
             console.log(`   ${chalk.cyan('·')} ${cwdRel(actual)}  ${chalk.gray('(模板, ' + fmtBytes(fs.statSync(actual).size) + ')')}`);
@@ -633,9 +627,9 @@ async function interactiveBrowse(edmDir, startParsed) {
 
           // Always copy the series' corresponding template's ico (overwrite),
           // regardless of which items were selected.
-          const isrc = resolveTemplateIcon(brandDir, versions.length > 0 ? versions[0].path : null);
+          const isrc = resolveTemplateIcon(brandDir, version ? version.path : null);
           if (isrc) {
-            const idest = path.join(cwd, 'favicon.ico');
+            const idest = path.join(cwd, ICON_FILE);
             fs.copyFileSync(isrc, idest);
             console.log(`   ${chalk.cyan('·')} ${cwdRel(idest)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(idest).size) + ')')}`);
           }
@@ -653,13 +647,7 @@ async function interactiveBrowse(edmDir, startParsed) {
 // ─── Main Entry ──────────────────────────────────────────────────────────────
 
 async function runViewMode({ viewPath, interactive, scope }) {
-  let edmDir;
-  try {
-    edmDir = resolveEdmDir();
-  } catch (err) {
-    console.error(chalk.red(`\n  ✘ ${err.message}\n`));
-    process.exit(1);
-  }
+  const edmDir = resolveEdmDir();
 
   if (interactive) {
     let startParsed = null;
@@ -807,7 +795,7 @@ async function runViewMode({ viewPath, interactive, scope }) {
         for (const s of sList) {
           const variants = findSnippetVariants(s.path);
           for (const v of variants) {
-            const snipPath = path.join(v.path, 'snippet.html');
+            const snipPath = path.join(v.path, SNIPPET_FILE);
             if (fs.existsSync(snipPath)) {
               allSnippets.push({ brand: b, series: s, variant: v, snippetPath: snipPath });
             }
@@ -881,12 +869,7 @@ async function runViewMode({ viewPath, interactive, scope }) {
     }
 
     if (viewPath) {
-      try {
-        startParsed = parseViewPath(viewPath, edmDir);
-      } catch (err) {
-        console.error(chalk.red(`\n  ✘ ${err.message}\n`));
-        process.exit(1);
-      }
+      startParsed = parseViewPath(viewPath, edmDir);
     }
 
     await interactiveBrowse(edmDir, startParsed || null);
@@ -909,13 +892,7 @@ async function runViewMode({ viewPath, interactive, scope }) {
   }
 
   if (viewPath) {
-    let parsed;
-    try {
-      parsed = parseViewPath(viewPath, edmDir);
-    } catch (err) {
-      console.error(chalk.red(`\n  ✘ ${err.message}\n`));
-      process.exit(1);
-    }
+    const parsed = parseViewPath(viewPath, edmDir);
     printSubTree(edmDir, parsed);
     return;
   }

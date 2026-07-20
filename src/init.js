@@ -5,23 +5,14 @@ import chalk from 'chalk';
 import {
   resolveEdmDir, findBrands, findTemplateVersions,
   findSeriesDirs, filterSeries, findSnippetVariants, findConfigs,
-  promptOutputName, resolveTemplateIcon,
+  promptOutputName, resolveTemplateIcon, findVersionForSeries,
 } from './snippet.js';
+import { fmtBytes, formatName } from './format.js';
+import { ICON_FILE, SNIPPET_FILE } from './constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function fmtBytes(b) {
-  return b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`;
-}
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatName(meta, dirName) {
-  const display = meta.name || dirName;
-  return display !== dirName
-    ? chalk.bold.cyan(display) + ' ' + chalk.gray(`(${dirName})`)
-    : chalk.bold.cyan(dirName);
-}
 
 /**
  * Copy a single file to CWD with an optional custom name.
@@ -81,7 +72,7 @@ async function directCopy(srcPath, cwd) {
   // snippet/config copies whose source has no sibling ico.
   const iconSrc = findIconForFile(resolved);
   if (iconSrc && fs.existsSync(iconSrc)) {
-    const iconDest = path.join(cwd, 'favicon.ico');
+    const iconDest = path.join(cwd, ICON_FILE);
     fs.copyFileSync(iconSrc, iconDest);
     console.log(`   ${chalk.cyan('·')} ./${path.relative(cwd, iconDest)}  ${chalk.gray('(图标, ' + fmtBytes(fs.statSync(iconDest).size) + ')')}`);
   }
@@ -186,7 +177,7 @@ async function interactiveInit(edmDir, cwd) {
       });
 
       if (variant) {
-        const snipPath = path.join(variant.path, 'snippet.html');
+        const snipPath = path.join(variant.path, SNIPPET_FILE);
         if (fs.existsSync(snipPath)) {
           copyItems.push({
             name: '🧩 片段 HTML',
@@ -267,7 +258,7 @@ async function interactiveInit(edmDir, cwd) {
         }
 
         if (selected.includes('snippet') && variant) {
-          const snipPath = path.join(variant.path, 'snippet.html');
+          const snipPath = path.join(variant.path, SNIPPET_FILE);
           const destName = outputBaseName + '-snippet' + path.extname(snipPath);
           const dest = copyFileToCwd(snipPath, cwd, destName);
           console.log(`   ${chalk.cyan('·')} ${cwdRel(dest)}  ${chalk.gray('(片段, ' + fmtBytes(fs.statSync(dest).size) + ')')}`);
@@ -288,7 +279,7 @@ async function interactiveInit(edmDir, cwd) {
 
         console.log();
         if (selected.includes('snippet') && selected.includes('template')) {
-          const snipFile = outputBaseName + '-snippet' + path.extname(path.join(variant.path, 'snippet.html'));
+          const snipFile = outputBaseName + '-snippet' + path.extname(path.join(variant.path, SNIPPET_FILE));
           const tplFile = outputBaseName + path.extname(version.templatePath);
           console.log(
             '  ' + chalk.dim('💡 下一步：') + '\n' +
@@ -361,7 +352,7 @@ function countFiles(dir) {
 function copyIcon(versionDir, brandDir, cwd) {
   const src = resolveTemplateIcon(brandDir, versionDir);
   if (!src) return null;
-  const dest = path.join(cwd, 'favicon.ico');
+  const dest = path.join(cwd, ICON_FILE);
   fs.copyFileSync(src, dest); // always overwrite, never version
   return dest;
 }
@@ -381,7 +372,7 @@ function findIconForFile(srcPath) {
   const brandDir = parts.slice(0, idx + 2).join(path.sep);
 
   if (normalized.includes('/templates/')) {
-    const sib = path.join(path.dirname(srcPath), 'favicon.ico');
+    const sib = path.join(path.dirname(srcPath), ICON_FILE);
     if (fs.existsSync(sib)) return sib;
   }
   return resolveTemplateIcon(brandDir);
@@ -405,8 +396,7 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
       try { return resolveEdmDir(); } catch (_) { return null; }
     })();
     if (!edmDir) {
-      console.error(chalk.red('\n  ✘ EDM 资源库不存在，无法拷贝。\n'));
-      process.exit(1);
+      throw new Error('EDM 资源库不存在，无法拷贝。');
     }
     const target = all === true ? cwd : path.resolve(all);
     const destDir = path.join(target, 'edm');
@@ -464,30 +454,17 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
 
   if (initPath) {
     const { parseViewPath } = await import('./view.js');
-    let edmDir;
-    try {
-      edmDir = resolveEdmDir();
-    } catch (err) {
-      console.error(chalk.red(`\n  ✘ ${err.message}\n`));
-      process.exit(1);
-    }
-
-    let parsed;
-    try {
-      parsed = parseViewPath(initPath, edmDir);
-    } catch (err) {
-      console.error(chalk.red(`\n  ✘ ${err.message}\n`));
-      process.exit(1);
-    }
+    const edmDir = resolveEdmDir();
+    const parsed = parseViewPath(initPath, edmDir);
 
     if (parsed.type === 'template') {
       await directCopy(parsed.versionData.templatePath, cwd);
     } else if (parsed.type === 'variant') {
-      const snipPath = path.join(parsed.variantData.path, 'snippet.html');
+      const snipPath = path.join(parsed.variantData.path, SNIPPET_FILE);
       const configs = findConfigs(parsed.variantData.path);
       const brandDir = path.join(edmDir, parsed.brand);
       const versions = findTemplateVersions(brandDir);
-      const version = versions[0];
+      const version = findVersionForSeries(versions, parsed.series);
       const tplPath = version.templatePath;
 
       const copyItems = [
@@ -540,23 +517,14 @@ async function runInitMode({ initPath, template, snippet, config, all }) {
 
       console.log();
     } else {
-      console.error(chalk.red(
-        `\n  ✘ 无法从「${initPath}」初始化。\n` +
-        `  请指定：<brand>/templates/<version> 或 <brand>/<series>/<variant>\n`
-      ));
-      process.exit(1);
+      throw new Error(
+        `无法从「${initPath}」初始化。请指定：<brand>/templates/<version> 或 <brand>/<series>/<variant>`
+      );
     }
     return;
   }
 
-  let edmDir;
-  try {
-    edmDir = resolveEdmDir();
-  } catch (err) {
-    console.error(chalk.red(`\n  ✘ ${err.message}\n`));
-    process.exit(1);
-  }
-  await interactiveInit(edmDir, cwd);
+  await interactiveInit(resolveEdmDir(), cwd);
 }
 
 export { runInitMode };

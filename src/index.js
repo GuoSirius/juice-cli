@@ -8,6 +8,14 @@ import Mustache from 'mustache';
 import chalk from 'chalk';
 import ora from 'ora';
 import { minify as htmlMinify } from 'html-minifier-terser';
+import { fmtBytes } from './format.js';
+import {
+  DEFAULT_CONFIG_NAMES,
+  META_FILE,
+  META_FILE_ALT,
+  DEFAULT_NORMAL_SUFFIX,
+  DEFAULT_MINIFIED_SUFFIX,
+} from './constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -27,42 +35,10 @@ function loadDefaultConfig() {
 
 const CODE_DEFAULTS = loadDefaultConfig();
 
-const HOME_CANDIDATES = [
-  path.join(os.homedir(), 'juice.yaml'),
-  path.join(os.homedir(), 'juice.yml'),
-];
+const HOME_CANDIDATES = DEFAULT_CONFIG_NAMES.map((n) => path.join(os.homedir(), n));
 
 export function resolveHomeConfig() {
   return HOME_CANDIDATES.find((c) => fs.existsSync(c)) || null;
-}
-
-// ─── 配置文件查找 ─────────────────────────────────────────────────────────────
-
-export function findConfigs(configPath, inputFile) {
-  let highPriorityPath = null;
-
-  if (configPath) {
-    const resolved = path.resolve(configPath);
-    if (!fs.existsSync(resolved)) {
-      throw new Error(`指定的配置文件不存在：${resolved}`);
-    }
-    highPriorityPath = resolved;
-  }
-  else if (inputFile) {
-    const inputDir = path.dirname(path.resolve(inputFile));
-    const fileCandidates = [
-      path.join(inputDir, 'juice.yaml'),
-      path.join(inputDir, 'juice.yml'),
-    ];
-    for (const c of fileCandidates) {
-      if (fs.existsSync(c)) {
-        highPriorityPath = c;
-        break;
-      }
-    }
-  }
-
-  return { highPriorityPath, homePath: resolveHomeConfig() };
 }
 
 // ─── 列出目录下所有配置文件 ─────────────────────────────────────────────────────
@@ -71,7 +47,7 @@ function findYamlConfigFiles(dir) {
   if (!fs.existsSync(dir)) return [];
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   return entries
-    .filter(e => e.isFile() && /\.ya?ml$/i.test(e.name) && e.name !== '_meta.yaml' && e.name !== '_meta.yml')
+    .filter(e => e.isFile() && /\.ya?ml$/i.test(e.name) && e.name !== META_FILE && e.name !== META_FILE_ALT)
     .map(e => ({ name: e.name, path: path.join(dir, e.name) }));
 }
 
@@ -83,7 +59,7 @@ async function resolveProjectConfig(inputFile) {
 
   if (yamlFiles.length === 1) {
     const name = yamlFiles[0].name;
-    if (name === 'juice.yaml' || name === 'juice.yml') {
+    if (DEFAULT_CONFIG_NAMES.includes(name)) {
       return yamlFiles[0].path;
     }
   }
@@ -104,7 +80,7 @@ async function resolveProjectConfig(inputFile) {
     };
   });
 
-  const defaultIdx = yamlFiles.findIndex(f => f.name === 'juice.yaml');
+  const defaultIdx = yamlFiles.findIndex(f => f.name === DEFAULT_CONFIG_NAMES[0]);
 
   choices.push(
     { name: '  [自定义] 输入其他路径...', value: { type: 'custom' } },
@@ -169,6 +145,17 @@ export function deepMerge(base, ...overrides) {
 
 // ─── 配置合并 ─────────────────────────────────────────────────────────────────
 
+/**
+ * 将一组配置层（低优先级 → 高优先级）深度合并为最终配置。
+ * 普通模式与片段模式共用此函数，避免两套合并逻辑随迭代漂移。
+ * @param {{label:string, data:object}[]} layers
+ * @returns {{config:object, layers:object[]}}
+ */
+export function mergeConfigLayers(layers) {
+  const config = deepMerge(...layers.map((l) => l.data));
+  return { config, layers };
+}
+
 export function buildConfig(highPriorityPath, homePath) {
   const layers = [];
 
@@ -182,8 +169,7 @@ export function buildConfig(highPriorityPath, homePath) {
     layers.push({ label: `优先配置 (${highPriorityPath})`, data: loadYaml(highPriorityPath) });
   }
 
-  const config = deepMerge(...layers.map((l) => l.data));
-  return { config, layers };
+  return mergeConfigLayers(layers);
 }
 
 // ─── HTML 模板处理 ────────────────────────────────────────────────────────────
@@ -239,8 +225,8 @@ export async function minifyHtml(html, minifyConfig) {
 
 function resolveOutputPaths(inputFile, config) {
   const parsed = path.parse(path.resolve(inputFile));
-  const ns = (config.output && config.output.normalSuffix) || '.output.html';
-  const ms = (config.output && config.output.minifiedSuffix) || '.minified.html';
+  const ns = (config.output && config.output.normalSuffix) || DEFAULT_NORMAL_SUFFIX;
+  const ms = (config.output && config.output.minifiedSuffix) || DEFAULT_MINIFIED_SUFFIX;
   return {
     normal: path.join(parsed.dir, parsed.name + ns),
     minified: path.join(parsed.dir, parsed.name + ms),
@@ -250,12 +236,12 @@ function resolveOutputPaths(inputFile, config) {
 // ─── 格式化 ───────────────────────────────────────────────────────────────────
 
 export function fmtSize(str) {
-  const b = Buffer.byteLength(str, 'utf8');
-  return b < 1024 ? `${b} B` : `${(b / 1024).toFixed(1)} KB`;
+  return fmtBytes(Buffer.byteLength(str, 'utf8'));
 }
 
 export function savings(original, minified) {
   const orig = Buffer.byteLength(original, 'utf8');
+  if (orig === 0) return '0%';
   const mini = Buffer.byteLength(minified, 'utf8');
   return (((orig - mini) / orig) * 100).toFixed(1) + '%';
 }
@@ -268,8 +254,7 @@ export async function run({ file, config: configPath }) {
   try {
     const inputFile = path.resolve(file);
     if (!fs.existsSync(inputFile)) {
-      spinner.fail(chalk.red(`输入文件不存在：${inputFile}`));
-      process.exit(1);
+      throw new Error(`输入文件不存在：${inputFile}`);
     }
 
     let highPriorityPath = null;

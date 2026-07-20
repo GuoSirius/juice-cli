@@ -7,13 +7,20 @@ import Mustache from 'mustache';
 import chalk from 'chalk';
 import {
   loadYaml,
-  deepMerge,
   collectExtraCss,
   minifyHtml,
   fmtSize,
   savings,
   DEFAULT_CONFIG_PATH,
+  mergeConfigLayers,
 } from './index.js';
+import {
+  ICON_FILE,
+  SNIPPET_FILE,
+  META_FILE,
+  META_FILE_ALT,
+  DEFAULT_CONFIG_NAMES,
+} from './constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -43,7 +50,7 @@ function resolveEdmDir() {
  * 文件不存在时回退为 { name: 目录名, description: "" }。
  */
 function loadMeta(dir) {
-  const metaPath = path.join(dir, '_meta.yaml');
+  const metaPath = path.join(dir, META_FILE);
   if (fs.existsSync(metaPath)) {
     try {
       const raw = loadYaml(metaPath);
@@ -78,6 +85,30 @@ function filterSeries(allSeries, versionMeta) {
   }
 
   return allSeries;
+}
+
+/**
+ * 根据系列名挑选匹配的模板版本。
+ * 规则：遍历各版本 _meta.yaml 的 series.allow / series.block，
+ * 命中（allow 包含 / block 不含）该系列名则优先；否则回退到品牌的第一个模板版本。
+ * 这与 interactiveInit 中用户显式选定版本的行为保持一致，修正了
+ * 非交互拷贝路径（init <path> / view copy-multi）恒取 versions[0] 可能拷错模板的问题。
+ *
+ * @param {{name,path,meta}[]} versions 模板版本列表
+ * @param {string|null} seriesName 系列名
+ * @returns {{name,path,meta}|null}
+ */
+export function findVersionForSeries(versions, seriesName) {
+  if (!versions || versions.length === 0) return null;
+  if (!seriesName) return versions[0];
+  const matched = versions.find((v) => {
+    const s = v.meta && v.meta.series;
+    if (!s) return false;
+    if (Array.isArray(s.allow)) return s.allow.includes(seriesName);
+    if (Array.isArray(s.block)) return !s.block.includes(seriesName);
+    return false;
+  });
+  return matched || versions[0];
 }
 
 // ─── EDM 目录扫描 ───────────────────────────────────────────────────────────────
@@ -166,7 +197,7 @@ function findSnippetVariants(seriesDir) {
     const variants = [];
     for (const d of subDirs) {
       const dir = path.join(seriesDir, d.name);
-      const snipPath = path.join(dir, 'snippet.html');
+      const snipPath = path.join(dir, SNIPPET_FILE);
       if (fs.existsSync(snipPath)) {
         const meta = loadMeta(dir);
         variants.push({ name: d.name, path: dir, meta, hasSnippet: true });
@@ -176,7 +207,7 @@ function findSnippetVariants(seriesDir) {
   }
 
   // 单变体模式：系列目录自身就是变体
-  const snipPath = path.join(seriesDir, 'snippet.html');
+  const snipPath = path.join(seriesDir, SNIPPET_FILE);
   if (fs.existsSync(snipPath)) {
     const meta = loadMeta(seriesDir);
     return [{ name: 'default', path: seriesDir, meta, hasSnippet: true }];
@@ -192,7 +223,7 @@ function findSnippetVariants(seriesDir) {
 function findConfigs(variantDir, sourceLabel) {
   const yamlFiles = findYamlFiles(variantDir);
   return yamlFiles
-    .filter((f) => f.name !== '_meta.yaml' && f.name !== '_meta.yml')
+    .filter((f) => f.name !== META_FILE && f.name !== META_FILE_ALT)
     .map((f) => ({
       name: f.name,
       path: f.path,
@@ -259,11 +290,11 @@ function getBrand(filePath, edmDir) {
  */
 export function resolveTemplateIcon(brandDir, versionDir = null) {
   const candidates = [];
-  if (versionDir) candidates.push(path.join(versionDir, 'favicon.ico'));
+  if (versionDir) candidates.push(path.join(versionDir, ICON_FILE));
   try {
     const versions = findTemplateVersions(brandDir);
     if (versions.length > 0) {
-      candidates.push(path.join(versions[0].path, 'favicon.ico'));
+      candidates.push(path.join(versions[0].path, ICON_FILE));
     }
   } catch (_) {}
   for (const src of candidates) {
@@ -291,10 +322,7 @@ function buildSnippetConfig({ priorityConfigPath, cliConfigPath }) {
   layers.push({ label: 'CLI 内置默认值', data: defaults });
 
   // 2. 用户主目录
-  const homeCandidates = [
-    path.join(os.homedir(), 'juice.yaml'),
-    path.join(os.homedir(), 'juice.yml'),
-  ];
+  const homeCandidates = DEFAULT_CONFIG_NAMES.map((n) => path.join(os.homedir(), n));
   const homePath = homeCandidates.find((c) => fs.existsSync(c));
   if (homePath) {
     layers.push({ label: `用户目录配置 (${homePath})`, data: loadYaml(homePath) });
@@ -314,8 +342,7 @@ function buildSnippetConfig({ priorityConfigPath, cliConfigPath }) {
     layers.push({ label: `CLI 指定配置 (${resolved})`, data: loadYaml(resolved) });
   }
 
-  const config = deepMerge(...layers.map((l) => l.data));
-  return { config, layers };
+  return mergeConfigLayers(layers);
 }
 
 // ─── 内容插入 ─────────────────────────────────────────────────────────────────
@@ -720,7 +747,7 @@ async function copyTemplateToCwd(templatePath) {
 
   fs.copyFileSync(templatePath, destPath);
   // 所有拷贝必拷对应模板的 ico（覆盖）：模板同级 favicon.ico
-  const icoSrc = path.join(path.dirname(templatePath), 'favicon.ico');
+  const icoSrc = path.join(path.dirname(templatePath), ICON_FILE);
   if (fs.existsSync(icoSrc)) {
     fs.copyFileSync(icoSrc, path.join(process.cwd(), 'favicon.ico'));
   }
@@ -766,8 +793,7 @@ async function promptConfirm(summary) {
 async function runSnippetMode({ snippet, template, config: cliConfigPath, outputName }) {
   const snippetPath = path.resolve(snippet);
   if (!fs.existsSync(snippetPath)) {
-    console.error(chalk.red(`片段文件不存在：${snippetPath}`));
-    process.exit(1);
+    throw new Error(`片段文件不存在：${snippetPath}`);
   }
 
   let templatePath;
@@ -775,8 +801,7 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
   if (template) {
     templatePath = path.resolve(template);
     if (!fs.existsSync(templatePath)) {
-      console.error(chalk.red(`模板文件不存在：${templatePath}`));
-      process.exit(1);
+      throw new Error(`模板文件不存在：${templatePath}`);
     }
   } else {
     // 交互式选择：品牌 → 模板版本
