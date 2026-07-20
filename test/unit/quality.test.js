@@ -1,9 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { findVersionForSeries } from '../../src/snippet.js';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { findVersionForSeries, findTemplateVersions } from '../../src/snippet.js';
 import { mergeConfigLayers } from '../../src/index.js';
 import { savings } from '../../src/index.js';
 import { fmtBytes, formatName } from '../../src/format.js';
 import * as C from '../../src/constants.js';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 describe('findVersionForSeries (L: 按系列匹配模板版本)', () => {
   const versions = [
@@ -90,5 +93,37 @@ describe('constants.js (J: 集中魔法字符串)', () => {
     expect(C.SNIPPET_OUTPUT_SUFFIXES).toEqual(['.raw.html', '.html', '.output.html', '.minified.html']);
     expect(C.DEFAULT_NORMAL_SUFFIX).toBe('.output.html');
     expect(C.DEFAULT_MINIFIED_SUFFIX).toBe('.minified.html');
+  });
+});
+
+describe('findTemplateVersions (P3-3: 多 html 取 template.html)', () => {
+  let tmp;
+  beforeEach(() => {
+    tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'juice-ver-'));
+    const v = path.join(tmp, 'templates', 'v1');
+    fs.mkdirSync(v, { recursive: true });
+    fs.writeFileSync(path.join(v, 'a.html'), '<html></html>');
+    fs.writeFileSync(path.join(v, 'template.html'), '<html>tmpl</html>');
+    fs.writeFileSync(path.join(v, '_meta.yaml'), 'name: v1\n');
+  });
+  afterEach(() => {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('含多个 .html 时优先选用 template.html', () => {
+    const versions = findTemplateVersions(tmp);
+    expect(versions).toHaveLength(1);
+    expect(path.basename(versions[0].templatePath)).toBe('template.html');
+  });
+
+  it('仅一个 .html 时正常返回该文件', () => {
+    const v2 = path.join(tmp, 'templates', 'v2');
+    fs.mkdirSync(v2, { recursive: true });
+    fs.writeFileSync(path.join(v2, 'only.html'), '<html></html>');
+    fs.writeFileSync(path.join(v2, '_meta.yaml'), 'name: v2\n');
+    const versions = findTemplateVersions(tmp);
+    expect(versions).toHaveLength(2);
+    const v2ver = versions.find((x) => x.name === 'v2');
+    expect(path.basename(v2ver.templatePath)).toBe('only.html');
   });
 });

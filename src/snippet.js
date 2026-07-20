@@ -146,11 +146,20 @@ function findTemplateVersions(brandDir) {
     const meta = loadMeta(dir);
     const htmlFiles = findFiles(dir, /\.html?$/i);
     if (htmlFiles.length === 0) continue;
+    // 多 html 文件时优先选用 template.html，避免静默选错（评审 P3-3）
+    let templateFile = htmlFiles[0];
+    if (htmlFiles.length > 1) {
+      const named = htmlFiles.find((f) => /(^|[/\\])template\.html?$/i.test(f.path));
+      if (named) templateFile = named;
+      console.warn(chalk.yellow(
+        `⚠ 版本「${e.name}」含 ${htmlFiles.length} 个 .html 文件，已选用 ${path.basename(templateFile.path)}`
+      ));
+    }
     versions.push({
       name: e.name,
       path: dir,
       meta,
-      templatePath: htmlFiles[0].path,
+      templatePath: templateFile.path,
     });
   }
   if (versions.length === 0) {
