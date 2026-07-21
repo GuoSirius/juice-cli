@@ -12,7 +12,7 @@
 variables:
   banner:
     image: https://file.elabscience.com/edm/202607201058/banner.webp
-    link:
+    link: https://www.elabscience.com/events/webinars/2109
     keywords: CAR-T cell therapy has achieved remarkable success in hematological malignancies. However, translating this success to solid tumors remains challenging due to antigen heterogeneity, limited tumor infiltration, an immunosuppressive tumor microenvironment, and insufficient CAR-T cell persistence.
     keywords2: Join our upcoming webinar, we will discuss how advances in cell engineering, synthetic biology, and immune modulation are helping researchers develop more effective CAR-T strategies for solid tumors.
 
@@ -26,7 +26,7 @@ variables:
       - <span class="color-blue text-size-[12px]">·</span>Innovations in receptor design and immune modulation
       - <span class="color-blue text-size-[12px]">·</span>Strategies for remodeling the tumor microenvironment
       - <span class="color-blue text-size-[12px]">·</span>Translational considerations for next-generation cellular therapies
-    buttonLink:
+    buttonLink: https://www.elabscience.com/events/webinars/2109
     buttonText: Register for the Webinar
 
   reserve:
@@ -38,7 +38,7 @@ variables:
       - Overcoming Biological Barriers and Advancing Clinical Translation
     weekDate: Thursday, 6 August 2026
     time: 12:00 CEST (Berlin, UTC+2); 14:00 GST (Dubai, UTC+4); 15:30 IST (Delhi, UTC+5:30); 17:00 WIB (Jakarta, UTC+7); 06:00 EDT (New York, UTC−4)
-    buttonLink:
+    buttonLink: https://events.teams.microsoft.com/event/4be890b6-3d74-4f23-960b-ff7adccca9d9@493ee340-6918-46c6-bc3c-52bca3d37e35
     buttonText: Reserve Your Seat
 
   gift: Participants will receive a digital certificate of participation and will also have the opportunity to receive a free sample.
@@ -47,7 +47,7 @@ variables:
     avatar: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202607201058/speaker.webp
     username: Dr. Faheem Ahmed Khan
     jobTitle: Senior Researcher, Stem Cell & Cancer Research (SCCR) Indonesia
-    registerLink:
+    registerLink: https://events.teams.microsoft.com/event/4be890b6-3d74-4f23-960b-ff7adccca9d9@493ee340-6918-46c6-bc3c-52bca3d37e35
     email: events@elabscience.com
 
   # ── 产品列表 ────────────────────────────────────────────────────────────────
