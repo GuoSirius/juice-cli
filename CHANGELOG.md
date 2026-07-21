@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/GuoSirius/juice-cli/compare/v3.0.0...v3.1.0) (2026-07-21)
+
+
+### Features
+
+* **release:** 本地发布脚本增加发布前校验闸门 ([d36ae20](https://github.com/GuoSirius/juice-cli/commit/d36ae202d55af82dcda1df1bd9f8e86f186ae304))
+
 ## [3.0.0](https://github.com/GuoSirius/juice-cli/compare/v2.4.20...v3.0.0) (2026-07-20)
 
 
