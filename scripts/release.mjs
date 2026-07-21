@@ -73,6 +73,27 @@ function runStandardVersion(releaseType) {
   }
 }
 
+function runValidation() {
+  const checks = [
+    { name: 'Lint', cmd: 'npm run lint' },
+    { name: 'Unit tests', cmd: 'npm run test:unit' },
+    { name: 'Smoke test', cmd: 'npm test' },
+  ];
+
+  console.log(chalk.blue('\nRunning pre-release validation...'));
+  for (const check of checks) {
+    console.log(chalk.blue(`  → ${check.name}...`));
+    try {
+      execSync(check.cmd, { stdio: 'inherit', cwd: path.join(__dirname, '..') });
+    } catch (error) {
+      console.error(chalk.red(`\n✖ ${check.name} failed. Aborting release.`));
+      console.error(chalk.red('Please fix the reported issues above, then run the release again.'));
+      process.exit(1);
+    }
+  }
+  console.log(chalk.green('  ✓ All validation checks passed.\n'));
+}
+
 function pushToRemote() {
   try {
     console.log(chalk.blue('Pushing to origin...'));
@@ -129,6 +150,8 @@ async function main() {
       console.log('');
     }
   }
+
+  runValidation();
 
   const releaseTypes = [
     {
