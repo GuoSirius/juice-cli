@@ -14,7 +14,8 @@ variables:
     image: https://file.elabscience.com/edm/202607201058/banner.webp
     link: https://www.elabscience.com/events/webinars/2109
     keywords: CAR-T cell therapy has achieved remarkable success in hematological malignancies. However, translating this success to solid tumors remains challenging due to antigen heterogeneity, limited tumor infiltration, an immunosuppressive tumor microenvironment, and insufficient CAR-T cell persistence.
-    keywords2: Join our upcoming webinar, we will discuss how advances in cell engineering, synthetic biology, and immune modulation are helping researchers develop more effective CAR-T strategies for solid tumors.
+    moreKeywords:
+      - Join our upcoming webinar, we will discuss how advances in cell engineering, synthetic biology, and immune modulation are helping researchers develop more effective CAR-T strategies for solid tumors.
 
   introduction:
     title: What You'll Get
