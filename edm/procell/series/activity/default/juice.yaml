@@ -31,7 +31,7 @@ variables:
         note:
           - 注1：除BCA蛋白浓度测定试剂盒（货号：E-BC-K318-M）外，全线可参与；免价格最低款
           - 注2：除BCA蛋白浓度测定试剂盒（货号：E-BC-K318-M）外，全线可参与；免价格最低款
-        link: "#test1"
+        link: '#test1'
         buttonText: 点击查看流式抗体及流式辅助试剂活动产品列表
 
       - title: 活动2：代谢检测试剂盒 立减150元
@@ -41,17 +41,18 @@ variables:
         note:
           - 注1：除BCA蛋白浓度测定试剂盒（货号：E-BC-K318-M）外，全线可参与；免价格最低款
           - 注2：除BCA蛋白浓度测定试剂盒（货号：E-BC-K318-M）外，全线可参与；免价格最低款
-        link: "#test2"
+        link: '#test2'
         buttonText: 点击查看流式抗体及流式辅助试剂活动产品列表
 
       - title: 活动3：代谢检测试剂盒 立减150元
         condition:
           - 购买≥100 Assays磁珠分选试剂盒：加价800元换购磁力架1个
           - 累计购买≥200 Assays磁珠分选试剂盒：加价500元换购磁力架1个
-        link: "#test3"
+        link: '#test3'
         # buttonText: 点击查看流式抗体及流式辅助试剂活动产品列表
 
   needSearch: true
+  placeholder: 请输入产品货号、名称等关键词
 
   # ── 产品列表 ────────────────────────────────────────────────────────────────
   # 使用 {{#productLists}}...{{/productLists}} 循环遍历
