@@ -417,7 +417,8 @@ juice init
 
 - [x] `juice -f edm/elabscience/templates/standard/template.html` — 普通模式正常
 - [x] `juice -f template.html`（同级仅有 juice.yaml）— 自动使用，无需交互
-- [ ] `juice -f template.html`（同级有多个配置 / 非默认配置）— 交互式选择配置（需 TTY）
+- [ ] `juice -f template.html`（同级有多个配置 / 非默认配置）— 交互式选择配置（非 TTY 自动选最优配置，isTTY 守卫）
+- [x] `juice -f template.html`（输出已存在）— TTY 提示 [覆盖/版本/重命名]，非 TTY 默认覆盖 + 警告（与片段模式统一）
 - [x] `juice -s edm/elabscience/series/literature/default/snippet.html -f edm/elabscience/templates/standard/template.html` — 命令行片段模式，同品牌输出 4 文件
 - [x] `juice -s edm/elabscience/series/literature/default/snippet.html -f edm/procell/templates/standard/template.html` — 跨品牌警告
 - [x] `juice view` — 完整资源树
@@ -432,3 +433,56 @@ juice init
 - [ ] `juice --install` / `juice --uninstall` — 右键菜单含文件/文件夹/空白处所有选项
 - [x] `juice -c defaults/juice.yaml --snippet ...` — 配置文件覆盖生效
 - [x] `edm/procell/` 品牌（暂无片段文件夹）— 交互模式优雅提示
+
+---
+
+## 输出冲突处理（统一）
+
+模板模式（`run`）与片段模式（`runSnippetMode` / `promptOutputName`）共用同一个冲突处理函数 `promptOutputConflict(defaultBase, dir, suffixes, opts)`，位于 `src/index.js`，保证两种生成模式行为完全一致：
+
+| 场景 | 行为 |
+|---|---|
+| 无冲突 | 直接写入，不提示 |
+| TTY（交互） | 提示 `[覆盖(默认) / 版本 / 重新输入文件名]`，回车即覆盖；选「版本」按 `-vN` 约定生成新文件；选「重命名」进入输入循环直到无冲突 |
+| 非 TTY（CI/管道） | 按 `defaultAction` 处理（默认 `overwrite`，可选 `version`），输出黄色警告，**绝不卡死** |
+
+- 菜单文案三处一致（模板/片段交互/片段 `-s -f`），避免「同一 CLI 两套菜单」。
+- `promptOutputConflict` 在各模式通过 `allowRename` 控制是否展示「重命名」项；非 TTY 下该选项自动隐藏。
+- `src/snippet.js` 不再保留本地 `checkOutputConflicts` / `findNextVersion`，改为从 `src/index.js` 导入复用，消除重复与漂移。
+
+### 配置选择的 TTY 守卫
+
+模板模式 `resolveProjectConfig`（输入目录有多个/非默认 yaml 配置时）同样受 `process.stdin.isTTY` 守卫：
+
+- **TTY**：弹出 `select` 让用户选配置（含「自定义路径 / 跳过」）。
+- **非 TTY**：自动选用 `juice.yaml`/`juice.yml`（最优配对）或目录中首个配置文件，并给出黄色警告，避免 `select` 在无终端时崩溃。
+
+> 片段模式（`-s -f`）配置走 `findLocalConfig` 自动检测，本就无需交互，不存在此问题。
+
+---
+
+## 代码评审结论（A~N 整改）
+
+历史评审提出的 A~N 共 14 项建议，除 **C（保持 `engines.node >= 24`）** 用户明确保留外，其余均已落地并验证：
+
+| 项 | 内容 | 状态 |
+|---|---|---|
+| A | 修 `juice init -s/-c` 参数冲突（去子命令短选项） | ✅ |
+| B | 引入 Vitest，纯函数单测（deepMerge / insertIntoContent / reindentHtml / filterSeries 等） | ✅ |
+| D | ESLint + Prettier + EditorConfig，husky 门禁 | ✅ |
+| E | CI：push/PR 跑 lint + test + smoke | ✅ |
+| F | 收敛双 `findConfigs` / 双 `buildConfig` → `mergeConfigLayers` 共享 | ✅ |
+| G | 单一 `resolveTemplateIcon` 替换三处 ico 解析 | ✅ |
+| H | `postinstall` 改为桌面环境才注册右键菜单（非 CI/SSH 跳过） | ✅ |
+| I | 核心函数去 `process.exit`，改抛错由 `safeAction` 兜底 | ✅ |
+| J | `src/constants.js` 集中魔法字符串 | ✅ |
+| K | `copyTemplateToCwd` 补 ico 拷贝 | ✅ |
+| L | `findVersionForSeries` 按系列匹配模板版本 | ✅ |
+| M | `src/format.js` 统一 `formatName` / `fmtBytes`；`describeVariant` 抽取 | ✅ |
+| N | P3 健壮性（除零、Separator 静态 import、仓库链接统一等） | ✅ |
+
+### 2026-08-05 收尾（输出冲突统一 + TTY 守卫）
+
+- 模板/片段模式的输出冲突处理统一为 `promptOutputConflict`，菜单一致为 `[覆盖(默认) / 版本 / 重命名]`，非 TTY 默认覆盖 + 警告。
+- `resolveProjectConfig` 增加 `isTTY` 守卫，非 TTY 自动选最优配置。
+- 说明：原评审 §十二 N·P3-6 描述的「普通模式冲突自动版本号」已于本轮应需求改为「交互提示」，故该条最终形态为提示而非静默版本号。

@@ -60,6 +60,8 @@ juice -c project.yaml -f my-email.html
 juice -f edm/elabscience/elabscience-template.html
 ```
 
+> **输出冲突**：若 `.output.html` / `.minified.html` 已存在，会提示 `覆盖（默认）` / `版本` / `重新输入文件名` 三种处理方式（与片段模式菜单一致）；非交互环境（如 CI/管道）默认覆盖并给出警告，不会卡死。
+
 生成文件（与输入文件同目录）：
 
 | 文件 | 说明 |
@@ -89,7 +91,7 @@ juice -s snippet.html -f template.html -n my-output
 | `<name>.output.html` | Juice CSS 内联后 |
 | `<name>.minified.html` | 压缩版 |
 
-输出文件名默认为模板文件名（不含扩展名）。如果文件冲突，交互模式下可选择覆盖、自动版本号（`-v1`、`-v2`...）或重新输入。
+输出文件名默认为模板文件名（不含扩展名）。如果文件冲突，会提示 `覆盖（默认）` / `版本` / `重新输入文件名` 三种处理方式；`-s -f` 直接指定时同样走此逻辑，非交互环境默认覆盖并给出警告。
 
 ### 交互模式（逐步选择）
 
