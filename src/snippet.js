@@ -13,6 +13,9 @@ import {
   savings,
   DEFAULT_CONFIG_PATH,
   mergeConfigLayers,
+  promptOutputConflict,
+  findNextVersion,
+  checkOutputConflicts,
 } from './index.js';
 import {
   ICON_FILE,
@@ -20,6 +23,7 @@ import {
   META_FILE,
   META_FILE_ALT,
   DEFAULT_CONFIG_NAMES,
+  SNIPPET_OUTPUT_SUFFIXES,
 } from './constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -661,74 +665,22 @@ async function promptConfig(configs, preferredPath) {
 // ─── 输出文件名处理 ───────────────────────────────────────────────────────────
 
 /**
- * 检查指定 baseName 在 cwd 下是否已有输出文件冲突
- * 返回冲突的文件路径列表
+ * checkOutputConflicts / findNextVersion 已移至 index.js 统一实现，
+ * 本模块从 './index.js' 导入复用，保证模板/片段模式冲突处理一致。
  */
-function checkOutputConflicts(baseName, cwd) {
-  const suffixes = ['.raw.html', '.html', '.output.html', '.minified.html'];
-  return suffixes
-    .map((s) => path.join(cwd, baseName + s))
-    .filter((p) => fs.existsSync(p));
-}
 
 /**
- * 查找下一个可用版本号（baseName-v1, baseName-v2, ...）
- */
-function findNextVersion(baseName, cwd) {
-  let v = 1;
-  while (true) {
-    const candidate = baseName + '-v' + v;
-    if (checkOutputConflicts(candidate, cwd).length === 0) {
-      return candidate;
-    }
-    v++;
-  }
-}
-
-/**
- * 交互式输出文件名提示
- * 返回最终确定的 baseName
+ * 交互式输出文件名提示（片段模式交互流程使用）。
+ * 先让用户输入文件名，冲突时复用统一的 promptOutputConflict 展示
+ * [覆盖(默认) / 版本 / 重命名]，菜单与模板模式完全一致。
+ * @returns {Promise<string>} 最终确定的 baseName
  */
 async function promptOutputName(defaultBaseName, cwd) {
-  const { input, select } = await import('@inquirer/prompts');
-
-  let baseName = await input({
-    message: '请输入输出文件名：',
-    default: defaultBaseName,
-  });
-
-  // 冲突检测循环
-  while (true) {
-    const conflicts = checkOutputConflicts(baseName, cwd);
-    if (conflicts.length === 0) break;
-
-    console.log(chalk.yellow(`\n  ⚠  以下文件已存在：`));
-    conflicts.forEach((f) => console.log(chalk.gray(`      ${path.basename(f)}`)));
-
-    const action = await select({
-      message: '文件已存在，请选择处理方式：',
-      choices: [
-        { name: '覆盖现有文件', value: 'overwrite' },
-        { name: `自动版本号（${findNextVersion(baseName, cwd)}）`, value: 'version' },
-        { name: '重新输入文件名', value: 'rename' },
-      ],
-    });
-
-    if (action === 'overwrite') {
-      break;
-    } else if (action === 'version') {
-      baseName = findNextVersion(baseName, cwd);
-      console.log(chalk.green(`  ✔ 已自动生成版本号：${baseName}`));
-      break;
-    } else {
-      baseName = await input({
-        message: '请重新输入输出文件名：',
-        default: baseName,
-      });
-    }
-  }
-
-  return baseName;
+  const { input } = await import('@inquirer/prompts');
+  const suffixes = SNIPPET_OUTPUT_SUFFIXES;
+  const baseName = await input({ message: '请输入输出文件名：', default: defaultBaseName });
+  const res = await promptOutputConflict(baseName, cwd, suffixes, { allowRename: true });
+  return res.base;
 }
 
 /**
@@ -865,30 +817,17 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
 
   const { config, layers } = buildSnippetConfig({ priorityConfigPath, cliConfigPath });
 
-  // 确定输出文件名
+  // 确定输出文件名（与模板模式共用统一的冲突处理：TTY 提示、非 TTY 默认覆盖）
   const defaultBaseName = outputName || path.parse(templatePath).name;
+  const suffixes = SNIPPET_OUTPUT_SUFFIXES;
   let outputBaseName;
 
-  if (outputName) {
-    const conflicts = checkOutputConflicts(defaultBaseName, process.cwd());
-    if (conflicts.length > 0) {
-      outputBaseName = findNextVersion(defaultBaseName, process.cwd());
-      console.warn(chalk.yellow(
-        `\n⚠  文件冲突，自动使用版本号：${outputBaseName}`
-      ));
-    } else {
-      outputBaseName = defaultBaseName;
-    }
-  } else if (template) {
-    const conflicts = checkOutputConflicts(defaultBaseName, process.cwd());
-    if (conflicts.length > 0) {
-      outputBaseName = findNextVersion(defaultBaseName, process.cwd());
-      console.warn(chalk.yellow(
-        `\n⚠  文件冲突，自动使用版本号：${outputBaseName}`
-      ));
-    } else {
-      outputBaseName = defaultBaseName;
-    }
+  if (outputName || template) {
+    const res = await promptOutputConflict(defaultBaseName, process.cwd(), suffixes, {
+      allowRename: true,
+      defaultAction: 'overwrite',
+    });
+    outputBaseName = res.base;
   } else {
     outputBaseName = await promptOutputName(defaultBaseName, process.cwd());
   }

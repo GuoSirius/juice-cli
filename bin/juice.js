@@ -61,6 +61,8 @@ program
     juice -f my-email.html
     juice -f my-email.html -c project.yaml
     juice -f edm/elabscience/elabscience-template.html
+    注：若输出文件已存在，会提示「覆盖（默认）/ 版本 / 重命名」；
+        非交互环境（CI/管道）默认覆盖并给出警告。
 
   片段模式（片段 + 模板拼接，输出 4 个文件）：
     juice -s edm/elabscience/literature/snippet.html -f edm/elabscience/elabscience-template.html

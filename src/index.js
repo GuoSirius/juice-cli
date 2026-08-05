@@ -64,6 +64,14 @@ async function resolveProjectConfig(inputFile) {
     }
   }
 
+  // 非交互环境：自动选最优配置，避免 select 在无 TTY 时崩溃
+  if (!process.stdin.isTTY) {
+    const optimal = yamlFiles.find((f) => DEFAULT_CONFIG_NAMES.includes(f.name));
+    const chosen = optimal || yamlFiles[0];
+    console.warn(chalk.yellow(`  ⚠  检测到多个配置文件，非交互环境自动选用：${chalk.cyan(chosen.name)}`));
+    return chosen.path;
+  }
+
   const { select, input } = await import('@inquirer/prompts');
 
   const choices = yamlFiles.map(f => {
@@ -223,29 +231,105 @@ export async function minifyHtml(html, minifyConfig) {
 
 // ─── 输出路径 ─────────────────────────────────────────────────────────────────
 
-function resolveOutputPaths(inputFile, config) {
+function resolveOutputPaths(inputFile, config, base) {
   const parsed = path.parse(path.resolve(inputFile));
   const ns = (config.output && config.output.normalSuffix) || DEFAULT_NORMAL_SUFFIX;
   const ms = (config.output && config.output.minifiedSuffix) || DEFAULT_MINIFIED_SUFFIX;
   const dir = parsed.dir;
-  const conflicts = (base) =>
-    fs.existsSync(path.join(dir, base + ns)) || fs.existsSync(path.join(dir, base + ms));
-
-  // 输出冲突时自动版本号（与片段模式 findNextVersion 的 -vN 约定一致，P3-6）
-  let base = parsed.name;
-  if (conflicts(base)) {
-    let v = 1;
-    do {
-      v++;
-      base = `${parsed.name}-v${v}`;
-    } while (conflicts(base));
-  }
+  const actualBase = base || parsed.name;
   return {
-    base,
-    versioned: base !== parsed.name,
-    normal: path.join(dir, base + ns),
-    minified: path.join(dir, base + ms),
+    base: actualBase,
+    normal: path.join(dir, actualBase + ns),
+    minified: path.join(dir, actualBase + ms),
+    normalSuffix: ns,
+    minifiedSuffix: ms,
+    dir,
   };
+}
+
+// 输出文件是否已存在（dir 下任一 suffix 命中即冲突）
+function outputConflicts(dir, base, suffixes) {
+  return suffixes.some((s) => fs.existsSync(path.join(dir, base + s)));
+}
+
+// 查找下一个可用版本号（base-v1, base-v2, ...）
+function findNextVersion(base, dir, suffixes) {
+  let v = 1;
+  while (outputConflicts(dir, base + '-v' + v, suffixes)) v++;
+  return base + '-v' + v;
+}
+
+/**
+ * 统一的输出冲突处理（模板模式与片段模式共用，保证行为一致）。
+ *
+ * 行为：
+ *  - 无冲突：直接返回 { base, action: 'none' }。
+ *  - 非 TTY（CI/管道）：按 defaultAction 处理（默认 'overwrite'，可选 'version'），
+ *    输出黄色警告，绝不卡死。
+ *  - TTY：提示 [覆盖(默认) / 版本 / 重命名(可选)]；
+ *    · overwrite → 返回 base
+ *    · version  → 返回 findNextVersion(base)
+ *    · rename   → 进入输入循环直到无冲突（仅 allowRename 时可选）
+ *
+ * @param {string} defaultBase 默认输出 base（不含后缀）
+ * @param {string} dir          输出目录
+ * @param {string[]} suffixes   参与冲突判定的后缀列表
+ * @param {{allowRename?:boolean, defaultAction?:'overwrite'|'version', message?:string, inputMessage?:string}} [opts]
+ * @returns {Promise<{base:string, action:'none'|'overwrite'|'version'|'rename'}>}
+ */
+async function promptOutputConflict(defaultBase, dir, suffixes, opts = {}) {
+  const { allowRename = false, defaultAction = 'overwrite', message, inputMessage = '请重新输入输出文件名：' } = opts;
+  const first = suffixes[0];
+
+  if (!outputConflicts(dir, defaultBase, suffixes)) {
+    return { base: defaultBase, action: 'none' };
+  }
+
+  // 非交互环境：按既定默认动作处理，避免 select 在无 TTY 时崩溃
+  if (!process.stdin.isTTY) {
+    if (defaultAction === 'version') {
+      const v = findNextVersion(defaultBase, dir, suffixes);
+      console.warn(chalk.yellow(`  ⚠  输出文件已存在，非交互环境自动版本号：${chalk.cyan(v + first)}`));
+      return { base: v, action: 'version' };
+    }
+    console.warn(chalk.yellow(`  ⚠  输出文件已存在，非交互环境默认覆盖：${chalk.cyan(defaultBase + first)}`));
+    return { base: defaultBase, action: 'overwrite' };
+  }
+
+  const { select, input } = await import('@inquirer/prompts');
+  const versionedBase = findNextVersion(defaultBase, dir, suffixes);
+  const choices = [
+    { name: `${chalk.green('●')} 覆盖现有文件（默认）`, value: 'overwrite' },
+    { name: `自动版本号（${chalk.cyan(versionedBase + first)}）`, value: 'version' },
+  ];
+  if (allowRename) {
+    choices.push({ name: '重新输入文件名', value: 'rename' });
+  }
+
+  const action = await select({
+    message: message || `输出文件已存在：${chalk.cyan(defaultBase + first)}，请选择处理方式：`,
+    default: 'overwrite',
+    choices,
+  });
+
+  if (action === 'overwrite') return { base: defaultBase, action };
+  if (action === 'version') return { base: versionedBase, action };
+
+  // 重命名：输入循环直到无冲突
+  let base = defaultBase;
+  while (true) {
+    base = await input({ message: inputMessage, default: base });
+    if (!outputConflicts(dir, base, suffixes)) break;
+    console.log(chalk.yellow(`  ⚠  ${chalk.cyan(base + first)} 仍已存在，请换一个名字。`));
+  }
+  return { base, action: 'rename' };
+}
+
+// 列出 dir 下已存在的冲突文件（供调用方展示冲突清单）
+function checkOutputConflicts(baseName, dir, suffixes) {
+  return suffixes
+    .map((s) => path.join(dir, baseName + s))
+    .filter((p) => fs.existsSync(p));
 }
 
 // ─── 格式化 ───────────────────────────────────────────────────────────────────
@@ -293,10 +377,17 @@ export async function run({ file, config: configPath }) {
     spinner.text = `CSS 内联处理：${path.basename(inputFile)}`;
     const resultHtml = processTemplate(inputFile, config);
 
-    const outPaths = resolveOutputPaths(inputFile, config);
-    if (outPaths.versioned) {
-      spinner.warn(chalk.yellow(`输出文件已存在，自动重命名为：${path.basename(outPaths.normal)}`));
+    let outBase = path.parse(path.resolve(inputFile)).name;
+    const probe = resolveOutputPaths(inputFile, config, outBase);
+    const suffixes = [probe.normalSuffix, probe.minifiedSuffix];
+    if (outputConflicts(probe.dir, outBase, suffixes)) {
+      const isTty = process.stdin.isTTY;
+      if (isTty) spinner.stop();
+      const res = await promptOutputConflict(outBase, probe.dir, suffixes, { allowRename: true });
+      if (isTty) spinner.start();
+      outBase = res.base;
     }
+    const outPaths = resolveOutputPaths(inputFile, config, outBase);
 
     spinner.text = '写出 .output.html ...';
     fs.writeFileSync(outPaths.normal, resultHtml, encoding);
@@ -323,3 +414,6 @@ export async function run({ file, config: configPath }) {
     process.exit(1);
   }
 }
+
+// ─── 输出冲突处理（模板/片段模式共用，供 snippet.js 复用） ─────────────────
+export { outputConflicts, findNextVersion, checkOutputConflicts, promptOutputConflict };
