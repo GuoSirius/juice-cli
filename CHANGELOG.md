@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/GuoSirius/juice-cli/compare/v3.1.4...v3.2.0) (2026-08-05)
+
+
+### Bug Fixes
+
+* 统一模板/片段模式输出冲突处理并加 TTY 守卫 ([be3c340](https://github.com/GuoSirius/juice-cli/commit/be3c340e87bd4cd8064affceff1fba72f37e820b))
+
+
+### Documentation
+
+* 整理文档，统一冲突处理说明，合并评审结论并删除 CODE_REVIEW.md ([1ed7b50](https://github.com/GuoSirius/juice-cli/commit/1ed7b502056cdf3fc465f67a4de4589eb65811d6))
+
+
+### Chores
+
+* update ([ffe3397](https://github.com/GuoSirius/juice-cli/commit/ffe3397a9fac4456b7d54806559a4eafb58e5d72))
+
 ### [3.1.4](https://github.com/GuoSirius/juice-cli/compare/v3.1.3...v3.1.4) (2026-07-30)
 
 
