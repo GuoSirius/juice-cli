@@ -59,16 +59,18 @@ function commitFiles(message) {
   }
 }
 
-function runStandardVersion(releaseType) {
+function runChangelogen(releaseType, nextVersion) {
   try {
-    const args = ['--release-as', releaseType];
-    execSync(`npx standard-version ${args.join(' ')}`, { 
+    // changelogen: --r forces the exact version, --release commits + tags.
+    // --no-github avoids a duplicate GitHub release (CI creates it from CHANGELOG.md).
+    const args = ['--release', '--r', nextVersion, '--no-github'];
+    execSync(`npx changelogen ${args.join(' ')}`, {
       stdio: 'inherit',
       cwd: path.join(__dirname, '..')
     });
-    console.log(chalk.green('Version updated and changelog generated'));
+    console.log(chalk.green(`Version ${nextVersion} updated and changelog generated`));
   } catch (error) {
-    console.error(chalk.red('Error running standard-version:', error.message));
+    console.error(chalk.red('Error running changelogen:', error.message));
     process.exit(1);
   }
 }
@@ -190,7 +192,7 @@ async function main() {
   }
 
   console.log('\n' + chalk.blue('Updating version and changelog...'));
-  runStandardVersion(releaseType);
+  runChangelogen(releaseType, nextVersion);
 
   console.log('\n' + chalk.blue('Pushing to origin...'));
   pushToRemote();

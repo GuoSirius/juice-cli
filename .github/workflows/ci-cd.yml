@@ -69,15 +69,15 @@ jobs:
             exit 0
           fi
 
-          # standard-version uses ## for minor/major bumps, ### for patch bumps.
-          # Extract everything between the target version heading and the next
-          # version heading (any level), or EOF.
+          # changelogen headings: '## vX.Y.Z' (no brackets); legacy standard-version: '### [X.Y.Z]'.
+          # Make brackets optional so both formats match. Extract everything between the target
+          # version heading (any level) and the next version heading, or EOF.
           node -e "
             const fs = require('fs');
             const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
             const lines = changelog.split('\n');
 
-            const verRe = /^#+\s*\[v?(\d+\.\d+\.\d+)\]/;
+            const verRe = /^#+\s*v?(\d+\.\d+\.\d+)/;
             let start = -1;
             let end = -1;
 
