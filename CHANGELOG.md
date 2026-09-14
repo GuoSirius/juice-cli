@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [changelogen](https://github.com/unjs/changelogen) for commit guidelines.
 
+## v3.3.1
+
+[compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.3.0...v3.3.1)
+
+### 🏡 Chore
+
+- Optimize literature ([10f5307](https://github.com/GuoSirius/juice-cli/commit/10f5307))
+
+### ❤️ Contributors
+
+- 郭之存 ([@siriusSupreme](https://github.com/siriusSupreme))
+
 ## v3.3.0
 
 [compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.2.6...v3.3.0)
