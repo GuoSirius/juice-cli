@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [changelogen](https://github.com/unjs/changelogen) for commit guidelines.
 
+## v3.3.4
+
+[compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.3.3...v3.3.4)
+
+### 🏡 Chore
+
+- Update footer icons ([f42fe37](https://github.com/GuoSirius/juice-cli/commit/f42fe37))
+
+### ❤️ Contributors
+
+- 郭之存 ([@siriusSupreme](https://github.com/siriusSupreme))
+
 ## v3.3.3
 
 [compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.3.2...v3.3.3)
