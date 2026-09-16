@@ -18,116 +18,116 @@ variables:
   indicator:
     title: Indicators
     className: title
-    needCondensed: false
+    needCondensed: true
     lists:
       - text: CD14
-        color: "#D100DE"
+        color: '#D100DE'
         link:
       - text: TNFα
-        color: "#FF0207"
+        color: '#FF0207'
         link: https://www.elabscience.com/search?keywords=TNF-%CE%B1
       - text: CD195
-        color: "#000000"
+        color: '#000000'
         link:
       - text: CD25
-        color: "#00BF54"
+        color: '#00BF54'
         link:
       - text: TCR Vβ7.1
-        color: "#FF0207"
+        color: '#FF0207'
         link:
       - text: CD1d
-        color: "#000000"
+        color: '#000000'
         link:
       - text: Integrin β7
-        color: "#2A77FE"
+        color: '#2A77FE'
         link:
       - text: CD2
-        color: "#FF0207"
+        color: '#FF0207'
         link:
       - text: CD8
-        color: "#FF7800"
+        color: '#FF7800'
         link:
       - text: HLA-A2,B7
-        color: "#B10202"
+        color: '#B10202'
         link:
       - text: CD8a
-        color: "#FF7800"
+        color: '#FF7800'
         link:
       - text: CD123
-        color: "#2A77FE"
+        color: '#2A77FE'
         link: https://www.elabscience.com/search?keywords=CD123
       - text: TCR Vβ1
-        color: "#B10202"
+        color: '#B10202'
         link:
       - text: CD1b
-        color: "#00BF54"
+        color: '#00BF54'
         link:
       - text: CD272/BTLA
-        color: "#000000"
+        color: '#000000'
         link: https://www.elabscience.com/search?keywords=CD272/BTLA
       - text: CD151
-        color: "#BF37FA"
+        color: '#BF37FA'
         link:
       - text: CD180
-        color: "#000000"
+        color: '#000000'
         link:
       - text: CD122
-        color: "#FF0000"
+        color: '#FF0000'
         link:
       - text: IL-10
-        color: "#00BF54"
+        color: '#00BF54'
         link:
       - text: ROR1
-        color: "#2A77FE"
+        color: '#2A77FE'
         link:
       - text: CD90.2
-        color: "#FF0207"
+        color: '#FF0207'
         link:
       - text: FOXP3
-        color: "#FF7800"
+        color: '#FF7800'
         link:
       - text: FMC63
-        color: "#D100DE"
+        color: '#D100DE'
         link:
       - text: CD159a
-        color: "#B10202"
+        color: '#B10202'
         link:
       - text: TNF-alpha
-        color: "#D100DE"
+        color: '#D100DE'
         link:
       - text: CD206
-        color: "#FF0207"
+        color: '#FF0207'
         link:
       - text: FcεRIα
-        color: "#000000"
+        color: '#000000'
         link:
       - text: IgD
-        color: "#00BF54"
+        color: '#00BF54'
         link:
       - text: CD3
-        color: "#FF0207"
+        color: '#FF0207'
         link:
       - text: CD200
-        color: "#000000"
+        color: '#000000'
         link:
       - text: CD68
-        color: "#2A77FE"
+        color: '#2A77FE'
         link:
       - text: CD43
-        color: "#FF0207"
+        color: '#FF0207'
         link:
       - text: CD335
-        color: "#FF7800"
+        color: '#FF7800'
         link:
       - text: CD52
-        color: "#B10202"
+        color: '#B10202'
         link:
       - text: ......
-        color: "#FF7805"
+        color: '#FF7805'
         link:
 
   antibodyOffer:
-    title: "Designed for Multicolor Panel Flexibility, These Antibodies Offer:"
+    title: 'Designed for Multicolor Panel Flexibility, These Antibodies Offer:'
     className: title
     itemClassName: circle
     lists:
@@ -140,9 +140,10 @@ variables:
     className: title
     itemClassName: gold-star
     lists:
-      - "Immunotherapy for Hepatocellular Carcinoma Research: Human TCR Vβ7.1"
-      - "Autoimmune Diseases Research: Human TCR Vβ1"
-      - "Auxiliary Diagnosis of Tumors: Human CD151"
+      - '<strong>Immune Disorder-Related Diseases:</strong> Rat CD5'
+      - '<strong>Adaptive Immune Function:</strong> Human TRAV5'
+      - '<strong>Tumor Immunotherapy:</strong> Human T/B/NK Antibody Cocktail'
+      - '<strong>Non-Human Primate (NHP) Animal Models:</strong> Monkey CD45'
 
   # ── 产品列表 ────────────────────────────────────────────────────────────────
   # 使用 {{#productLists}}...{{/productLists}} 循环遍历
@@ -164,3 +165,27 @@ variables:
       link: https://www.elabscience.com/search?keywords=Human CD151
       buttonText: Learn More
       width: 20%
+
+  # isGridProduct: true
+  # productLists:
+  #   -
+  #     - name: Mouse CD43
+  #       image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202607150905/Mouse CD43.webp
+  #       link: https://www.elabscience.com/search?keywords=Mouse%20CD43
+  #       buttonText: Learn More
+
+  #     - name: Rat CD8b
+  #       image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202607150905/Rat CD8b.webp
+  #       link: https://www.elabscience.com/search?keywords=Rat%20CD8b
+  #       buttonText: Learn More
+
+  #   -
+  #     - name: Rat TCR α/β
+  #       image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202607150905/Rat TCR αβ.webp
+  #       link: https://www.elabscience.com/search?keywords=Rat%20TCR%20%CE%B1/%CE%B2
+  #       buttonText: Learn More
+
+  #     - name: Rat CD172a
+  #       image: https://elabcomfile.oss-us-west-1.aliyuncs.com/edm/202607150905/Rat CD172a.webp
+  #       link: https://www.elabscience.com/search?keywords=Rat%20CD172a
+  #       buttonText: Learn More
