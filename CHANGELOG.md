@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [changelogen](https://github.com/unjs/changelogen) for commit guidelines.
 
+## v3.3.7
+
+[compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.3.6...v3.3.7)
+
+### 🏡 Chore
+
+- Update elab template ([8f70818](https://github.com/GuoSirius/juice-cli/commit/8f70818))
+
+### ❤️ Contributors
+
+- 郭之存 ([@siriusSupreme](https://github.com/siriusSupreme))
+
 ## v3.3.6
 
 [compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.3.5...v3.3.6)
