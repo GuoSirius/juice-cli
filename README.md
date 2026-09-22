@@ -394,6 +394,7 @@ edm/
 ```
 📧 用 juice 生成邮件 HTML
   ├── ⚙️ 作为配置，拼接邮件 HTML     → juice -c %1（交互选择品牌/模板/片段）
+  ├── 🧱 作为页面装配，生成邮件 HTML → juice build -p %1
   ├── 📋 查看可用资源
   ├── 📦 拷贝全部资源
   ├── 📥 选择资源拷贝
@@ -404,6 +405,7 @@ edm/
 
 ```
 📧 用 juice 生成邮件 HTML
+  ├── 🧱 页面装配，交互生成邮件 HTML → juice build（选模板/多选板块，自动生成 page.yaml）
   ├── 📋 查看可用资源
   ├── 📦 拷贝全部资源
   ├── 📥 选择资源拷贝
@@ -414,6 +416,7 @@ edm/
 
 ```
 📧 用 juice 生成邮件 HTML
+  ├── 🧱 页面装配，交互生成邮件 HTML → juice build
   ├── 📋 查看可用资源
   ├── 📦 拷贝全部资源
   ├── 📥 选择资源拷贝
@@ -426,58 +429,6 @@ juice --uninstall   # 卸载
 ```
 
 > **注意**：注册到当前用户（HKCU），无需管理员权限。注册成功后如菜单未立即出现，重启文件资源管理器（`explorer.exe`）即可。
-
----
-
-## 目录结构
-
-```
-juice-cli/
-├── bin/
-│   └── juice.js               # CLI 入口（Commander.js）
-├── src/
-│   ├── index.js               # 核心逻辑（配置合并、模板处理、双输出）
-│   ├── render.js              # 模板渲染（Handlebars 引擎 + Mustache 语义对齐 + 逻辑 helper）
-│   ├── snippet.js             # 片段组装模式 + 交互式提示
-│   ├── page.js                # 页面装配模式（juice build -p）
-│   ├── page-interactive.js    # 交互式页面装配（juice build 无 -p）
-│   ├── css-links.js           # 本地 <link> 样式表构建期内联
-│   ├── view.js                # EDM 资源查看/浏览（juice view）
-│   ├── init.js                # EDM 资源拷贝初始化（juice init）
-│   ├── context-menu.js        # Windows 右键菜单注册
-│   ├── constants.js           # 集中常量（文件名/配置名/输出后缀等魔法字符串）
-│   └── format.js              # 统一格式化函数（formatName / fmtBytes）
-├── docs/
-│   └── template-syntax.md     # 模板语法参考（完整）
-├── examples/
-│   ├── page-assembly/         # 页面装配完整可运行示例
-│   └── template.html 等       # 基础用法示例
-├── defaults/
-│   └── juice.yaml             # CLI 内置默认配置
-├── edm/                       # EDM 模板库（npm 发布时包含）
-│   ├── elabscience/
-│   │   ├── _meta.yaml
-│   │   ├── templates/
-│   │   │   └── standard/
-│   │   │       └── template.html
-│   │   └── series/
-│   │       └── literature/
-│   │           └── default/
-│   │               ├── snippet.html
-│   │               └── juice.yaml
-│   └── procell/
-│       ├── _meta.yaml
-│       └── templates/
-│           └── standard/
-│               └── template.html
-├── icons/
-│   └── juice-icon.ico          # 右键菜单图标
-├── scripts/
-│   └── release.mjs            # 发布脚本
-├── CHANGELOG.md                # 变更日志（自动生成）
-├── LICENSE                     # MIT
-└── package.json
-```
 
 ---
 
