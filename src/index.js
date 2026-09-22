@@ -9,6 +9,7 @@ import ora from 'ora';
 import { minify as htmlMinify } from 'html-minifier-terser';
 import { fmtBytes } from './format.js';
 import { renderTemplate } from './render.js';
+import { inlineLocalStylesheets } from './css-links.js';
 import {
   DEFAULT_CONFIG_NAMES,
   META_FILE,
@@ -183,7 +184,10 @@ export function buildConfig(highPriorityPath, homePath) {
 // ─── HTML 模板处理 ────────────────────────────────────────────────────────────
 
 export function processTemplate(inputFile, config) {
-  const htmlRaw = fs.readFileSync(inputFile, 'utf8');
+  const htmlRaw0 = fs.readFileSync(inputFile, 'utf8');
+
+  // 渲染前解析本地 <link rel="stylesheet">（渲染后 CSS 中的模板变量也能生效）
+  const htmlRaw = inlineLocalStylesheets(htmlRaw0, path.dirname(path.resolve(inputFile)));
 
   const htmlWithVars = renderTemplate(htmlRaw, config.variables || {}, {
     rawHtml: !!config.rawHtml,

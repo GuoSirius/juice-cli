@@ -17,6 +17,7 @@ import {
   checkOutputConflicts,
 } from './index.js';
 import { renderTemplate } from './render.js';
+import { inlineLocalStylesheets } from './css-links.js';
 import {
   ICON_FILE,
   SNIPPET_FILE,
@@ -468,7 +469,10 @@ function resolveSnippetOutputPaths(outputBaseName, cwd) {
  *   4. 压缩 → .minified.html
  */
 async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputBaseName, layers = [] }) {
-  const templateHtml = fs.readFileSync(templatePath, 'utf8');
+  const templateHtml = inlineLocalStylesheets(
+    fs.readFileSync(templatePath, 'utf8'),
+    path.dirname(templatePath),
+  );
   const snippetRaw = fs.readFileSync(snippetPath, 'utf8');
   const outPaths = resolveSnippetOutputPaths(outputBaseName, cwd);
   const variables = Object.assign({}, config.variables || {});
