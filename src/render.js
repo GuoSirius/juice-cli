@@ -22,7 +22,9 @@ hb.registerHelper('blockHelperMissing', function (context, options) {
     data.contextPath = hb.Utils.appendContextPath(options.data.contextPath, options.name);
     options = { data };
   }
-  return fn(context, options);
+  // Mustache 语义：对象 section 压栈上下文；字符串/数字/布尔 section 保持父级上下文
+  // （否则 {{#email}}mailto:{{email}}{{/email}} 这类块内父级引用会渲染为空）
+  return fn(typeof context === 'object' ? context : this, options);
 });
 
 // ─── 内置逻辑判断 helper（需求④：循环索引之外的必要逻辑） ────────────────────

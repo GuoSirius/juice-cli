@@ -27,9 +27,27 @@ describe('renderTemplate（Handlebars 渲染）', () => {
     expect(out).toBe('[a][b]');
   });
 
-  it('{{.}} 当前元素（Mustache 兼容，现有模板在用）', () => {
+  it('{{.}} 当前元素（Mustache 兼容，现有模板在用，仅数组迭代）', () => {
     expect(renderTemplate('{{#items}}{{.}};{{/items}}', { items: ['x', 'y'] })).toBe('x;y;');
-    expect(renderTemplate('{{#banner.image}}<img src="{{.}}" />{{/banner.image}}', { banner: { image: 'a.png' } })).toContain('src="a.png"');
+  });
+
+  it('字符串 section 保持父级上下文（Mustache 语义，现有模板大量在用）', () => {
+    // webinar/literature 模板模式：{{#speaker.email}}mailto:{{speaker.email}}{{/speaker.email}}
+    expect(
+      renderTemplate('{{#email}}<a href="mailto:{{email}}">{{email}}</a>{{/email}}', { email: 'a@b.c' }),
+    ).toBe('<a href="mailto:a@b.c">a@b.c</a>');
+    // {{#gift}} 块内 {{gift}}（同名字段父级引用）
+    expect(renderTemplate('{{#gift}}<p>{{gift}}</p>{{/gift}}', { gift: 'Gift box' })).toBe('<p>Gift box</p>');
+    // 块内引用兄弟路径
+    expect(
+      renderTemplate('{{#banner.link}}<a href="{{banner.link}}"><img src="{{banner.image}}" /></a>{{/banner.link}}',
+        { banner: { link: 'http://x', image: 'a.png' } }),
+    ).toBe('<a href="http://x"><img src="a.png" /></a>');
+  });
+
+  it('对象 section 压栈上下文（Mustache 语义：块内可直接用子字段）', () => {
+    expect(renderTemplate('{{#person}}[{{name}} {{age}}]{{/person}}', { person: { name: 'Tom', age: 3 } }))
+      .toBe('[Tom 3]');
   });
 
   it('反向块 {{^var}}（Mustache 兼容）', () => {
