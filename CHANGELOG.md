@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [changelogen](https://github.com/unjs/changelogen) for commit guidelines.
 
+## v4.0.0
+
+[compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.3.7...v4.0.0)
+
+### 🚀 Enhancements
+
+- 模板引擎迁移至 Handlebars（rawHtml 映射 + 循环索引 + 逻辑 helper + Mustache section 语义对齐） ([9c562b0](https://github.com/GuoSirius/juice-cli/commit/9c562b0))
+- 本地 <link rel=stylesheet> 构建期内联（支持引入自定义 CSS/Bootstrap/uno.css） ([8985b68](https://github.com/GuoSirius/juice-cli/commit/8985b68))
+- 页面装配模式 juice build -p page.yaml（多板块按序组装 + 板块独立 vars + partial 注册） ([11e9d81](https://github.com/GuoSirius/juice-cli/commit/11e9d81))
+- 交互式页面装配（品牌/模板/多选板块生成 page.yaml）+ 右键菜单页面装配入口 ([ba6f0e4](https://github.com/GuoSirius/juice-cli/commit/ba6f0e4))
+
+### 🩹 Fixes
+
+- 字符串/数字 section 保持父级上下文（Mustache 语义，修复块内父级引用渲染为空） ([888f439](https://github.com/GuoSirius/juice-cli/commit/888f439))
+
+### 📖 Documentation
+
+- 增强规划需求基线（方案对比与决策点） ([6391897](https://github.com/GuoSirius/juice-cli/commit/6391897))
+- 新增页面装配完整示例 examples/page-assembly（page.yaml + link 内联 + Handlebars 语法） ([fc54b6f](https://github.com/GuoSirius/juice-cli/commit/fc54b6f))
+- 模板语法参考 docs/template-syntax.md + README/CLAUDE 同步 Handlebars 与页面装配 ([1779e77](https://github.com/GuoSirius/juice-cli/commit/1779e77))
+- Readme 移除项目目录结构章节，右键菜单补充页面装配入口说明 ([d40fcdb](https://github.com/GuoSirius/juice-cli/commit/d40fcdb))
+
+### 🏡 Chore
+
+- 同步依赖版本（npm install 范围刷新） ([e567248](https://github.com/GuoSirius/juice-cli/commit/e567248))
+
+### ❤️ Contributors
+
+- 郭之存 ([@siriusSupreme](https://github.com/siriusSupreme))
+
 ## v3.3.7
 
 [compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.3.6...v3.3.7)
