@@ -113,6 +113,7 @@ const SUBCMDS = {
   generate:  'JuiceEmail.Generate',
   snippet:   'JuiceEmail.Snippet',
   config:    'JuiceEmail.WithConfig',
+  pageBuild: 'JuiceEmail.PageBuild',
   viewEdm:   'JuiceEmail.ViewEdm',
   initEdm:   'JuiceEmail.InitEdm',
   pwsh:      'JuiceEmail.OpenPwsh',
@@ -247,6 +248,13 @@ function registerSubCommands(containerPath, kind, nodePath, scriptPath, iconPath
     const cfgPs = `${cdYaml}& '${node}' '${script}' -c '%1'; Write-Host ''; Read-Host 'Press Enter to close'`;
     regAdd(`${cfgKey}\\command`, '', 'REG_SZ', `powershell.exe -Command "${cfgPs}"`);
 
+    // 页面装配：.yaml 作为 page.yaml 驱动多板块组装
+    const pageKey = `${containerPath}\\shell\\${SUBCMDS.pageBuild}`;
+    regAdd(pageKey, 'MUIVerb', 'REG_SZ', '作为页面装配，生成邮件 HTML');
+    regAdd(pageKey, 'Icon', 'REG_SZ', iconPath);
+    const pagePs = `${cdYaml}& '${node}' '${script}' build -p '%1'; Write-Host ''; Read-Host 'Press Enter to close'`;
+    regAdd(`${pageKey}\\command`, '', 'REG_SZ', `powershell.exe -Command "${pagePs}"`);
+
     regResourceCmds(cdYaml);
 
     if (pwshPath) {
@@ -281,6 +289,13 @@ function registerSubCommands(containerPath, kind, nodePath, scriptPath, iconPath
     regAdd(pKey, 'Icon', 'REG_SZ', iconPath);
     const pPs = `${cd}& '${node}' '${script}' init; Write-Host ''; Read-Host 'Press Enter to close'`;
     regAdd(`${pKey}\\command`, '', 'REG_SZ', `powershell.exe -Command "${pPs}"`);
+
+    // 页面装配（交互式：选品牌/模板/多选板块，生成 page.yaml 后组装）
+    const bKey = `${containerPath}\\shell\\${SUBCMDS.pageBuild}`;
+    regAdd(bKey, 'MUIVerb', 'REG_SZ', '页面装配，交互生成邮件 HTML');
+    regAdd(bKey, 'Icon', 'REG_SZ', iconPath);
+    const bPs = `${cd}& '${node}' '${script}' build; Write-Host ''; Read-Host 'Press Enter to close'`;
+    regAdd(`${bKey}\\command`, '', 'REG_SZ', `powershell.exe -Command "${bPs}"`);
 
     if (pwshPath) {
       const pwshKey = `${containerPath}\\shell\\JuiceEmail.Pwsh`;
@@ -386,6 +401,7 @@ async function registerContextMenu() {
     `\n  ${chalk.bold('.yaml / .yml')} 文件右键：\n` +
     `    ${chalk.bold('用 juice 生成邮件 HTML')}\n` +
     `      +-- 作为配置，拼接邮件 HTML  ->  juice -c\n` +
+    `      +-- 作为页面装配，生成邮件 HTML -> juice build -p\n` +
     `      +-- 查看可用资源\n` +
     `      +-- 拷贝全部资源\n` +
     `      +-- 选择资源拷贝\n` +
@@ -395,6 +411,7 @@ async function registerContextMenu() {
     `      +-- 查看可用资源\n` +
     `      +-- 拷贝全部资源\n` +
     `      +-- 选择资源拷贝\n` +
+    `      +-- 页面装配，交互生成邮件 HTML -> juice build\n` +
     (pwshPath ? `      +-- 在此打开终端\n` : '') +
     '\n' +
     chalk.gray('  注意：如菜单未出现，请重启文件资源管理器（explorer.exe）。\n')
