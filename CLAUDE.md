@@ -2,14 +2,16 @@
 
 ## 项目概述
 
-CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 内联 + Mustache 模板变量 + 压缩）。
+CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 内联 + Handlebars 模板（Mustache 兼容语义）+ 压缩）。
 
 ## 当前功能
 
-- `juice -f template.html` — 对 HTML 做 Mustache 变量替换 → juice CSS 内联 → 输出 `.output.html` + `.minified.html`
+- `juice -f template.html` — 对 HTML 做模板变量替换（Handlebars 引擎）→ juice CSS 内联 → 输出 `.output.html` + `.minified.html`
 - `juice -c config.yaml -f template.html` — 同上，指定配置文件
 - `juice -s snippet.html -f template.html` — 片段组装模式：片段 + 模板拼接，输出 4 个文件。跨品牌时给出警告但仍可执行
 - `juice -s snippet.html` — 片段模式，交互式选择品牌和模板，跨品牌时给出警告
+- `juice build -p page.yaml` — 页面装配模式：多个片段（可带独立 vars）按序组装进页面骨架，输出 4 个文件
+- `juice build` — 交互式页面装配：选择品牌/模板/多选板块，自动生成 page.yaml
 - `juice` — 全交互模式：逐步选择品牌、模板、片段系列、片段 HTML、配置（同品牌内组合，不会跨品牌）
 - `juice view` — 查看 EDM 资源树（品牌、模板、系列、片段变体）
 - `juice view -i` — 交互式浏览，叶节点可多选拷贝到当前目录
@@ -19,8 +21,9 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 - `juice --install` / `juice --uninstall` — Windows 右键菜单注册/卸载（npm install 时自动执行 postinstall）
 - 右键菜单：
   - `.html`/`.htm` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为模板生成 / 作为片段拼接 / 查看可用资源 / 拷贝全部资源 / 选择资源拷贝 / 打开 PowerShell）
-  - `.yaml`/`.yml` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为配置拼接 / 查看可用资源 / 拷贝全部资源 / 选择资源拷贝 / 打开 PowerShell）
-  - 文件夹 / 空白处 → "📧 用 juice 生成邮件 HTML" → 子菜单（查看可用资源 / 拷贝全部资源 / 选择资源拷贝 / 打开终端）
+  - `.yaml`/`.yml` → "📧 用 juice 生成邮件 HTML" → 子菜单（作为配置拼接 / 页面装配 / 查看可用资源 / 拷贝全部资源 / 选择资源拷贝 / 打开 PowerShell）
+  - 文件夹 / 空白处 → "📧 用 juice 生成邮件 HTML" → 子菜单（页面装配 / 查看可用资源 / 拷贝全部资源 / 选择资源拷贝 / 打开终端）
+- 模板能力：循环索引 `{{@index}}`、逻辑 helper（eq/ne/gt/gte/lt/lte/and/or/not）、partial（`{{> name}}`）、本地 `<link>` 样式表构建期内联（`src/css-links.js`）；语法详见 `docs/template-syntax.md`
 
 ## npm 生命周期（自动菜单注册）
 
@@ -34,12 +37,18 @@ CLI 工具，生成标准、兼容各大邮件发送平台的 HTML 邮件（CSS 
 ```
 bin/juice.js              # CLI 入口（Commander.js, ESM）
 src/index.js              # 核心逻辑：配置加载、模板处理、输出
+src/render.js             # 模板渲染：Handlebars 引擎 + Mustache 语义对齐 + 逻辑 helper
 src/snippet.js            # 片段组装模式逻辑 + 交互式提示
+src/page.js               # 页面装配模式（juice build -p）
+src/page-interactive.js   # 交互式页面装配（juice build 无 -p）
+src/css-links.js          # 本地 <link> 样式表构建期内联
 src/view.js               # EDM 资源查看/浏览（juice view）
 src/init.js               # EDM 资源拷贝初始化（juice init）
 src/context-menu.js       # Windows 右键菜单注册
 src/constants.js          # 集中常量（文件名/配置名/输出后缀）
 src/format.js             # 统一格式化函数（formatName / fmtBytes）
+docs/template-syntax.md   # 模板语法参考（完整）
+examples/page-assembly/   # 页面装配完整可运行示例
 defaults/juice.yaml       # CLI 内置默认配置
 edm/                      # EDM 模板库（npm 发布时包含，全局安装后可用）
 scripts/release.mjs       # 发布脚本（ESM，使用 @inquirer/prompts）
@@ -62,7 +71,7 @@ edm/
         _meta.yaml                #   [可选] 系列元数据
         <variant>/                #   片段变体目录（如 default, meeting）
           _meta.yaml              #   [可选] 片段变体元数据
-          snippet.html            #   片段 HTML（Mustache 模板片段）
+          snippet.html            #   片段 HTML（Handlebars/Mustache 模板片段）
           juice.yaml              #   最优配对配置（默认选中）
           <other>.yaml            #   替代配置（可选）
 ```
@@ -287,8 +296,8 @@ juice init
 
 | 文件 | 说明 |
 |---|---|
-| `<name>.raw.html` | 原始组装：未渲染的片段 + 模板（Mustache 标签保留，无 CSS 内联） |
-| `<name>.html` | 已渲染：Mustache 变量已替换，无 CSS 内联 |
+| `<name>.raw.html` | 原始组装：未渲染的片段 + 模板（模板标签保留，无 CSS 内联） |
+| `<name>.html` | 已渲染：模板变量已替换，无 CSS 内联 |
 | `<name>.output.html` | Juice CSS 内联后 |
 | `<name>.minified.html` | 压缩版 |
 
@@ -374,8 +383,8 @@ juice init
 ### 组装流水线（`assembleSnippet`）
 
 1. 读取片段 HTML + 模板 HTML
-2. 未渲染的片段插入模板 `id="content"` → `.raw.html`（Mustache 标签保留，无 juice）
-3. Mustache 渲染合并 HTML → `.html`（变量已替换，无 juice）
+2. 未渲染的片段插入模板 `id="content"` → `.raw.html`（模板标签保留，无 juice）
+3. Handlebars 渲染合并 HTML → `.html`（变量已替换，无 juice）
 4. 收集模板目录额外 CSS + Juice CSS 内联 → `.output.html`
 5. 压缩 → `.minified.html`
 6. 输出报告

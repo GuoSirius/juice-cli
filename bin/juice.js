@@ -99,8 +99,8 @@ program
     <name>.minified.html   压缩版
 
   片段模式（当前工作目录）：
-    <name>.raw.html         原始组装（Mustache 未渲染，无 CSS 内联）
-    <name>.html             已渲染（Mustache 变量已替换，无 CSS 内联）
+    <name>.raw.html         原始组装（模板未渲染，无 CSS 内联）
+    <name>.html             已渲染（模板变量已替换，无 CSS 内联）
     <name>.output.html      Juice CSS 内联后
     <name>.minified.html    压缩版
 

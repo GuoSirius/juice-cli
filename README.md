@@ -1,19 +1,21 @@
 # juice-email-cli
 
-> 一个用于生成符合各大邮件平台标准的 HTML 邮件命令行工具，基于 [juice](https://github.com/Automattic/juice) 实现 CSS 内联，支持 Mustache 模板变量替换，同时输出标准版与压缩版。
+> 一个用于生成符合各大邮件平台标准的 HTML 邮件命令行工具，基于 [juice](https://github.com/Automattic/juice) 实现 CSS 内联，支持 Handlebars 模板（完全兼容 Mustache 语义），同时输出标准版与压缩版。
 
 ---
 
 ## 功能特性
 
 - **CSS 内联** —— 将 `<style>` 中的样式全部内联为 `style=""` 属性，兼容 Gmail / Outlook / Apple Mail 等
-- **Mustache 模板变量** —— 支持 `{{变量名}}` 语法，通过配置文件批量替换
-- **Mustache 列表循环** —— 支持 `{{#items}}...{{/items}}` 遍历数组，支持嵌套循环
+- **模板引擎** —— Handlebars 渲染 + Mustache 语义完全对齐（空串/0 为假值、上下文规则一致），**现有 Mustache 模板零改动可用**
+- **模板增强** —— 循环索引 `{{@index}}`、逻辑 helper（`eq/gt/and/or…`）、`{{#each}}`、partial（`{{> name}}`）、`{{{var}}}` 原样输出
+- **本地样式表内联** —— 模板中 `<link rel="stylesheet" href="./xx.css">` 构建期自动合并内联（自定义 CSS / Bootstrap / uno.css）
 - **片段组装** —— 将片段 HTML 插入模板的 `<tbody id="content">`，自动调整缩进，输出 4 个阶段文件
+- **页面装配** —— `juice build -p page.yaml`：多个片段（可带独立变量）按序组装进页面骨架，另支持交互式装配
 - **三层配置合并** —— CLI 默认 < 用户目录 < 优先配置，层层合并
 - **HTML 标签渲染** —— 变量值中的 `<sup>`、`<sub>` 等 HTML 标签直接渲染（可通过 `rawHtml` 关闭）
 - **双文件输出** —— 普通模式生成 `.output.html` + `.minified.html`
-- **四文件输出** —— 片段模式生成 `.raw.html` + `.html` + `.output.html` + `.minified.html`
+- **四文件输出** —— 片段模式 / 页面装配生成 `.raw.html` + `.html` + `.output.html` + `.minified.html`
 - **交互模式** —— 无参数运行，逐步选择品牌、模板、片段、配置
 - **资源浏览** —— `juice view` 查看 EDM 资源树，`-i` 交互式逐层翻页
 - **资源拷贝** —— `juice init` 将模板/片段/配置拷贝到当前目录
@@ -86,12 +88,52 @@ juice -s snippet.html -f template.html -n my-output
 
 | 文件 | 说明 |
 |------|------|
-| `<name>.raw.html` | 原始组装（Mustache 未渲染，无 CSS 内联） |
-| `<name>.html` | 已渲染（Mustache 变量已替换，无 CSS 内联） |
+| `<name>.raw.html` | 原始组装（模板未渲染，无 CSS 内联） |
+| `<name>.html` | 已渲染（模板变量已替换，无 CSS 内联） |
 | `<name>.output.html` | Juice CSS 内联后 |
 | `<name>.minified.html` | 压缩版 |
 
 输出文件名默认为模板文件名（不含扩展名）。如果文件冲突，会提示 `覆盖（默认）` / `版本` / `重新输入文件名` 三种处理方式；`-s -f` 直接指定时同样走此逻辑，非交互环境默认覆盖并给出警告。
+
+### 页面装配（多片段组装成页面，输出 4 个文件）
+
+```bash
+# 按 page.yaml 装配
+juice build -p page.yaml
+
+# 自定义输出名（覆盖 page.yaml 的 outputName）
+juice build -p page.yaml -n my-page
+
+# 交互式装配：选择品牌/模板/多选板块，自动生成 page.yaml
+juice build
+```
+
+`page.yaml` 结构（路径相对 page.yaml 所在目录，产物输出在**运行命令时所在目录**）：
+
+```yaml
+template: tpl.html          # 页面骨架，<tbody id="content"> 处插入板块
+outputName: demo-page
+variables:                  # 全局变量
+  brand: ACME
+sections:                   # 按序装配，每个板块可带独立 vars
+  - snippet: sections/header/snippet.html
+    vars: { title: 标题A }
+  - snippet: sections/products/snippet.html
+    vars: { items: [{ name: P1, tag: hot }] }
+partials:                   # 可选：{{> sub}} 局部复用
+  sub: sections/footer/sub.html
+```
+
+生成文件（与片段模式相同的 4 文件）：
+
+| 文件 | 说明 |
+|------|------|
+| `<name>.raw.html` | 原始组装（板块已插入、变量未渲染） |
+| `<name>.html` | 已渲染（变量已替换、无 CSS 内联） |
+| `<name>.output.html` | Juice CSS 内联后 |
+| `<name>.minified.html` | 压缩版 |
+
+完整示例见 [`examples/page-assembly/`](./examples/page-assembly/)。
 
 ### 交互模式（逐步选择）
 
@@ -153,7 +195,8 @@ juice init --config edm/elabscience/series/literature/default/juice.yaml
 | `--file <path>` | `-f` | 输入 HTML 模板文件路径 |
 | `--snippet <path>` | `-s` | 片段 HTML 文件路径：插入到模板 `<tbody id="content">` |
 | `--config <path>` | `-c` | 配置文件路径，不指定时自动查找 |
-| `--name <name>` | `-n` | 片段模式输出文件名（不含扩展名） |
+| `--name <name>` | `-n` | 片段/页面装配模式输出文件名（不含扩展名） |
+| `--page <path>` | `-p` | 页面装配描述文件（YAML），仅 `juice build` 子命令使用 |
 | `--install` | | 注册 Windows 右键菜单（当前用户，无需管理员） |
 | `--uninstall` | | 取消 Windows 右键菜单注册 |
 | `--version` | `-v` | 查看版本号 |
@@ -166,6 +209,7 @@ juice init --config edm/elabscience/series/literature/default/juice.yaml
 | ✓ | * | * | 片段模式（-s 指定片段，-f 可选指定模板） |
 | ✗ | ✓ | * | 普通模式（生成 .output.html + .minified.html） |
 | ✗ | ✗ | ✗ | 交互式片段模式（逐步选择） |
+| — | — | — | `juice build [-p page.yaml]` 页面装配（无 -p 时交互式） |
 | — | — | — | `juice view [path]` 浏览资源 / `-i` 交互浏览 |
 | — | — | — | `juice init [path]` 拷贝资源到当前目录 |
 
@@ -261,16 +305,21 @@ variables:
 
 ## 模板语法
 
-使用 [Mustache](https://mustache.github.io/) 语法：
+完整语法参考见 **[docs/template-syntax.md](./docs/template-syntax.md)**（含值类型→行为对照表、helper 一览、迁移注意事项）。速查：
 
-```html
-<h1>你好，{{recipientName}}！</h1>
-<a href="{{ctaUrl}}" style="background-color: {{brandColor}};">{{ctaText}}</a>
-```
+| 语法 | 说明 | 示例 |
+|------|------|------|
+| `{{var}}` / `{{a.b.c}}` | 插值（默认转义） | `{{overview.title}}` |
+| `{{{var}}}` | 插值，恒不转义 | `{{{html}}}` |
+| `{{#var}}…{{/var}}` | 条件渲染（真值时显示；对象压栈上下文、字符串保持父级上下文） | `{{#gift}}{{gift}}{{/gift}}` |
+| `{{^var}}…{{/var}}` | 反向（空串/0/undefined/空数组时显示） | `{{^banner.link}}…{{/banner.link}}` |
+| `{{#list}}…{{/list}}` | 数组迭代，`{{.}}` 为当前项 | `{{#products}}{{name}}{{/products}}` |
+| `{{#each list}}…{{/each}}` | 增强迭代：`@index` / `@first` / `@last` | `{{@index}}. {{name}}` |
+| `{{#if (eq a "x")}}…{{else}}…{{/if}}` | 逻辑 helper：eq/ne/gt/gte/lt/lte/and/or/not | `{{#if (gt count 3)}}…{{/if}}` |
+| `{{> name}}` | partial 引入（yaml `partials` 注册） | `{{> note}}` |
+| `<link rel="stylesheet" href="./x.css">` | 本地样式表构建期内联 | — |
 
-### HTML 标签在变量中
-
-当 `rawHtml: true`（默认）时，变量值中的 HTML 标签直接渲染：
+HTML 标签在变量中：`rawHtml: true`（默认）时直接渲染：
 
 ```yaml
 variables:
@@ -283,41 +332,6 @@ variables:
 <!-- 渲染为：CD38-NAD<sup>+</sup> Axis, NO<sub>3</sub><sup>-</sup> -->
 ```
 
-### Mustache 列表循环
-
-支持 `{{#items}}...{{/items}}` 语法遍历数组数据：
-
-```yaml
-variables:
-  products:
-    - name: "产品 A"
-      price: "¥99.00"
-      tag: "热销"
-    - name: "产品 B"
-      price: "¥199.00"
-```
-
-```html
-{{#products}}
-<div class="product-item">
-  <h3>{{name}}</h3>
-  <p class="price">{{price}}</p>
-  {{#tag}}<span class="tag">{{tag}}</span>{{/tag}}
-</div>
-{{/products}}
-
-{{^products}}
-<p>暂无商品</p>
-{{/products}}
-```
-
-| 语法 | 说明 | 示例 |
-|------|------|------|
-| `{{#list}}{{/list}}` | 循环遍历 | `{{#products}}{{name}}{{/products}}` |
-| `{{^list}}{{/list}}` | 反向（空列表时显示） | `{{^products}}暂无{{/products}}` |
-| `{{.}}` | 当前元素 | `{{#items}}{{.}}{{/items}}` |
-| `{{#var}}{{/var}}` | 条件渲染（仅当有值时显示） | `{{#tag}}{{tag}}{{/tag}}` |
-
 ---
 
 ## 片段组装
@@ -329,7 +343,7 @@ edm/
 ├── <brand>/                       # 品牌目录
 │   ├── <brand>-template.html      #   品牌模板（含 <tbody id="content">）
 │   └── <series>/                  #   片段系列目录
-│       ├── snippet.html           #     片段 HTML（Mustache 模板片段）
+│       ├── snippet.html           #     片段 HTML（Handlebars/Mustache 模板片段）
 │       └── juice.yaml             #     片段配置（variables）
 ```
 
@@ -423,12 +437,21 @@ juice-cli/
 │   └── juice.js               # CLI 入口（Commander.js）
 ├── src/
 │   ├── index.js               # 核心逻辑（配置合并、模板处理、双输出）
+│   ├── render.js              # 模板渲染（Handlebars 引擎 + Mustache 语义对齐 + 逻辑 helper）
 │   ├── snippet.js             # 片段组装模式 + 交互式提示
+│   ├── page.js                # 页面装配模式（juice build -p）
+│   ├── page-interactive.js    # 交互式页面装配（juice build 无 -p）
+│   ├── css-links.js           # 本地 <link> 样式表构建期内联
 │   ├── view.js                # EDM 资源查看/浏览（juice view）
 │   ├── init.js                # EDM 资源拷贝初始化（juice init）
 │   ├── context-menu.js        # Windows 右键菜单注册
 │   ├── constants.js           # 集中常量（文件名/配置名/输出后缀等魔法字符串）
 │   └── format.js              # 统一格式化函数（formatName / fmtBytes）
+├── docs/
+│   └── template-syntax.md     # 模板语法参考（完整）
+├── examples/
+│   ├── page-assembly/         # 页面装配完整可运行示例
+│   └── template.html 等       # 基础用法示例
 ├── defaults/
 │   └── juice.yaml             # CLI 内置默认配置
 ├── edm/                       # EDM 模板库（npm 发布时包含）
