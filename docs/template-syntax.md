@@ -163,6 +163,14 @@ juice -f t.html --unocss
 
 **完整可运行示例**：见 [`examples/unocss-builtin/`](../examples/unocss-builtin/)（整封产品周报邮件，含 `juice.yaml(unocss:true)` 与真实产物前后对比）。
 
+**开发期免编译预览**：改一点就要跑完整邮件管线太重？用 `preview` 子命令 —— 仅把原子 CSS 注入 `<style>` 块（**不内联、不压缩**），浏览器直开刷新即见样式，迭代时无需走 juice：
+
+```bash
+juice preview t.html          # 生成 t-preview.html，浏览器打开、刷新即见
+juice preview t.html -w       # 监听模板改动，自动重生成预览文件
+juice preview t.html -s -o    # 起本地服务，保存后浏览器自动刷新（不落盘、不动源码）
+```
+
 > 依赖为 `optionalDependencies`：`@unocss/core` + `@unocss/preset-wind3`。未安装却启用会提示先安装；核心邮件链路不硬依赖。
 > UnoCSS 只扫描**静态** `class` 属性，无法解析 Handlebars 动态 class（如 `class="{{cls}}"`）。
 

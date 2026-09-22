@@ -5,6 +5,7 @@ dist/
 # Build outputs
 *.output.html
 *.minified.html
+*-preview.html
 
 # Editor
 .vscode/

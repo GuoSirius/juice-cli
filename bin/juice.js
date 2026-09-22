@@ -73,6 +73,12 @@ program
   交互模式（逐步选择品牌、模板、片段、配置）：
     juice
 
+  本地预览（仅注入 UnoCSS <style>，不内联/不压缩，免完整编译）：
+    juice preview t.html                生成 t-preview.html，浏览器打开刷新即见样式
+    juice preview t.html -w             生成并监听改动自动重生成
+    juice preview t.html -s             起本地服务，保存即自动刷新（不落盘）
+    juice preview t.html -s -o          同上并自动打开浏览器
+
 ════════════════════════════════════════════════════════════════
   资源浏览
 ════════════════════════════════════════════════════════════════
@@ -161,6 +167,27 @@ program
       config: options.config || globalOpts.config || null,
       outputName: options.name || globalOpts.name || null,
       unocss: options.unocss || globalOpts.unocss || null,
+    });
+  }));
+
+// ─── Subcommand: juice preview ─────────────────────────────────────────
+program
+  .command('preview <file>')
+  .description('本地预览：仅注入 UnoCSS 原子 CSS（<style> 块，不内联/不压缩），免完整编译即可在浏览器看样式')
+  .option('-c, --config <path>', '配置文件路径')
+  .option('-w, --watch', '监听模板改动，自动重生成预览文件（文件模式）或自动刷新（服务模式）')
+  .option('-s, --serve', '启动本地预览服务，浏览器访问后保存即自动刷新（不落盘、不动源码）')
+  .option('-p, --port <n>', '服务模式端口（默认 3000，被占用自动顺延）', (v) => parseInt(v, 10))
+  .option('-o, --open', '服务模式启动时自动打开默认浏览器')
+  .action(safeAction(async (file, options) => {
+    const { runPreviewMode } = await import('../src/preview.js');
+    await runPreviewMode({
+      file,
+      config: options.config || null,
+      watch: !!options.watch,
+      serve: !!options.serve,
+      port: options.port || 3000,
+      open: !!options.open,
     });
   }));
 
