@@ -139,6 +139,34 @@ partials:
 
 ---
 
+### 6.1 内建 UnoCSS 编译（opt-in · 新增能力）
+
+不想预编译 `uno.css`？开启后 juice-cli 直接扫描 HTML 里的工具类、构建期生成原子 CSS 并内联，**页面上直接写 class 即可**。
+
+**开启方式（任一即可）：**
+
+- CLI 旗标：`juice -f t.html --unocss`
+- 配置文件：`unocss: true`（项目 `juice.yaml` 或页面模式 `page.yaml`）
+
+**email-safe 处理**：关闭 preflights（不注入全局 reset）、关闭 `@layer`，并把 `@unocss/preset-wind3` 生成的 `var(--un-*-opacity)` 与 `rgb(R G B / A)` 归一为 `rgba(R,G,B,A)`——邮件客户端不支持 CSS 变量，否则背景色/文字色会整体失效。
+
+**示例：**
+
+```html
+<div class="flex items-center p-6 bg-blue-500 text-white rounded-lg">卡片</div>
+```
+
+```bash
+cd examples/bootstrap-unocss
+node ../../bin/juice.js -f template-unocss.html --unocss
+# 产物 div 已拿到 style="display:flex;...;background-color:rgba(59,130,246,1);..."
+```
+
+> 依赖为 `optionalDependencies`：`@unocss/core` + `@unocss/preset-wind3`。未安装却启用会提示先安装；核心邮件链路不硬依赖。
+> UnoCSS 只扫描**静态** `class` 属性，无法解析 Handlebars 动态 class（如 `class="{{cls}}"`）。
+
+---
+
 ## 7. 不支持的写法（从 Mustache 迁移注意）
 
 | 语法 | 支持情况 | 替代方案 |

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UnoCSS 内建编译示例</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:24px;">
+        <!-- 直接用 UnoCSS 工具类，无需预编译 uno.css；加 --unocss 后由 juice-cli 编译并内联 -->
+        <div class="flex items-center justify-center gap-3 p-6 bg-blue-500 text-white rounded-lg" style="max-width:420px;">
+          <span class="text-lg font-bold">UnoCSS</span>
+          <span class="text-sm opacity-80">邮件内联演示</span>
+        </div>
+        <p class="mt-4 text-center text-gray-600 text-sm">
+          该卡片的 display/flex/对齐/内边距/圆角/背景色均由工具类生成，已写入元素 style。
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
