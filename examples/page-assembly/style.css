@@ -1,0 +1,6 @@
+/* 示例：被 <link> 引入后在构建期合并为 <style>，再由 juice 内联到各元素（支持模板变量） */
+.card { max-width: 600px; margin: 0 auto; }
+.t-header { background: #0b6ec9; color: #ffffff; font-size: 20px; padding: 16px 24px; font-weight: bold; }
+.t-cell { padding: 10px 24px; font-size: 14px; color: #333333; border-bottom: 1px solid #eeeeee; }
+.t-tag { color: #e65100; font-size: 12px; }
+.t-foot { font-size: 12px; color: #888888; padding: 12px 24px; }

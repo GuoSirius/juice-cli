@@ -1,0 +1,30 @@
+# 页面装配示例描述文件
+# 路径均相对本文件所在目录
+template: template.html
+outputName: demo-page
+
+# 全局变量：所有板块与模板共享
+variables:
+  brand: Procell
+  year: "2026"
+
+# 板块按序插入模板 <tbody id="content">，每个板块可用 vars 覆盖/追加变量
+sections:
+  - snippet: sections/header/snippet.html
+    name: header
+    vars:
+      title: 产品速览
+  - snippet: sections/products/snippet.html
+    vars:
+      items:
+        - name: 96孔细胞培养板
+          tag: hot
+        - name: 移液枪头（滤芯型）
+        - name: 血清移液管 5ml
+  - snippet: sections/footer/snippet.html
+    vars:
+      summary: 以上产品本周下单享 95 折，联系当地销售。
+
+# 局部片段：片段内用 {{> note}} 引用
+partials:
+  note: partials/note.html

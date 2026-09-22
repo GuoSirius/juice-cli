@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{brand}} 产品速览</title>
+  <!-- 新能力②：本地样式表构建期内联（相对模板所在目录解析），随后由 juice 统一内联到元素上 -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body style="margin:0;padding:0;background:#f4f5f7;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f7;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" class="card" cellpadding="0" cellspacing="0" style="width:600px;background:#ffffff;border-radius:8px;">
+          <tbody id="content">
+            <!-- 页面装配：page.yaml 中的 sections 按序插入到这里 -->
+          </tbody>
+        </table>
+        <p style="color:#999;font-size:12px;">{{brand}} © {{year}}</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
