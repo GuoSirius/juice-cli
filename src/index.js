@@ -10,6 +10,7 @@ import { minify as htmlMinify } from 'html-minifier-terser';
 import { fmtBytes } from './format.js';
 import { renderTemplate } from './render.js';
 import { inlineLocalStylesheets } from './css-links.js';
+import { applyUnoCss } from './unocss.js';
 import {
   DEFAULT_CONFIG_NAMES,
   META_FILE,
@@ -183,7 +184,7 @@ export function buildConfig(highPriorityPath, homePath) {
 
 // ─── HTML 模板处理 ────────────────────────────────────────────────────────────
 
-export function processTemplate(inputFile, config) {
+export async function processTemplate(inputFile, config, unocssEnabled = false) {
   const htmlRaw0 = fs.readFileSync(inputFile, 'utf8');
 
   // 渲染前解析本地 <link rel="stylesheet">（渲染后 CSS 中的模板变量也能生效）
@@ -193,13 +194,16 @@ export function processTemplate(inputFile, config) {
     rawHtml: !!config.rawHtml,
   });
 
+  // opt-in UnoCSS：扫描 class → 原子 CSS → 注入 <head>（随后由 juice 统一内联）
+  const htmlForJuice = await applyUnoCss(htmlWithVars, unocssEnabled);
+
   const basePath = path.dirname(path.resolve(inputFile));
   const extraCss = collectExtraCss(basePath, config);
 
   const juiceOpts = Object.assign({}, config.juice || {});
   delete juiceOpts.extraCssFiles;
 
-  return juice(htmlWithVars, { ...juiceOpts, extraCss });
+  return juice(htmlForJuice, { ...juiceOpts, extraCss });
 }
 
 export function collectExtraCss(basePath, config) {
@@ -344,7 +348,7 @@ export function savings(original, minified) {
 
 // ─── 主入口 ───────────────────────────────────────────────────────────────────
 
-export async function run({ file, config: configPath }) {
+export async function run({ file, config: configPath, unocss }) {
   const spinner = ora({ text: '正在处理...', color: 'cyan' }).start();
 
   try {
@@ -372,7 +376,8 @@ export async function run({ file, config: configPath }) {
     const encoding = (config.output && config.output.encoding) || 'utf8';
 
     spinner.text = `CSS 内联处理：${path.basename(inputFile)}`;
-    const resultHtml = processTemplate(inputFile, config);
+    const unocssEnabled = !!unocss || !!config.unocss;
+    const resultHtml = await processTemplate(inputFile, config, unocssEnabled);
 
     let outBase = path.parse(path.resolve(inputFile)).name;
     const probe = resolveOutputPaths(inputFile, config, outBase);

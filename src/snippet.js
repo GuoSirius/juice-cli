@@ -18,6 +18,7 @@ import {
 } from './index.js';
 import { renderTemplate } from './render.js';
 import { inlineLocalStylesheets } from './css-links.js';
+import { applyUnoCss } from './unocss.js';
 import {
   ICON_FILE,
   SNIPPET_FILE,
@@ -468,7 +469,7 @@ function resolveSnippetOutputPaths(outputBaseName, cwd) {
  *   3. Juice CSS 内联 → .output.html
  *   4. 压缩 → .minified.html
  */
-async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputBaseName, layers = [] }) {
+async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputBaseName, layers = [], unocss }) {
   const templateHtml = inlineLocalStylesheets(
     fs.readFileSync(templatePath, 'utf8'),
     path.dirname(templatePath),
@@ -492,9 +493,11 @@ async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputB
   const extraCss = collectExtraCss(templateDir, config);
   const juiceOpts = Object.assign({}, config.juice || {});
   delete juiceOpts.extraCssFiles;
+  const unocssEnabled = !!unocss || !!config.unocss;
   let processed;
   try {
-    processed = juice(renderedHtml, { ...juiceOpts, extraCss });
+    const htmlForJuice = await applyUnoCss(renderedHtml, unocssEnabled);
+    processed = juice(htmlForJuice, { ...juiceOpts, extraCss });
   } catch (err) {
     throw new Error(`CSS 内联失败：${err.message}`, { cause: err });
   }
@@ -747,7 +750,7 @@ async function promptConfirm(summary) {
  *   - 配置文件：自动检测片段目录下的 juice.yaml / juice.yml，-c 可覆盖
  *   - 合并顺序：项目默认 → 用户目录 → 片段目录配置 → CLI -c
  */
-async function runSnippetMode({ snippet, template, config: cliConfigPath, outputName }) {
+async function runSnippetMode({ snippet, template, config: cliConfigPath, outputName, unocss }) {
   const snippetPath = path.resolve(snippet);
   if (!fs.existsSync(snippetPath)) {
     throw new Error(`片段文件不存在：${snippetPath}`);
@@ -836,6 +839,7 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
     cwd: process.cwd(),
     outputBaseName,
     layers,
+    unocss,
   });
 }
 
@@ -843,7 +847,7 @@ async function runSnippetMode({ snippet, template, config: cliConfigPath, output
  * 交互模式（无 --snippet，无 -f）— 方案 B 新结构
  *   流程：品牌 → 模板版本 → 片段系列 → 片段变体 → 配置文件 → 输出名 → 确认 → 执行
  */
-async function runInteractiveMode({ config: cliConfigPath }) {
+async function runInteractiveMode({ config: cliConfigPath, unocss }) {
   const edmDir = resolveEdmDir();
 
   // 1. 选择品牌
@@ -945,6 +949,7 @@ async function runInteractiveMode({ config: cliConfigPath }) {
     cwd: process.cwd(),
     outputBaseName,
     layers,
+    unocss,
   });
 }
 

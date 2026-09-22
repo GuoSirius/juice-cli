@@ -12,6 +12,7 @@ import {
 } from './index.js';
 import { renderTemplate } from './render.js';
 import { inlineLocalStylesheets } from './css-links.js';
+import { applyUnoCss } from './unocss.js';
 import { buildSnippetConfig, insertIntoContent, resolveSnippetOutputPaths } from './snippet.js';
 import { SNIPPET_OUTPUT_SUFFIXES } from './constants.js';
 
@@ -95,7 +96,7 @@ export function parsePageSpec(raw, baseDir) {
  *   3. Juice CSS 内联 → .output.html
  *   4. 压缩 → .minified.html
  */
-async function assemblePage({ spec, config, cwd, outputBaseName, layers = [] }) {
+async function assemblePage({ spec, config, cwd, outputBaseName, layers = [], unocss }) {
   const templateHtml = inlineLocalStylesheets(
     fs.readFileSync(spec.template, 'utf8'),
     path.dirname(spec.template),
@@ -131,9 +132,11 @@ async function assemblePage({ spec, config, cwd, outputBaseName, layers = [] }) 
   const extraCss = collectExtraCss(templateDir, config);
   const juiceOpts = Object.assign({}, config.juice || {});
   delete juiceOpts.extraCssFiles;
+  const unocssEnabled = !!unocss || !!config.unocss;
   let processed;
   try {
-    processed = juice(renderedHtml, { ...juiceOpts, extraCss });
+    const htmlForJuice = await applyUnoCss(renderedHtml, unocssEnabled);
+    processed = juice(htmlForJuice, { ...juiceOpts, extraCss });
   } catch (err) {
     throw new Error(`CSS 内联失败：${err.message}`, { cause: err });
   }
@@ -177,7 +180,7 @@ async function assemblePage({ spec, config, cwd, outputBaseName, layers = [] }) 
  * page.yaml 本身作为配置层参与合并（可携带 variables / juice / rawHtml 等），
  * 优先级与片段模式的「项目配置」一致：内置默认 < 用户目录 < page.yaml < -c 指定。
  */
-export async function runPageMode({ page, config: cliConfigPath, outputName }) {
+export async function runPageMode({ page, config: cliConfigPath, outputName, unocss }) {
   if (!page) {
     // 交互式页面装配（选择品牌/模板/板块多选）
     try {
@@ -211,7 +214,7 @@ export async function runPageMode({ page, config: cliConfigPath, outputName }) {
     defaultAction: 'overwrite',
   });
 
-  return assemblePage({ spec, config, cwd: process.cwd(), outputBaseName: res.base, layers });
+  return assemblePage({ spec, config, cwd: process.cwd(), outputBaseName: res.base, layers, unocss });
 }
 
 export { assemblePage };

@@ -41,6 +41,7 @@ program
   .option('-n, --name <name>', '片段模式输出文件名（不含扩展名）')
   .option('--install',   '注册 Windows 右键菜单（当前用户，无需管理员）')
   .option('--uninstall', '取消 Windows 右键菜单注册')
+  .option('--unocss', '启用内建 UnoCSS 编译：扫描 HTML 工具类 → 原子 CSS → 内联（opt-in，需先安装 @unocss/core @unocss/preset-wind3）')
   .addHelpText('before', `
 ╔════════════════════════════════════════════════════════════════╗
 ║  juice-email-cli v${pkg.version}                                     ║
@@ -150,6 +151,7 @@ program
   .option('-p, --page <path>', '页面装配描述文件（YAML）')
   .option('-c, --config <path>', '配置文件路径（也可放在子命令之前）')
   .option('-n, --name <name>', '输出文件名（不含扩展名，也可放在子命令之前）')
+  .option('--unocss', '启用内建 UnoCSS 编译：扫描 HTML 工具类 → 原子 CSS → 内联（opt-in，需先安装 @unocss/core @unocss/preset-wind3）')
   .action(safeAction(async (options) => {
     // 兼容「juice -c x build」全局写法：子命令未指定时回退到根命令解析结果
     const globalOpts = program.opts();
@@ -158,6 +160,7 @@ program
       page: options.page || null,
       config: options.config || globalOpts.config || null,
       outputName: options.name || globalOpts.name || null,
+      unocss: options.unocss || globalOpts.unocss || null,
     });
   }));
 
@@ -202,6 +205,7 @@ program
         template: options.file,
         config: options.config,
         outputName: options.name,
+        unocss: options.unocss,
       });
       return;
     }
@@ -215,12 +219,13 @@ program
       await run({
         file: inputFile,
         config: options.config,
+        unocss: options.unocss,
       });
       return;
     }
 
     const { runInteractiveMode } = await import('../src/snippet.js');
-    await runInteractiveMode({ config: options.config });
+    await runInteractiveMode({ config: options.config, unocss: options.unocss });
   }));
 
 program.parse(process.argv);
