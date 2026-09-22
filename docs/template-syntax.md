@@ -150,17 +150,18 @@ partials:
 
 **email-safe 处理**：关闭 preflights（不注入全局 reset）、关闭 `@layer`，并把 `@unocss/preset-wind3` 生成的 `var(--un-*-opacity)` 与 `rgb(R G B / A)` 归一为 `rgba(R,G,B,A)`——邮件客户端不支持 CSS 变量，否则背景色/文字色会整体失效。
 
-**示例：**
+**示例（最小片段）：**
 
 ```html
 <div class="flex items-center p-6 bg-blue-500 text-white rounded-lg">卡片</div>
 ```
 
 ```bash
-cd examples/bootstrap-unocss
-node ../../bin/juice.js -f template-unocss.html --unocss
+juice -f t.html --unocss
 # 产物 div 已拿到 style="display:flex;...;background-color:rgba(59,130,246,1);..."
 ```
+
+**完整可运行示例**：见 [`examples/unocss-builtin/`](../examples/unocss-builtin/)（整封产品周报邮件，含 `juice.yaml(unocss:true)` 与真实产物前后对比）。
 
 > 依赖为 `optionalDependencies`：`@unocss/core` + `@unocss/preset-wind3`。未安装却启用会提示先安装；核心邮件链路不硬依赖。
 > UnoCSS 只扫描**静态** `class` 属性，无法解析 Handlebars 动态 class（如 `class="{{cls}}"`）。
@@ -181,9 +182,13 @@ node ../../bin/juice.js -f template-unocss.html --unocss
 
 ## 8. 完整可运行示例
 
-见 [`examples/page-assembly/`](../examples/page-assembly/)（页面装配 + `<link>` 内联 + Handlebars 语法全覆盖）：
-
-```bash
-cd examples/page-assembly
-node ../../bin/juice.js build -p page.yaml
-```
+- 内建 UnoCSS 编译（整封邮件，含真实产物对比）：[`examples/unocss-builtin/`](../examples/unocss-builtin/)
+  ```bash
+  cd examples/unocss-builtin
+  node ../../bin/juice.js -f template.html   # juice.yaml 已含 unocss:true，免旗标
+  ```
+- 页面装配 + `<link>` 内联 + Handlebars 语法全覆盖：[`examples/page-assembly/`](../examples/page-assembly/)
+  ```bash
+  cd examples/page-assembly
+  node ../../bin/juice.js build -p page.yaml
+  ```

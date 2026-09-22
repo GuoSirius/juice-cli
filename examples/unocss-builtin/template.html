@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>产品周报 · UnoCSS 内建编译示例</title>
+</head>
+<!--
+  完整示例：直接用 UnoCSS 工具类写邮件，无需任何预编译步骤。
+  同目录 juice.yaml 含 `unocss: true`，normal 模式会自动启用内建编译；
+  也可显式加 --unocss 旗标。juice-cli 在构建期扫描 class → 生成原子 CSS
+  → 注入 <head> → 由 juice 内联进每个元素的 style（邮件客户端兼容）。
+-->
+<body style="margin:0;padding:0;background-color:#f3f4f6;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" class="bg-white rounded-xl overflow-hidden" style="max-width:600px;width:100%;">
+          <!-- 头部 -->
+          <tr>
+            <td class="bg-blue-600 px-6 py-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-lg">P</div>
+                <span class="text-white text-xl font-bold">产品周报</span>
+              </div>
+            </td>
+          </tr>
+          <!-- 正文 -->
+          <tr>
+            <td class="px-6 py-6">
+              <h1 class="text-2xl font-bold text-gray-900 m-0 mb-2">本周更新速览</h1>
+              <p class="text-sm text-gray-600 leading-relaxed m-0 mb-5">
+                下面是本周上线的重点功能，全部用 UnoCSS 工具类编写，由 juice-cli 在构建期内联为元素 style。
+              </p>
+
+              <div class="flex items-start gap-3 mb-3">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-700 text-xs flex items-center justify-center font-bold">✓</span>
+                <div>
+                  <p class="text-sm font-semibold text-gray-900 m-0">内建 UnoCSS 编译</p>
+                  <p class="text-sm text-gray-500 m-0">无需预编译，直接写 class 即可。</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 mb-5">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-700 text-xs flex items-center justify-center font-bold">✓</span>
+                <div>
+                  <p class="text-sm font-semibold text-gray-900 m-0">email-safe 后处理</p>
+                  <p class="text-sm text-gray-500 m-0">自动去掉 CSS 变量，颜色归一为 rgba()，Gmail/Outlook 可用。</p>
+                </div>
+              </div>
+
+              <a href="https://example.com" class="inline-block px-5 py-3 rounded-lg bg-blue-600 text-white text-sm font-semibold no-underline">
+                查看完整周报
+              </a>
+            </td>
+          </tr>
+          <!-- 页脚 -->
+          <tr>
+            <td class="bg-gray-50 px-6 py-4">
+              <p class="text-xs text-gray-400 m-0 text-center">你收到此邮件是因为订阅了产品周报 · © 2026 Example</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

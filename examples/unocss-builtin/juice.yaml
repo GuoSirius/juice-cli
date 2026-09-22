@@ -1,0 +1,5 @@
+# 内建 UnoCSS 编译示例配置
+#
+# unocss: true 让 normal 模式自动启用内建 UnoCSS 编译，
+# 无需在命令行加 --unocss 旗标。也可两选一（旗标或配置，任一为真即启用）。
+unocss: true
