@@ -17,7 +17,8 @@
     "preuninstall": "node bin/juice.js --uninstall",
     "prepare": "husky",
     "release": "node scripts/release.mjs",
-    "release:dry": "changelogen --dry"
+    "release:dry": "changelogen --dry",
+    "test:e2e:page": "node test/e2e-page.mjs"
   },
   "keywords": [
     "email",

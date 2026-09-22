@@ -143,6 +143,24 @@ program
     });
   }));
 
+// ─── Subcommand: juice build ────────────────────────────────────────────
+program
+  .command('build')
+  .description('页面装配：按 page.yaml 将多个片段（可带独立变量）按序组装进模板')
+  .option('-p, --page <path>', '页面装配描述文件（YAML）')
+  .option('-c, --config <path>', '配置文件路径（也可放在子命令之前）')
+  .option('-n, --name <name>', '输出文件名（不含扩展名，也可放在子命令之前）')
+  .action(safeAction(async (options) => {
+    // 兼容「juice -c x build」全局写法：子命令未指定时回退到根命令解析结果
+    const globalOpts = program.opts();
+    const { runPageMode } = await import('../src/page.js');
+    await runPageMode({
+      page: options.page || null,
+      config: options.config || globalOpts.config || null,
+      outputName: options.name || globalOpts.name || null,
+    });
+  }));
+
 // ─── Subcommand: juice init ─────────────────────────────────────────────
 program
   .command('init [path]')
