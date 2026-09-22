@@ -74,10 +74,10 @@ program
     juice
 
   本地预览（仅注入 UnoCSS <style>，不内联/不压缩，免完整编译）：
-    juice preview t.html                生成 t-preview.html，浏览器打开刷新即见样式
-    juice preview t.html -w             生成并监听改动自动重生成
-    juice preview t.html -s             起本地服务，保存即自动刷新（不落盘）
-    juice preview t.html -s -o          同上并自动打开浏览器
+    juice preview t.html                  模板模式：生成 t-preview.html，浏览器打开刷新即见
+    juice preview -s snippet.html -f t.html   片段模式：预览片段拼进模板的效果
+    juice preview -p page.yaml            页面装配模式：改 yaml / 新增板块自动生效
+    加 -w 监听改动自动重生成；加 --serve 起本地服务（保存自动刷新），-o 自动开浏览器
 
 ════════════════════════════════════════════════════════════════
   资源浏览
@@ -172,21 +172,30 @@ program
 
 // ─── Subcommand: juice preview ─────────────────────────────────────────
 program
-  .command('preview <file>')
-  .description('本地预览：仅注入 UnoCSS 原子 CSS（<style> 块，不内联/不压缩），免完整编译即可在浏览器看样式')
+  .command('preview [file]')
+  .description('本地预览：仅注入 UnoCSS 原子 CSS（<style> 块，不内联/不压缩），免完整编译即可在浏览器看样式；支持模板 / 片段 / 页面装配三种模式')
+  .option('-s, --snippet <path>', '片段模式：预览片段拼进模板的效果（需与 -f 同用）')
+  .option('-f, --file <path>', '模板 HTML 路径（片段模式配套模板；模板模式也可直接传位置参数）')
+  .option('-p, --page <path>', '页面装配模式：预览 page.yaml 装配效果（改 yaml / 新增板块均自动生效）')
   .option('-c, --config <path>', '配置文件路径')
-  .option('-w, --watch', '监听模板改动，自动重生成预览文件（文件模式）或自动刷新（服务模式）')
-  .option('-s, --serve', '启动本地预览服务，浏览器访问后保存即自动刷新（不落盘、不动源码）')
-  .option('-p, --port <n>', '服务模式端口（默认 3000，被占用自动顺延）', (v) => parseInt(v, 10))
+  .option('-w, --watch', '监听改动（模板/片段/yaml）自动重生成预览文件（文件模式）或自动刷新（服务模式）')
+  .option('--serve', '启动本地预览服务，浏览器访问后保存即自动刷新（不落盘、不动源码）')
+  .option('--port <n>', '服务模式端口（默认 5000，被占用自动 +1 直至可用）', (v) => parseInt(v, 10))
   .option('-o, --open', '服务模式启动时自动打开默认浏览器')
-  .action(safeAction(async (file, options) => {
+  .action(safeAction(async (fileArg, options) => {
+    // -s/-f 与全局旗标同名，commander 会把值路由进 program.opts()，故两路兜底
+    const globalOpts = program.opts();
+    const file = fileArg || options.file || globalOpts.file || null;
     const { runPreviewMode } = await import('../src/preview.js');
     await runPreviewMode({
       file,
-      config: options.config || null,
+      snippet: options.snippet || globalOpts.snippet || null,
+      template: file,
+      page: options.page || globalOpts.page || null,
+      config: options.config || globalOpts.config || null,
       watch: !!options.watch,
       serve: !!options.serve,
-      port: options.port || 3000,
+      port: options.port || 5000,
       open: !!options.open,
     });
   }));

@@ -90,13 +90,11 @@ export function parsePageSpec(raw, baseDir) {
 // ─── 页面装配流水线 ────────────────────────────────────────────────────────────
 
 /**
- * 页面装配流水线（与片段模式同为 4 文件输出）：
- *   1. 未渲染板块按序插入模板 → .raw.html
- *   2. 模板渲染全局变量 + 各板块独立渲染（全局 + 板块 vars）后插入 → .html
- *   3. Juice CSS 内联 → .output.html
- *   4. 压缩 → .minified.html
+ * 组装并渲染页面装配 HTML（不含 UnoCSS 注入与 juice 内联）。
+ * assemblePage 与 preview（免编译预览）共用，避免两处装配逻辑漂移。
+ * @returns {{rawMarkup:string, renderedHtml:string}}
  */
-async function assemblePage({ spec, config, cwd, outputBaseName, layers = [], unocss }) {
+function buildPageHtml({ spec, config }) {
   const templateHtml = inlineLocalStylesheets(
     fs.readFileSync(spec.template, 'utf8'),
     path.dirname(spec.template),
@@ -109,14 +107,12 @@ async function assemblePage({ spec, config, cwd, outputBaseName, layers = [], un
     return fs.readFileSync(s.snippet, 'utf8');
   });
 
-  const outPaths = resolveSnippetOutputPaths(outputBaseName, cwd);
   const globalVars = config.variables || {};
   const renderOpts = { rawHtml: !!config.rawHtml, partials: spec.partials };
 
   // 1. raw：未渲染板块按序拼接后一次插入
   //    （insertIntoContent 以「空 content」为前提，循环多次插入会丢弃先前内容）
   const rawMarkup = insertIntoContent(templateHtml, rawSectionHtmls.join('\n'));
-  fs.writeFileSync(outPaths.raw, rawMarkup, 'utf8');
 
   // 2. 渲染：模板先渲染全局变量；各板块独立渲染（全局 + 板块 vars）后按序插入
   let renderedHtml = renderTemplate(templateHtml, globalVars, renderOpts);
@@ -125,6 +121,23 @@ async function assemblePage({ spec, config, cwd, outputBaseName, layers = [], un
     return renderTemplate(rawSectionHtmls[i], secVars, renderOpts);
   });
   renderedHtml = insertIntoContent(renderedHtml, renderedSections.join('\n'));
+
+  return { rawMarkup, renderedHtml };
+}
+
+/**
+ * 页面装配流水线（与片段模式同为 4 文件输出）：
+ *   1. 未渲染板块按序插入模板 → .raw.html
+ *   2. 模板渲染全局变量 + 各板块独立渲染（全局 + 板块 vars）后插入 → .html
+ *   3. Juice CSS 内联 → .output.html
+ *   4. 压缩 → .minified.html
+ */
+async function assemblePage({ spec, config, cwd, outputBaseName, layers = [], unocss }) {
+  const outPaths = resolveSnippetOutputPaths(outputBaseName, cwd);
+
+  // 1-2. 组装 + 渲染 → .raw.html / .html
+  const { rawMarkup, renderedHtml } = buildPageHtml({ spec, config });
+  fs.writeFileSync(outPaths.raw, rawMarkup, 'utf8');
   fs.writeFileSync(outPaths.normal, renderedHtml, 'utf8');
 
   // 3. Juice CSS 内联
@@ -217,4 +230,4 @@ export async function runPageMode({ page, config: cliConfigPath, outputName, uno
   return assemblePage({ spec, config, cwd: process.cwd(), outputBaseName: res.base, layers, unocss });
 }
 
-export { assemblePage };
+export { assemblePage, buildPageHtml };

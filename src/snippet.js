@@ -463,6 +463,24 @@ function resolveSnippetOutputPaths(outputBaseName, cwd) {
 // ─── 组装流水线 ───────────────────────────────────────────────────────────────
 
 /**
+ * 组装并渲染片段模式 HTML（不含 UnoCSS 注入与 juice 内联）。
+ * assembleSnippet 与 preview（免编译预览）共用，避免两处装配逻辑漂移。
+ * @returns {{rawMarkup:string, renderedHtml:string}}
+ */
+function buildSnippetHtml({ snippetPath, templatePath, config }) {
+  const templateHtml = inlineLocalStylesheets(
+    fs.readFileSync(templatePath, 'utf8'),
+    path.dirname(templatePath),
+  );
+  const snippetRaw = fs.readFileSync(snippetPath, 'utf8');
+  const rawMarkup = insertIntoContent(templateHtml, snippetRaw);
+  const renderedHtml = renderTemplate(rawMarkup, Object.assign({}, config.variables || {}), {
+    rawHtml: !!config.rawHtml,
+  });
+  return { rawMarkup, renderedHtml };
+}
+
+/**
  * 片段组装流水线：
  *   1. 未渲染的片段 + 模板 → .raw.html（模板标签保留，无 juice 内联）
  *   2. Handlebars 渲染合并 HTML → .html（已渲染，无 juice 内联）
@@ -470,22 +488,11 @@ function resolveSnippetOutputPaths(outputBaseName, cwd) {
  *   4. 压缩 → .minified.html
  */
 async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputBaseName, layers = [], unocss }) {
-  const templateHtml = inlineLocalStylesheets(
-    fs.readFileSync(templatePath, 'utf8'),
-    path.dirname(templatePath),
-  );
-  const snippetRaw = fs.readFileSync(snippetPath, 'utf8');
   const outPaths = resolveSnippetOutputPaths(outputBaseName, cwd);
-  const variables = Object.assign({}, config.variables || {});
 
-  // 1. 未渲染的片段插入模板 → .raw.html
-  const rawMarkup = insertIntoContent(templateHtml, snippetRaw);
+  // 1-2. 组装 + 渲染 → .raw.html / .html
+  const { rawMarkup, renderedHtml } = buildSnippetHtml({ snippetPath, templatePath, config });
   fs.writeFileSync(outPaths.raw, rawMarkup, 'utf8');
-
-  // 2. Handlebars 渲染 → .html
-  const renderedHtml = renderTemplate(rawMarkup, variables, {
-    rawHtml: !!config.rawHtml,
-  });
   fs.writeFileSync(outPaths.normal, renderedHtml, 'utf8');
 
   // 3. Juice CSS 内联 → .output.html
@@ -975,6 +982,7 @@ export {
   insertIntoContent,
   reindentHtml,
   resolveSnippetOutputPaths,
+  buildSnippetHtml,
   assembleSnippet,
   // prompts
   promptBrand,

@@ -26,9 +26,16 @@ node ../../bin/juice.js -f template.html
 上面是**最终邮件产物**的生成方式（juice 内联 + 压缩）。写模板、调样式的迭代阶段用 `preview` 子命令 —— 只把原子 CSS 注入 `<style>` 块（不内联、不压缩），浏览器直开刷新即见，**每次改动无需重跑完整管线**：
 
 ```bash
-juice preview template.html          # 生成 template-preview.html，浏览器打开、刷新即见
-juice preview template.html -w       # 监听改动，自动重生成预览文件
-juice preview template.html -s -o    # 起本地服务，保存后浏览器自动刷新（不落盘、不动源码）
+juice preview template.html              # 模板模式：生成 template-preview.html，浏览器打开、刷新即见
+juice preview template.html -w           # 监听改动（模板/yaml）自动重生成
+juice preview template.html --serve -o   # 起本地服务（默认 5000，冲突自动 +1），保存后浏览器自动刷新
+```
+
+三种装配模式都能预览，开发流程全程免编译：
+
+```bash
+juice preview -s snippet.html -f template.html   # 片段模式：片段拼进模板的效果
+juice preview -p page.yaml                       # 页面装配：改 page.yaml / 新增板块文件都自动生效
 ```
 
 - `preview` 产物是**浏览器预览用**；真正发邮件仍用 `juice -f template.html` 生成内联版。
