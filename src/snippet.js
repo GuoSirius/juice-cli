@@ -3,7 +3,6 @@ import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
 import juice from 'juice';
-import Mustache from 'mustache';
 import chalk from 'chalk';
 import {
   loadYaml,
@@ -17,6 +16,7 @@ import {
   findNextVersion,
   checkOutputConflicts,
 } from './index.js';
+import { renderTemplate } from './render.js';
 import {
   ICON_FILE,
   SNIPPET_FILE,
@@ -462,8 +462,8 @@ function resolveSnippetOutputPaths(outputBaseName, cwd) {
 
 /**
  * 片段组装流水线：
- *   1. 未渲染的片段 + 模板 → .raw.html（Mustache 标签保留，无 juice 内联）
- *   2. Mustache 渲染合并 HTML → .html（已渲染，无 juice 内联）
+ *   1. 未渲染的片段 + 模板 → .raw.html（模板标签保留，无 juice 内联）
+ *   2. Handlebars 渲染合并 HTML → .html（已渲染，无 juice 内联）
  *   3. Juice CSS 内联 → .output.html
  *   4. 压缩 → .minified.html
  */
@@ -477,17 +477,10 @@ async function assembleSnippet({ snippetPath, templatePath, config, cwd, outputB
   const rawMarkup = insertIntoContent(templateHtml, snippetRaw);
   fs.writeFileSync(outPaths.raw, rawMarkup, 'utf8');
 
-  // 2. Mustache 渲染 → .html
-  const originalEscape = Mustache.escape;
-  let renderedHtml;
-  try {
-    if (config.rawHtml) {
-      Mustache.escape = (text) => text;
-    }
-    renderedHtml = Mustache.render(rawMarkup, variables);
-  } finally {
-    Mustache.escape = originalEscape;
-  }
+  // 2. Handlebars 渲染 → .html
+  const renderedHtml = renderTemplate(rawMarkup, variables, {
+    rawHtml: !!config.rawHtml,
+  });
   fs.writeFileSync(outPaths.normal, renderedHtml, 'utf8');
 
   // 3. Juice CSS 内联 → .output.html

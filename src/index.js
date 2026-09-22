@@ -4,11 +4,11 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import * as yaml from 'js-yaml';
 import juice from 'juice';
-import Mustache from 'mustache';
 import chalk from 'chalk';
 import ora from 'ora';
 import { minify as htmlMinify } from 'html-minifier-terser';
 import { fmtBytes } from './format.js';
+import { renderTemplate } from './render.js';
 import {
   DEFAULT_CONFIG_NAMES,
   META_FILE,
@@ -185,16 +185,9 @@ export function buildConfig(highPriorityPath, homePath) {
 export function processTemplate(inputFile, config) {
   const htmlRaw = fs.readFileSync(inputFile, 'utf8');
 
-  const originalEscape = Mustache.escape;
-  let htmlWithVars;
-  try {
-    if (config.rawHtml) {
-      Mustache.escape = (text) => text;
-    }
-    htmlWithVars = Mustache.render(htmlRaw, config.variables || {});
-  } finally {
-    Mustache.escape = originalEscape;
-  }
+  const htmlWithVars = renderTemplate(htmlRaw, config.variables || {}, {
+    rawHtml: !!config.rawHtml,
+  });
 
   const basePath = path.dirname(path.resolve(inputFile));
   const extraCss = collectExtraCss(basePath, config);
