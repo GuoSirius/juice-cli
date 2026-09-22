@@ -1,0 +1,9 @@
+/* 等价于 UnoCSS 预编译输出：先在你的 HTML 里写工具类，再用 unocss 编译出本文件。
+   npx unocss "src/**/*.html" -o uno.css
+   然后 <link rel="stylesheet" href="./uno.css"> 引入，juice 会把规则内联到元素 style。 */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.p-4 { padding: 1rem; }
+.text-blue-500 { color: #3b82f6; }
+.font-bold { font-weight: 700; }

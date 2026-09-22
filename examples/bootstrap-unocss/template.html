@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{brand}} 公告</title>
+  <!-- 本地样式表：构建期被解析为 <style>，再由 juice 内联到元素 style 属性 -->
+  <!-- Bootstrap（静态文件，官方 bootstrap.min.css 放旁边即可） -->
+  <link rel="stylesheet" href="./bootstrap.min.css">
+  <!-- UnoCSS（先由 unocss 预编译成 uno.css，再引入；juice 把工具类规则内联到元素） -->
+  <link rel="stylesheet" href="./uno.css">
+</head>
+<body style="margin:0;background:#f4f5f7;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center">
+        <!-- Bootstrap 类 -->
+        <div class="container text-center">
+          <h1 class="h3">{{brand}} 周报</h1>
+          <a class="btn btn-primary" href="{{ctaUrl}}">{{ctaText}}</a>
+        </div>
+        <!-- UnoCSS 工具类（uno.css 里已生成对应规则，会被 juice 内联） -->
+        <div class="flex items-center justify-center p-4">
+          <span class="text-blue-500 font-bold">{{highlight}}</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

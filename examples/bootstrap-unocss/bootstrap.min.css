@@ -1,0 +1,7 @@
+/* 占位：请替换为官方 bootstrap.min.css（https://getbootstrap.com）或精简版。
+   这里只保留本示例用到的类，用于演示 <link> 内联机制。 */
+.container { width: 100%; max-width: 600px; margin: 0 auto; }
+.text-center { text-align: center; }
+.h3 { font-size: 1.75rem; margin: .5rem 0; }
+.btn { display: inline-block; padding: .5rem 1rem; border-radius: .25rem; text-decoration: none; }
+.btn-primary { background: #0d6efd; color: #fff; }

@@ -1,0 +1,7 @@
+template: template.html
+outputName: bs-unocss-demo
+variables:
+  brand: ACME
+  ctaUrl: "https://example.com"
+  ctaText: "立即查看"
+  highlight: "本周精选"
