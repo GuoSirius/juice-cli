@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [changelogen](https://github.com/unjs/changelogen) for commit guidelines.
 
+## v4.1.0
+
+[compare changes](https://github.com/GuoSirius/juice-cli/compare/v4.0.0...v4.1.0)
+
+### 🚀 Enhancements
+
+- 新增 Bootstrap + UnoCSS 邮件引入示例 ([1564517](https://github.com/GuoSirius/juice-cli/commit/1564517))
+- 内建 UnoCSS 编译（opt-in，email-safe 原子 CSS 内联） ([da2d85b](https://github.com/GuoSirius/juice-cli/commit/da2d85b))
+- 新增 preview 子命令（免完整编译的本地快速预览） ([aaf92e9](https://github.com/GuoSirius/juice-cli/commit/aaf92e9))
+- Preview 支持片段与页面装配模式，全流程免编译预览 ([661449c](https://github.com/GuoSirius/juice-cli/commit/661449c))
+
+### 📖 Documentation
+
+- 补充内建 UnoCSS 编译文档与 opt-in 示例模板 ([b902f6a](https://github.com/GuoSirius/juice-cli/commit/b902f6a))
+- 新增内建 UnoCSS 完整可运行示例（unocss-builtin） ([2639484](https://github.com/GuoSirius/juice-cli/commit/2639484))
+
+### 🏡 Chore
+
+- **ci:** 重启用 package-lock 并同步锁文件以修复 npm ci ([ef319a0](https://github.com/GuoSirius/juice-cli/commit/ef319a0))
+- 忽略嵌套 node_modules 目录 ([4d89b75](https://github.com/GuoSirius/juice-cli/commit/4d89b75))
+
+### ❤️ Contributors
+
+- 郭之存 ([@siriusSupreme](https://github.com/siriusSupreme))
+
 ## v4.0.0
 
 [compare changes](https://github.com/GuoSirius/juice-cli/compare/v3.3.7...v4.0.0)
